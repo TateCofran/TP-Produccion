@@ -2,11 +2,22 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+public interface ITileDupeSystem
+{
+    TileLevelData GetTileLevelData(TileDataSO tile);
+    void AddDupe(TileDataSO tile);
+    event System.Action<TileDataSO, TileLevelData> OnTileLevelUp;
+}
 public class TileDupeSystem : MonoBehaviour, ITileDupeSystem
 {
     private Dictionary<string, TileLevelData> tileLevels = new Dictionary<string, TileLevelData>();
 
     public event System.Action<TileDataSO, TileLevelData> OnTileLevelUp;
+    private void Awake()
+    {
+        var capProvider = FindFirstObjectByType<TileLevelCapProvider>();
+        TileLevelData.SetCapProvider(capProvider);
+    }
 
     public TileLevelData GetTileLevelData(TileDataSO tile)
     {

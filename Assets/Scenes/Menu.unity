@@ -1972,9 +1972,9 @@ RectTransform:
   - {fileID: 480049036}
   m_Father: {fileID: 2005633889}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 75, y: -563.5}
   m_SizeDelta: {x: 125, y: 75}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!95 &378008436
@@ -4202,7 +4202,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &845437051
 RectTransform:
   m_ObjectHideFlags: 0
@@ -4630,6 +4630,8 @@ GameObject:
   m_Component:
   - component: {fileID: 1048117081}
   - component: {fileID: 1048117080}
+  - component: {fileID: 1048117083}
+  - component: {fileID: 1048117082}
   m_Layer: 0
   m_Name: UpgradeSystem
   m_TagString: Untagged
@@ -4664,6 +4666,32 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1048117082
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1048117079}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e63a859767420eb4d88f26a616503d22, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &1048117083
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1048117079}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9c4f9970add7db74985fd7b2d24e1d42, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  tileCapUpgradeSO: {fileID: 11400000, guid: e9e87193224bfa64cbf2264da960a926, type: 2}
+  capsByUpgradeLevel: 050000000a0000000f000000
 --- !u!1 &1095629949
 GameObject:
   m_ObjectHideFlags: 0
@@ -6672,7 +6700,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1554281898
 RectTransform:
   m_ObjectHideFlags: 0
@@ -9712,9 +9740,9 @@ RectTransform:
   - {fileID: 1658678956024098525}
   m_Father: {fileID: 2005633889}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 225, y: -563.5}
   m_SizeDelta: {x: 125, y: 75}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!224 &4939333520716488742

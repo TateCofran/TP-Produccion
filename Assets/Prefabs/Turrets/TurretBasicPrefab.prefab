@@ -890,7 +890,8 @@ MonoBehaviour:
   targetChordLength: 0.011
   minSegments: 24
   maxSegments: 256
-  yOffset: 0.02
+  yOffset: 0.05
+  alwaysRedrawOnShow: 1
   showDuration: 0.35
   widthMultiplierTarget: 0.1
 --- !u!114 &-7384505950414907851

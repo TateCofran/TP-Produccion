@@ -1,12 +1,4 @@
-﻿// ITileDupeSystem.cs
-using UnityEngine;
-
-public interface ITileDupeSystem
-{
-    TileLevelData GetTileLevelData(TileDataSO tile);
-    void AddDupe(TileDataSO tile);
-    event System.Action<TileDataSO, TileLevelData> OnTileLevelUp;
-}
+﻿using UnityEngine;
 
 [System.Serializable]
 public class TileLevelData
@@ -19,10 +11,32 @@ public class TileLevelData
     public float spawnChanceMultiplier = 1f;
     public float sizeMultiplier = 1f;
 
+    // Nuevo: referencia global al proveedor de cap
+    private static TileLevelCapProvider capProvider;
+
+    public static void SetCapProvider(TileLevelCapProvider provider)
+    {
+        capProvider = provider;
+    }
+
     public void AddDupe()
     {
         currentDupes++;
-        if (currentDupes >= dupesRequiredForNextLevel) LevelUp();
+        if (currentDupes >= dupesRequiredForNextLevel)
+            TryLevelUp();
+    }
+
+    private void TryLevelUp()
+    {
+        int maxCap = capProvider != null ? capProvider.GetCurrentCap() : 5;
+        if (currentLevel >= maxCap)
+        {
+            // Alcanzó el cap, no sube más
+            currentDupes = dupesRequiredForNextLevel;
+            return;
+        }
+
+        LevelUp();
     }
 
     private void LevelUp()
