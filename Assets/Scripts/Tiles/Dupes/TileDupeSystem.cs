@@ -15,8 +15,9 @@ public class TileDupeSystem : MonoBehaviour, ITileDupeSystem
     public event System.Action<TileDataSO, TileLevelData> OnTileLevelUp;
     private void Awake()
     {
-        var capProvider = FindFirstObjectByType<TileLevelCapProvider>();
-        TileLevelData.SetCapProvider(capProvider);
+        // Registrar provider de leveleo
+        var levelingProvider = FindFirstObjectByType<TileLevelingPermissionProvider>();
+        TileLevelData.SetLevelingProvider(levelingProvider);
     }
 
     public TileLevelData GetTileLevelData(TileDataSO tile)
