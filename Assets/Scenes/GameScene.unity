@@ -3127,8 +3127,7 @@ MonoBehaviour:
   cam: {fileID: 1988510278026477433}
   cellLayers:
     serializedVersion: 2
-    m_Bits: 4294967295
-  turretYOffset: 1
+    m_Bits: 8
   placeWithUI: 0
   enableDupesSystem: 1
   normalWorldFill: {fileID: 8296576713939227880}

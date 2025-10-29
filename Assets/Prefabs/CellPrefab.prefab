@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7917832257458904478}
   m_Layer: 3
-  m_Name: Transform
+  m_Name: BaseAnchor
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

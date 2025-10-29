@@ -46,7 +46,7 @@ public class ResultSceneController : MonoBehaviour
 
     private void UpdateUI()
     {
-        var gm = GameManager.Instance != null ? GameManager.Instance : FindObjectOfType<GameManager>();
+        var gm = GameManager.Instance != null ? GameManager.Instance : FindFirstObjectByType<GameManager>();
 
         if (gm == null)
         {

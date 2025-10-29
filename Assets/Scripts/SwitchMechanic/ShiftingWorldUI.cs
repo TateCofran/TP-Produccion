@@ -35,7 +35,7 @@ public class ShiftingWorldUI : MonoBehaviour
     [Header("Placement")]
     [SerializeField] private Camera cam;
     [SerializeField] private LayerMask cellLayers = ~0;
-    [SerializeField] private float turretYOffset = 0.5f;
+    //[SerializeField] private float turretYOffset = 0.01f;
     [Tooltip("Si está activo, la UI coloca la torreta. Si está desactivado, delega en TurretPlacer externo.")]
     [SerializeField] private bool placeWithUI = false;
 
