@@ -1468,6 +1468,7 @@ GameObject:
   - component: {fileID: 252089842}
   - component: {fileID: 252089841}
   - component: {fileID: 252089843}
+  - component: {fileID: 252089844}
   m_Layer: 5
   m_Name: ListOfUpgrades
   m_TagString: Untagged
@@ -1548,6 +1549,32 @@ MonoBehaviour:
   category: 0
   contentParent: {fileID: 252089840}
   itemButtonPrefab: {fileID: 2324416796028159000, guid: bc3161907c837b74e9965361a1d91f74, type: 3}
+--- !u!114 &252089844
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 252089839}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 59f8146938fff824cb5fd77236b75775, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Padding:
+    m_Left: 0
+    m_Right: 0
+    m_Top: 0
+    m_Bottom: 0
+  m_ChildAlignment: 7
+  m_Spacing: 10
+  m_ChildForceExpandWidth: 1
+  m_ChildForceExpandHeight: 1
+  m_ChildControlWidth: 0
+  m_ChildControlHeight: 0
+  m_ChildScaleWidth: 0
+  m_ChildScaleHeight: 0
+  m_ReverseArrangement: 0
 --- !u!1 &323279790
 GameObject:
   m_ObjectHideFlags: 0
@@ -4630,6 +4657,9 @@ GameObject:
   m_Component:
   - component: {fileID: 1048117081}
   - component: {fileID: 1048117080}
+  - component: {fileID: 1048117083}
+  - component: {fileID: 1048117082}
+  - component: {fileID: 1048117084}
   m_Layer: 0
   m_Name: UpgradeSystem
   m_TagString: Untagged
@@ -4664,6 +4694,45 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1048117082
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1048117079}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e63a859767420eb4d88f26a616503d22, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &1048117083
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1048117079}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9c4f9970add7db74985fd7b2d24e1d42, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  tileCapUpgradeSO: {fileID: 11400000, guid: e9e87193224bfa64cbf2264da960a926, type: 2}
+  capsByUpgradeLevel: 050000000a0000000f000000
+--- !u!114 &1048117084
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1048117079}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4905dc5cc4b39f44e873826acc493146, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  tileLevelingUnlock: {fileID: 11400000, guid: 2d90ac646cdac4a4baf85cbf585c26da, type: 2}
 --- !u!1 &1095629949
 GameObject:
   m_ObjectHideFlags: 0

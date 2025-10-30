@@ -42,21 +42,36 @@ public class UIController : MonoBehaviour
         SetNextWaveButtonVisible(true);
         SetNextWaveButtonInteractable(true);
     }
+    private void Start()
+    {
+        // Si en OnEnable no estaba listo, probá ahora.
+        TrySubscribeWaveManager();
+    }
 
     private void OnEnable()
+    {
+        TrySubscribeWaveManager();
+    }
+
+    private void TrySubscribeWaveManager()
     {
         var wm = WaveManager.Instance;
         if (wm == null) return;
 
+        wm.OnWaveStarted -= HandleWaveStarted;
+        wm.OnWaveEnded -= HandleWaveEnded;
+        wm.OnEnemiesRemainingChanged -= HandleEnemiesRemainingChanged;
+        wm.OnNextWaveCountdownTick -= HandleCountdownTick;
+        wm.OnNextWaveReady -= HandleNextWaveReady;
+        wm.OnWaveNumberChanged -= HandleWaveNumberChanged;
+
         wm.OnWaveStarted += HandleWaveStarted;
         wm.OnWaveEnded += HandleWaveEnded;
-
         wm.OnEnemiesRemainingChanged += HandleEnemiesRemainingChanged;
         wm.OnNextWaveCountdownTick += HandleCountdownTick;
         wm.OnNextWaveReady += HandleNextWaveReady;
         wm.OnWaveNumberChanged += HandleWaveNumberChanged;
     }
-
     private void OnDisable()
     {
         var wm = WaveManager.Instance;
@@ -118,12 +133,16 @@ public class UIController : MonoBehaviour
 
     public void SetNextWaveCountdownVisible(bool visible)
     {
-        if (nextWavePanel != null)
-            nextWavePanel.SetActive(visible);
-
-        if (nextWaveCountdownText != null && nextWavePanel == null)
+        // No apagues el panel si dentro está el botón
+        // Mostrá/ocultá sólo el texto del contador.
+        if (nextWaveCountdownText != null)
             nextWaveCountdownText.gameObject.SetActive(visible);
+
+        // Si preferís seguir usando el panel como contenedor, dejalo siempre activo:
+        if (nextWavePanel != null && !nextWavePanel.activeSelf)
+            nextWavePanel.SetActive(true);
     }
+
 
     public void SetNextWaveButtonInteractable(bool interactable)
     {
