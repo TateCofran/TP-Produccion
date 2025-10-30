@@ -75,7 +75,7 @@ MonoBehaviour:
   - {x: 2, y: 4}
   - {x: 4, y: 2}
   defaultPathMods:
-    dps: 10
+    dps: 5
     slow: 0
     stun: 0
   perCellOverrides: []

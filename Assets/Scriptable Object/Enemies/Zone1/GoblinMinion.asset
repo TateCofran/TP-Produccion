@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: GoblinMinion
   m_EditorClassIdentifier: 
   enemyName: Goblin
-  maxHealth: 17
+  maxHealth: 20
   defense: 3
   moveSpeed: 1
   damageToCore: 1

@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: BigGoblin
   m_EditorClassIdentifier: 
   enemyName: BigGoblin
-  maxHealth: 60
+  maxHealth: 100
   defense: 6
   moveSpeed: 0.5
   damageToCore: 3

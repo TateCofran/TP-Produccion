@@ -52,24 +52,24 @@ public class ResultSceneController : MonoBehaviour
         {
             // Fallback visible para detectar si no existe GameManager
             if (titleText) titleText.text = "Results";
-            if (timeText) timeText.text = "Tiempo: --:--";
+            if (timeText) timeText.text = "Time: --:--";
             if (waveText) waveText.text = "Waves completed: -";
-            if (totalEnemiesKilledText) totalEnemiesKilledText.text = "Total Enemies killed: -";
-            if (blueEssencesText) blueEssencesText.text = $"Normal Essences: -";
-            if (redEssencesText) redEssencesText.text = $"Other World Essences: -";
+            if (totalEnemiesKilledText) totalEnemiesKilledText.text = "Enemies killed: -";
+            if (blueEssencesText) blueEssencesText.text = $"Normal Essences: ";
+            if (redEssencesText) redEssencesText.text = $"OW Essences: ";
 
             Debug.LogWarning("[ResultSceneController] GameManager no encontrado. ¿Está marcado como DontDestroyOnLoad?");
             return;
         }
 
-        if (titleText) titleText.text = gm.PlayerHasWon ? "¡Ganaste!" : "Perdiste...";
-        if (timeText) timeText.text = "Tiempo: " + FormatTime(gm.timePlayed);
+        if (titleText) titleText.text = gm.PlayerHasWon ? "¡Won!" : "Lose...";
+        if (timeText) timeText.text = "Time: " + FormatTime(gm.timePlayed);
         if (waveText) waveText.text = "Waves Completed: " + gm.wavesCompleted;
-        if (totalEnemiesKilledText) totalEnemiesKilledText.text = "Total Enemies Killed: " + gm.totalEnemiesKilled;
+        if (totalEnemiesKilledText) totalEnemiesKilledText.text = "Enemies Killed: " + gm.totalEnemiesKilled;
         if (blueEssencesText)
-            blueEssencesText.text = $"Normal Essences (run): {gm.totalBlueEssences}\nBank total: {EssenceBank.TotalBlue}";
+            blueEssencesText.text = $"Normal Essences: {gm.totalBlueEssences} Total: {EssenceBank.TotalBlue}";
         if (redEssencesText)
-            redEssencesText.text = $"Other World Essences (run): {gm.totalRedEssences}\nBank total: {EssenceBank.TotalRed}";
+            redEssencesText.text = $"OW Essences: {gm.totalRedEssences} Total: {EssenceBank.TotalRed}";
 
     }
 

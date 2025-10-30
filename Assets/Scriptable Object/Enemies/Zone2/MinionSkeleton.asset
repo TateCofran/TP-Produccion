@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: MinionSkeleton
   m_EditorClassIdentifier: 
   enemyName: Skeleton
-  maxHealth: 25
+  maxHealth: 50
   defense: 5
   moveSpeed: 1.25
   damageToCore: 1

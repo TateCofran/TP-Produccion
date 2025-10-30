@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: FastSkeleton
   m_EditorClassIdentifier: 
   enemyName: FastSkeleton
-  maxHealth: 18
+  maxHealth: 20
   defense: 2
   moveSpeed: 5
   damageToCore: 1

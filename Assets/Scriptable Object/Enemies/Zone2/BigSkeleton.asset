@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: BigSkeleton
   m_EditorClassIdentifier: 
   enemyName: BigSkeleton
-  maxHealth: 80
+  maxHealth: 200
   defense: 12
   moveSpeed: 0.8
   damageToCore: 3

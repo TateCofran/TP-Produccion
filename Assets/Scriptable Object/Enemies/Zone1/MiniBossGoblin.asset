@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: MiniBossGoblin
   m_EditorClassIdentifier: 
   enemyName: MiniBossGoblin
-  maxHealth: 150
+  maxHealth: 250
   defense: 9
   moveSpeed: 1.5
   damageToCore: 5
