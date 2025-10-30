@@ -530,6 +530,7 @@ GameObject:
   - component: {fileID: -3860705843057971811}
   - component: {fileID: 7671586546552071002}
   - component: {fileID: 7591455121023013617}
+  - component: {fileID: 5445119312647018773}
   m_Layer: 6
   m_Name: EnemyBossPrefab
   m_TagString: Enemy
@@ -684,6 +685,7 @@ MonoBehaviour:
   maxHealth: 0
   defense: 0
   currentHealth: 0
+  shieldCurrent: 0
 --- !u!114 &-3860705843057971811
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -698,8 +700,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   healthBarPrefab: {fileID: 4226652873309903254, guid: e992eef13a5dec64495e55e9ee746145, type: 3}
   healthBarHeight: 2
-  damageTextPrefab: {fileID: 3297664047394320152, guid: 5dc51b662dd03134386338d874af2d33, type: 3}
   damageTextYOffset: 2
+  damageTextXOffset: -30
   reduceSpeed: 6
 --- !u!114 &7671586546552071002
 MonoBehaviour:
@@ -726,6 +728,26 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   health: {fileID: 3273943754081973009}
+--- !u!114 &5445119312647018773
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5019013483156572802}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8fb8dca6bed88fc4a8aca5ba709ce5fb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  spawnType: 0
+  countPerWave: 3
+  periodSeconds: 2
+  spreadRadius: 0.75
+  spawnOnStart: 1
+  maxWaves: 0
+  maxActiveMinions: 0
+  spawnVfxPrefab: {fileID: 0}
 --- !u!1 &5149005899031532267
 GameObject:
   m_ObjectHideFlags: 0

@@ -22,6 +22,10 @@ public class EnemyHealthBar : MonoBehaviour, IHealthDisplay
     private float targetFill = 1f;
     //
     private Coroutine smoothBarRoutine;
+    // 🔹 Nuevo overlay para el escudo
+    private Image shieldOverlayFill;
+    private float shieldAlpha = 0.35f; // opacidad del overlay (puede ajustarse)
+
 
     // Llama esto cuando el enemigo se saca del pool o spawnea
     public void Initialize(Transform parent, float maxHealth)
@@ -113,6 +117,37 @@ public class EnemyHealthBar : MonoBehaviour, IHealthDisplay
         // Trigger del popup
         var popup = damageTextTransform.GetComponent<DamageTextPopup>();
         if (popup != null) popup.Play();
+    }
+
+    public void SetShieldOverlay(float normalizedValue)
+    {
+        // 1) crear overlay si no existe todavía
+        if (shieldOverlayFill == null)
+        {
+            var bg = healthBarInstance?.transform.Find("Background");
+            if (bg != null)
+            {
+                // Creamos un duplicado del "Filled" pero más transparente
+                var overlayGO = new GameObject("ShieldOverlay", typeof(Image));
+                overlayGO.transform.SetParent(bg, false);
+                overlayGO.transform.SetSiblingIndex(1); // encima del fondo, debajo del fill real
+
+                shieldOverlayFill = overlayGO.GetComponent<Image>();
+                shieldOverlayFill.color = new Color(0f, 0.8f, 1f, shieldAlpha); // azul celeste translúcido
+                shieldOverlayFill.type = Image.Type.Filled;
+                shieldOverlayFill.fillMethod = Image.FillMethod.Horizontal;
+                shieldOverlayFill.raycastTarget = false;
+            }
+        }
+
+        // 2) aplicar valor (0–1)
+        if (shieldOverlayFill != null)
+        {
+            shieldOverlayFill.fillAmount = Mathf.Clamp01(normalizedValue);
+
+            // si no hay escudo, esconder
+            shieldOverlayFill.enabled = (normalizedValue > 0.001f);
+        }
     }
 
 
