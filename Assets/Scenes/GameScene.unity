@@ -2891,7 +2891,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!1 &2622026475795021918
 GameObject:
   m_ObjectHideFlags: 0
@@ -4236,7 +4236,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: -39.61}
-  m_SizeDelta: {x: 200, y: 50}
+  m_SizeDelta: {x: 250, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!224 &4360930113946385127
 RectTransform:
@@ -6061,17 +6061,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   counterLabel: {fileID: 7843459497665175295}
   popupLabel: {fileID: 8018247227806509723}
-  singularName: Normal Essence
-  textColor: {r: 1, g: 0.7725491, b: 0.33333334, a: 1}
-  counterColor: {r: 1, g: 0.7725491, b: 0.33333334, a: 1}
-  popupColor: {r: 0.034784317, g: 0, b: 1, a: 1}
+  normalName: Normal Essences
+  otherName: Other Essences
+  normalCounterColor: {r: 1, g: 0.7372549, b: 0.28627452, a: 1}
+  normalPopupColor: {r: 0, g: 0.010046482, b: 1, a: 1}
+  otherCounterColor: {r: 1, g: 0.7372549, b: 0.28627452, a: 1}
+  otherPopupColor: {r: 1, g: 0, b: 0, a: 1}
   baseScale: 1
   popScale: 1.2
   popInTime: 0.1
   holdTime: 0.8
   outTime: 0.2
   risePixels: 16
-  total: 0
+  totalBlue: 0
+  totalRed: 0
   showCounterAtZero: 1
 --- !u!1 &6454194843984394648
 GameObject:
@@ -6600,6 +6603,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mechanic: {fileID: 2182181466141838572}
+  essenceUI: {fileID: 6402472055481174259}
   essencesOnNormal: 1
   essencesOnOther: 1
   labBlueUpgradeId: upgrade_moreEssencePerSwitchTile
@@ -6610,34 +6614,10 @@ MonoBehaviour:
   totalRedEssences: 0
   OnBlueEssenceGained:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 6402472055481174259}
-        m_TargetAssemblyTypeName: EssencePopupUI, Assembly-CSharp
-        m_MethodName: HandleEssence
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
   OnRedEssenceGained:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 6832551708009307719}
-        m_TargetAssemblyTypeName: EssencePopupUI, Assembly-CSharp
-        m_MethodName: HandleEssence
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!224 &6735404222824339564
 RectTransform:
   m_ObjectHideFlags: 0
@@ -6751,17 +6731,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   counterLabel: {fileID: 6147234325914257391}
   popupLabel: {fileID: 6056301650470113810}
-  singularName: Other Essence
-  textColor: {r: 1, g: 0.7725491, b: 0.33333334, a: 1}
-  counterColor: {r: 1, g: 0.7725491, b: 0.33333334, a: 1}
-  popupColor: {r: 1, g: 0, b: 0, a: 1}
+  normalName: Blue Essences
+  otherName: Red Essences
+  normalCounterColor: {r: 0, g: 1, b: 1, a: 1}
+  normalPopupColor: {r: 0, g: 1, b: 1, a: 1}
+  otherCounterColor: {r: 1, g: 0, b: 0, a: 1}
+  otherPopupColor: {r: 1, g: 0, b: 0, a: 1}
   baseScale: 1
   popScale: 1.2
   popInTime: 0.1
   holdTime: 0.8
   outTime: 0.2
   risePixels: 16
-  total: 0
+  totalBlue: 0
+  totalRed: 0
   showCounterAtZero: 1
 --- !u!1 &7018481039005529719
 GameObject:
@@ -8117,8 +8100,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7da02bc68a6725a43a90546b91865ba3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  normalWorldClip: {fileID: 8300000, guid: c3d9f7a8f84027840ac05ca9f78ac774, type: 3}
-  otherWorldClip: {fileID: 8300000, guid: 64285a3e371f7ef4eb324e7557e28aa3, type: 3}
+  normalWorldClip: {fileID: 8300000, guid: 7a544678983aab748af510227520e4ad, type: 3}
+  otherWorldClip: {fileID: 8300000, guid: 7d5ebc5b1da7cc543828c50a7b7be639, type: 3}
 --- !u!224 &8093663495761489504
 RectTransform:
   m_ObjectHideFlags: 0

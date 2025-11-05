@@ -6,6 +6,7 @@ public class WorldSwitchPoints : MonoBehaviour
     [Header("Refs")]
     [Tooltip("Arrastra el ShiftingWorldMechanic de la escena.")]
     [SerializeField] private ShiftingWorldMechanic mechanic;
+    [SerializeField] private EssencePopupUI essenceUI; // referencia al único UI
 
     [Header("Esencias base al cambiar de mundo")]
     [Tooltip("Al quedar en el mundo Normal - esencias AZULES ganadas.")]
@@ -60,7 +61,7 @@ public class WorldSwitchPoints : MonoBehaviour
         _init = true;
     }
 
-    private void Update()
+    /*private void Update()
     {
         if (!_init || mechanic == null) return;
 
@@ -80,8 +81,33 @@ public class WorldSwitchPoints : MonoBehaviour
 
             _lastWorld = current;
         }
-    }
+    }*/
+    private void Update()
+{
+    if (!_init || mechanic == null) return;
 
+    var current = mechanic.GetCurrentWorld();
+    if (current != _lastWorld)
+    {
+        // Actualiza el UI de acuerdo al mundo actual
+        essenceUI.SetWorld(current == ShiftingWorldMechanic.World.Normal);
+
+        if (current == ShiftingWorldMechanic.World.Normal)
+        {
+            int amount = CalculateBlueEssence();
+            totalBlueEssences += amount;
+            essenceUI.HandleEssence(amount, totalBlueEssences);
+        }
+        else
+        {
+            int amount = CalculateRedEssence();
+            totalRedEssences += amount;
+            essenceUI.HandleEssence(amount, totalRedEssences);
+        }
+
+        _lastWorld = current;
+    }
+}
     private int CalculateBlueEssence()
     {
         int level = UpgradeLevels.Get(labBlueUpgradeId);
