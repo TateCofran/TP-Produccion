@@ -40,9 +40,17 @@ public class PathCellEffect : MonoBehaviour
 
     private bool TryGetAffectable(Collider other, out IPathAffectable aff, out int id)
     {
-        aff = other.GetComponent<IPathAffectable>() ?? other.GetComponentInParent<IPathAffectable>();
-        id = other.GetInstanceID();
-        return aff != null;
+        aff = other.GetComponentInParent<IPathAffectable>();
+        if (aff != null)
+        {
+            // ⚠️ clave: ID estable por enemigo, no por collider hijo
+            var c = (Component)aff;
+            id = c.gameObject.GetInstanceID();            // o: c.transform.root.GetInstanceID()
+            return true;
+        }
+
+        id = 0;
+        return false;
     }
 
     private void ApplyDamageFixed(Collider other)

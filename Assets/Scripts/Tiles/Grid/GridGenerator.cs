@@ -43,6 +43,8 @@ public class GridGenerator : MonoBehaviour, ITileGenerator
     [SerializeField] private GameObject permanentSpawnPrefab;
     [SerializeField] private float permanentSpawnYOffset = 0.1f;
     [SerializeField] private Transform permanentSpawnRoot;
+    private int _rrIndex = 0;
+
 
     private readonly List<Vector3> _permanentSpawnPoints = new();
     private readonly List<GameObject> _spawnPrefabsInScene = new();
@@ -627,32 +629,54 @@ public class GridGenerator : MonoBehaviour, ITileGenerator
     {
         var result = new List<Vector3>();
 
-        // 1) Agregar permanentes primero
+        // 1) permanentes
         foreach (var p in _permanentSpawnPoints)
             if (!result.Any(r => Vector3.Distance(r, p) < 0.05f))
                 result.Add(p);
 
-        // 2) (Opcional) Luego agregá tus exits abiertos como venías haciendo
-        foreach (var (label, wpos) in exits.GetAvailableWorld(chain.Get))
+        // 2) exits abiertos
+        foreach (var (_, wpos) in exits.GetAvailableWorld(chain.Get))
             if (!result.Any(r => Vector3.Distance(r, wpos) < 0.05f))
                 result.Add(wpos);
 
-        // ... si tenías filtros por core distance o vecinos, aplicalos acá como antes ...
+        // 3) filtros opcionales (distancia a core, vecinos) — si los tenías, aplicalos acá
 
-        if (result.Count == 0)
+        // 4) fallback opcional si no hay nada
+        if (result.Count == 0 && chain.Count > 0)
         {
-            // tu fallback de siempre (último tile, etc.)
-            // ...
+            var last = chain.Get(chain.Count - 1);
+            if (last.layout?.exits != null)
+            {
+                foreach (var ex in last.layout.exits)
+                {
+                    var w = last.worldOrigin + orient.CellToWorldLocal(ex, last.layout, last.rotSteps, last.flipped);
+                    if (!result.Any(r => Vector3.Distance(r, w) < 0.05f))
+                        result.Add(w);
+                }
+            }
         }
 
         return result;
     }
 
 
+
     public Vector3 GetNextSpawnRoundRobin()
     {
-        return spawns != null ? spawns.GetNextRoundRobin() : Vector3.zero;
+        var pts = GetSpawnPoints();
+        if (pts == null || pts.Count == 0)
+            return Vector3.zero;
+
+        // round-robin local
+        int idx = _rrIndex % pts.Count;
+        _rrIndex = (idx + 1) % pts.Count;
+
+        // aseguramos altura cómoda para el spawn
+        var p = pts[idx];
+        p.y = (core != null && core.HasCore) ? core.Position.y + runnerYOffset : p.y + runnerYOffset;
+        return p;
     }
+
 
     public bool TryGetRouteExitToCore(Vector3 exitWorldPos, out List<Vector3> route)
     {
