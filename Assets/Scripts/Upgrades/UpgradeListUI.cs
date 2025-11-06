@@ -27,11 +27,19 @@ public class UpgradeListUI : MonoBehaviour
         foreach (var up in repository.GetByCategory(category))
         {
             var btn = Instantiate(itemButtonPrefab, contentParent);
-            _spawned.Add(btn.gameObject);
+       
+            var rect = btn.GetComponent<RectTransform>();
+            rect.sizeDelta = new Vector2(380f, 120f);
 
+            _spawned.Add(btn.gameObject);
             var label = btn.GetComponentInChildren<TextMeshProUGUI>();
-            int level = UpgradeSystemBootstrap.Service.GetCurrentLevel(up);
-            label.text = $"{up.DisplayName}  Lv.{level}/{up.MaxLevel}";
+
+            if (label != null)
+            {
+                label.fontSize = 30f;
+                int level = UpgradeSystemBootstrap.Service.GetCurrentLevel(up);
+                label.text = $"{up.DisplayName}  Lv.{level}/{up.MaxLevel}";
+            }
 
             btn.onClick.AddListener(() => OnItemSelected?.Invoke(up));
         }
