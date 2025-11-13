@@ -115,7 +115,11 @@ public class ShiftingWorldUI : MonoBehaviour
 
     private void Start()
     {
-        dupeSystem = FindFirstObjectByType<TurretDupeSystem>();
+        dupeSystem = FindFirstObjectByType<TurretDupeSystem>() as ITurretDupeSystem;
+        if (TurretDupeUI.Instance != null)
+        {
+            TurretDupeUI.Instance.ConnectToSystem((TurretDupeSystem)dupeSystem);
+        }
     }
 
     void Update()
@@ -574,7 +578,7 @@ private void OnExitButtonClicked(string exitLabel)
             return !string.IsNullOrEmpty(turret.displayName) ? turret.displayName : turret.name;
 
         var levelData = dupeSystem.GetTurretLevelData(turret);
-        return $"{(!string.IsNullOrEmpty(turret.displayName) ? turret.displayName : turret.name)}\n{levelData.GetStatusText()}";
+        return $"{(!string.IsNullOrEmpty(turret.displayName) ? turret.displayName : turret.name)}";
     }
 
     private void HandleDupeSystem(TurretDataSO turret)
