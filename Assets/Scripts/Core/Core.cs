@@ -10,6 +10,10 @@ public class Core : MonoBehaviour
     [SerializeField] private int maxHealth = 10;
     private int currentHealth;
 
+    [Header("Debug / Cheats")]
+    [SerializeField] private bool infiniteHealth = false;
+    public bool InfiniteHealth => infiniteHealth;
+
     [Header("Screen Shake")]
     [SerializeField] private CinemachineImpulseSource impulseSource;
 
@@ -49,10 +53,30 @@ public class Core : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Activa o desactiva vida infinita desde cheats / GameManager.
+    /// Resetea la vida al máximo y actualiza la UI.
+    /// </summary>
+    public void SetInfiniteHealth(bool enabled)
+    {
+        infiniteHealth = enabled;
+        currentHealth = maxHealth;
+        UIController.Instance.UpdateCoreHealth(currentHealth, maxHealth);
+    }
+
     public void TakeDamage(int amount)
     {
-        currentHealth -= amount;
-        if (currentHealth < 0) currentHealth = 0;
+        // Si NO tiene vida infinita, se aplica el daño normalmente
+        if (!infiniteHealth)
+        {
+            currentHealth -= amount;
+            if (currentHealth < 0) currentHealth = 0;
+        }
+        else
+        {
+            // Con vida infinita mantenemos siempre la vida al máximo
+            currentHealth = maxHealth;
+        }
 
         UIController.Instance.UpdateCoreHealth(currentHealth, maxHealth);
 
@@ -71,7 +95,8 @@ public class Core : MonoBehaviour
             vignetteCoroutine = StartCoroutine(HitVignetteRoutine());
         }
 
-        if (currentHealth <= 0)
+        // Solo puede morir si NO tiene vida infinita
+        if (!infiniteHealth && currentHealth <= 0)
         {
             Debug.Log("Core destroyed!");
             if (GameManager.Instance != null)

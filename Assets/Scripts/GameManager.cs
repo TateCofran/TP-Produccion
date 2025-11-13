@@ -43,6 +43,15 @@ public class GameManager : MonoBehaviour
         set => debugWaveToJump = Mathf.Max(1, value);
     }
 
+    [Tooltip("Tag que se usa para encontrar enemigos al completar la oleada por debug.")]
+    [SerializeField] private string enemyTag = "Enemy";
+
+    [Header("Debug Core")]
+    [Tooltip("Estado actual del cheat de vida infinita del Core (solo lectura visual).")]
+    [SerializeField] private bool coreInfiniteHealth = false;
+
+    private Core cachedCore;
+
     private void Awake()
     {
         if (Instance == null)
@@ -75,6 +84,10 @@ public class GameManager : MonoBehaviour
         // Si entramos a la escena de juego, reseteamos estado de run
         if (scene.name == gameplayScene)
             ResetRunState(false);
+
+        // Limpiamos referencia al Core y la reobtendremos cuando haga falta
+        cachedCore = null;
+
         StartCoroutine(SubscribeWhenReady());
     }
 
@@ -274,7 +287,7 @@ public class GameManager : MonoBehaviour
         // se alinea en TryBindPausePanel() cuando cargue la escena.
     }
 
-    // ====== DEBUG BUTTONS ======
+    // ====== DEBUG BUTTONS EXISTENTES ======
     public void Debug_Editor_JumpToWave() => TryJumpToWave(debugWaveToJump);
     public void Debug_Editor_ForceWin() => WinGame();
     public void Debug_Editor_ForceLose() => GameOver();
@@ -323,5 +336,101 @@ public class GameManager : MonoBehaviour
 
         Debug.LogWarning("[GameManager] No encontré una API pública en WaveManager para cambiar de oleada. " +
                          "Agregá en WaveManager: public void JumpToWave(int wave).");
+    }
+
+    // ====== NUEVOS BOTONES DEBUG ======
+
+    /// <summary>
+    /// Botón de inspector: mata todos los enemigos en pantalla
+    /// y completa la oleada actual notificando a WaveManager.
+    /// </summary>
+    public void Debug_Editor_CompleteCurrentWaveAndKillEnemies()
+    {
+        var wm = WaveManager.Instance;
+        if (wm == null)
+        {
+            Debug.LogWarning("[GameManager] No se puede completar la oleada: WaveManager.Instance es null.");
+            return;
+        }
+
+        int enemiesAliveBefore = wm.GetEnemiesAlive();
+        if (enemiesAliveBefore <= 0)
+        {
+            Debug.Log("[GameManager] Debug_CompleteWave: no hay enemigos vivos en esta oleada.");
+            return;
+        }
+
+        int destroyed = 0;
+
+        if (!string.IsNullOrEmpty(enemyTag))
+        {
+            var enemies = GameObject.FindGameObjectsWithTag(enemyTag);
+            foreach (var e in enemies)
+            {
+                if (e == null) continue;
+                Destroy(e);
+                destroyed++;
+            }
+        }
+
+        // Forzamos a WaveManager a considerar que todos los enemigos murieron
+        for (int i = 0; i < enemiesAliveBefore; i++)
+        {
+            wm.NotifyEnemyKilled();
+        }
+
+        Debug.Log($"[GameManager] Debug_CompleteWave: destruidos {destroyed} enemigos (tag '{enemyTag}') " +
+                  $"y notificados {enemiesAliveBefore} kills a WaveManager.");
+    }
+
+    /// <summary>
+    /// Obtiene (y cachea) la referencia al Core en la escena actual.
+    /// </summary>
+    private Core GetCoreInstance()
+    {
+        if (cachedCore == null)
+        {
+            cachedCore = FindFirstObjectByType<Core>();
+            if (cachedCore == null)
+                Debug.LogWarning("[GameManager] No se encontró un Core en la escena actual.");
+        }
+        return cachedCore;
+    }
+
+    /// <summary>
+    /// Botón de inspector: alterna el estado de vida infinita del Core.
+    /// </summary>
+    public void Debug_Editor_ToggleCoreInfiniteHealth()
+    {
+        var core = GetCoreInstance();
+        if (core == null)
+        {
+            Debug.LogWarning("[GameManager] No se puede alternar vida infinita: Core no encontrado.");
+            return;
+        }
+
+        coreInfiniteHealth = !coreInfiniteHealth;
+        core.SetInfiniteHealth(coreInfiniteHealth);
+
+        Debug.Log($"[GameManager] Core vida infinita: {(coreInfiniteHealth ? "ACTIVADA" : "DESACTIVADA")}.");
+    }
+
+    /// <summary>
+    /// Por si querés tener un botón separado de "activar" o "desactivar" directo,
+    /// este método se puede usar también desde el editor.
+    /// </summary>
+    public void Debug_Editor_SetCoreInfiniteHealth(bool enabled)
+    {
+        var core = GetCoreInstance();
+        if (core == null)
+        {
+            Debug.LogWarning("[GameManager] No se puede setear vida infinita: Core no encontrado.");
+            return;
+        }
+
+        coreInfiniteHealth = enabled;
+        core.SetInfiniteHealth(coreInfiniteHealth);
+
+        Debug.Log($"[GameManager] Core vida infinita seteada a: {coreInfiniteHealth}.");
     }
 }

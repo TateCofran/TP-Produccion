@@ -15,7 +15,7 @@ public class GameManagerEditor : Editor
 
         var gm = (GameManager)target;
 
-        // Campo de oleada
+        // Campo de oleada actual
         int newWave = EditorGUILayout.IntField("Oleada a saltar", gm.DebugWaveToJump);
         if (newWave != gm.DebugWaveToJump)
         {
@@ -23,6 +23,7 @@ public class GameManagerEditor : Editor
             EditorUtility.SetDirty(gm);
         }
 
+        // ---- EXISTENTES ----
         GUILayout.BeginHorizontal();
         if (GUILayout.Button("Saltar a Oleada"))
         {
@@ -37,6 +38,23 @@ public class GameManagerEditor : Editor
             gm.Debug_Editor_ForceLose();
         }
         GUILayout.EndHorizontal();
+
+        GUILayout.Space(12);
+
+        // ---- NUEVOS BOTONES ----
+        EditorGUILayout.LabelField("Debug Cheats Extra", EditorStyles.boldLabel);
+
+        // Completar oleada (matar enemigos)
+        if (GUILayout.Button("Completar Oleada (Matar Enemigos)"))
+        {
+            gm.Debug_Editor_CompleteCurrentWaveAndKillEnemies();
+        }
+
+        // Toggle vida infinita Core
+        if (GUILayout.Button("Toggle Core Vida Infinita"))
+        {
+            gm.Debug_Editor_ToggleCoreInfiniteHealth();
+        }
     }
 }
 #endif
