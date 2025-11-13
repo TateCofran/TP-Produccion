@@ -8,6 +8,7 @@ public class ShiftingWorldMechanic : MonoBehaviour
     [SerializeField] private GridGenerator grid;
     [SerializeField] private ShiftingWorldUI ui;   // ← La UI mostrará barras
     [SerializeField] private ShiftingWorldAudio shiftingWorldAudio;
+    [SerializeField] private FogWorldMaterialSwitcher fogWorld; // ← NUEVO
 
     [Header("Estado")]
     [SerializeField] private World currentWorld = World.Normal;
@@ -45,6 +46,17 @@ public class ShiftingWorldMechanic : MonoBehaviour
         }
     }
 
+    private void Start()
+    {
+        // Sincronizar Fog al estado inicial del mundo
+        if (fogWorld != null)
+        {
+            bool startInOther = (currentWorld == World.Otro);
+            isOtherWorld = startInOther;
+            fogWorld.SetWorld(startInOther);
+        }
+    }
+
     private void Update()
     {
         // ↓↓↓ COOLDOWN del cambio de mundo ↓↓↓
@@ -66,16 +78,20 @@ public class ShiftingWorldMechanic : MonoBehaviour
         if (Input.GetKeyDown(toggleKey) && toggleCooldownLeft <= 0f)
         {
             currentWorld = (currentWorld == World.Normal) ? World.Otro : World.Normal;
-            
-            isOtherWorld = !isOtherWorld;
 
-            //sonido de cambio de mundo
+            isOtherWorld = (currentWorld == World.Otro);
+
+            // sonido de cambio de mundo
             if (shiftingWorldAudio != null)
                 shiftingWorldAudio.PlayWorldSound(isOtherWorld);
 
+            // avisar al Fog
+            if (fogWorld != null)
+                fogWorld.SetWorld(isOtherWorld);
+
             toggleCooldownLeft = Mathf.Max(0.01f, toggleCooldownSeconds); // arranca cooldown
             Debug.Log($"[ShiftingWorldMechanic] Cambié de mundo → {currentWorld}. Cooldown: {toggleCooldownSeconds:0.##}s");
-            
+
             if (ui != null)
                 ui.SetWorldIcon(currentWorld);
 

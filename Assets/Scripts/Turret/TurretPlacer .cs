@@ -9,7 +9,6 @@ public class TurretPlacer : MonoBehaviour
     [SerializeField] private Camera cam;              // si es null usa Camera.main
 
     [Header("Preview (opcional)")]
-    [SerializeField] private GameObject ghostPrefab;  // prefab visual para preview
     [SerializeField] private Vector3 ghostOffset = new Vector3(0f, 0.01f, 0f);
 
     [Header("Raycast")]
@@ -43,10 +42,31 @@ public class TurretPlacer : MonoBehaviour
     private void EnterPlacementMode()
     {
         _placing = (_selectedTurret != null);
-        if (_placing && ghostPrefab != null)
+
+        // Destruimos cualquier ghost anterior
+        if (_ghost != null)
         {
-            if (_ghost != null) Destroy(_ghost);
-            _ghost = Instantiate(ghostPrefab);
+            Destroy(_ghost);
+            _ghost = null;
+        }
+
+        // Creamos el ghost usando EL MISMO PREFAB de la torreta seleccionada
+        if (_placing && _selectedTurret != null && _selectedTurret.prefab != null)
+        {
+            _ghost = Instantiate(_selectedTurret.prefab);
+
+            // Opcional pero recomendado:
+            // Desactivar colisionadores para que el raycast siga detectando la celda
+            var colliders = _ghost.GetComponentsInChildren<Collider>();
+            foreach (var col in colliders)
+            {
+                col.enabled = false;
+            }
+
+            // Opcional: si tus torretas disparan al instanciarse, acá podrías
+            // desactivar sus behaviours específicos, por ejemplo:
+            // var shooting = _ghost.GetComponentInChildren<IShootingBehavior>();
+            // if (shooting != null) (shooting as MonoBehaviour).enabled = false;
         }
     }
 
@@ -54,7 +74,12 @@ public class TurretPlacer : MonoBehaviour
     {
         _placing = false;
         _selectedTurret = null;
-        if (_ghost != null) Destroy(_ghost);
+
+        if (_ghost != null)
+        {
+            Destroy(_ghost);
+            _ghost = null;
+        }
     }
 
     private void Update()

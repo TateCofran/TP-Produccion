@@ -20,7 +20,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: M_Cloud
+  m_Name: M_Blue
   m_Shader: {fileID: -6465566751694194690, guid: d5fac6cbbda18d74e84d62269b459ac0, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
