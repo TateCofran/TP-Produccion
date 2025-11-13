@@ -673,7 +673,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   data: {fileID: 11400000, guid: b9e15f4d261a13e4b84b65c5288ba09a, type: 2}
   waypointTolerance: 0.03
-  faceDirection: 0
+  faceDirection: 1
 --- !u!114 &8413191888970248871
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -689,6 +689,7 @@ MonoBehaviour:
   maxHealth: 0
   defense: 0
   currentHealth: 0
+  shieldCurrent: 0
 --- !u!114 &8820110197504237048
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -703,8 +704,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   healthBarPrefab: {fileID: 4226652873309903254, guid: e992eef13a5dec64495e55e9ee746145, type: 3}
   healthBarHeight: 1.5
-  damageTextPrefab: {fileID: 3297664047394320152, guid: 5dc51b662dd03134386338d874af2d33, type: 3}
   damageTextYOffset: 2
+  damageTextXOffset: -30
   reduceSpeed: 6
 --- !u!114 &-2998138191193648476
 MonoBehaviour:

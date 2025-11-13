@@ -108,9 +108,12 @@ public class Enemy : MonoBehaviour, IEnemyDeathHandler // <- implementamos el ha
 
         if (faceDirection && dir.sqrMagnitude > 0.0001f)
         {
-            var look = Quaternion.LookRotation(new Vector3(dir.x, 0f, dir.z), Vector3.up);
+            // Invertimos la dirección porque el modelo mira "al revés"
+            var forward = -new Vector3(dir.x, 0f, dir.z);
+            var look = Quaternion.LookRotation(forward, Vector3.up);
             transform.rotation = Quaternion.Slerp(transform.rotation, look, 0.25f);
         }
+
 
         // ?? Tick de habilidades
         float dt = Time.deltaTime;

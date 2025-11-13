@@ -587,6 +587,7 @@ MonoBehaviour:
   maxHealth: 0
   defense: 0
   currentHealth: 0
+  shieldCurrent: 0
 --- !u!114 &8820110197504237048
 MonoBehaviour:
   m_ObjectHideFlags: 0

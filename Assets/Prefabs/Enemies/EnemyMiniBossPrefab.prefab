@@ -604,7 +604,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   data: {fileID: 11400000, guid: 8501f4f7e03344a4490d9a95a4ed1190, type: 2}
   waypointTolerance: 0.03
-  faceDirection: 0
+  faceDirection: 1
 --- !u!114 &6440740474934862740
 MonoBehaviour:
   m_ObjectHideFlags: 0

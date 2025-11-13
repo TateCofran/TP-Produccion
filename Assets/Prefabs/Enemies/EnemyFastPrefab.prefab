@@ -654,6 +654,7 @@ MonoBehaviour:
   maxHealth: 0
   defense: 0
   currentHealth: 0
+  shieldCurrent: 0
 --- !u!114 &-1633866569161232141
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -668,7 +669,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   data: {fileID: 11400000, guid: e6127cb92ab6f1a48a59a4beb2ed39b4, type: 2}
   waypointTolerance: 0.03
-  faceDirection: 0
+  faceDirection: 1
 --- !u!114 &8162415360288955088
 MonoBehaviour:
   m_ObjectHideFlags: 0

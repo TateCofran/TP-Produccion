@@ -199,6 +199,9 @@ public class GridGenerator : MonoBehaviour, ITileGenerator
 
         int abiertos = exits.IndicesDisponibles().Count();
         Debug.Log($"[GridGenerator] Primer tile instanciado ({count} celdas). Exits disponibles: {abiertos}");
+        // Re-scan de exits por si el primer tile ya bloquea alguna (raro pero por las dudas)
+        UpdatePermanentSpawnPointsForAllExits();
+
     }
 
     public void AppendNextUsingSelectedExit()
@@ -312,7 +315,12 @@ public class GridGenerator : MonoBehaviour, ITileGenerator
             chain.Add(placed); overlap.Add(placed, chain.Count - 1);
             AddTileExitsToPool(chain.Count - 1, candidate.entry);
             AttachAndApplyDupe(parent, candidate);
+            // ⚠️ IMPORTANTE: cada vez que agregamos un tile,
+            // revisamos todas las exits abiertas por si ahora alguna quedó bloqueada
+            UpdatePermanentSpawnPointsForAllExits();
             Debug.Log($"[GridGenerator] Conectado via EXIT {chosen.label} → Nuevo tile #{chain.Count - 1} (rot={rot * 90}°, flip={flip}). Instancias: {count}");
+           
+
             return true;
         }
         return false;
@@ -345,7 +353,7 @@ public class GridGenerator : MonoBehaviour, ITileGenerator
         {
             if (!pt.layout.IsInside(ex) || !pt.layout.IsPath(ex)) continue;
             if (excludeAssetCell.HasValue && ex == excludeAssetCell.Value) continue;
-            if (IsExitBlockedByAnotherTile(tileIndex, ex))
+            if (IsExitBlockedByAnotherTile(tileIndex, ex, out var dirOut))
             {
                 Vector3 exitWorld = pt.worldOrigin + orient.CellToWorldLocal(ex, pt.layout, pt.rotSteps, pt.flipped);
 
@@ -353,12 +361,15 @@ public class GridGenerator : MonoBehaviour, ITileGenerator
                 {
                     _permanentSpawnPoints.Add(exitWorld);
 
-                    // creamos un visual (prefab) para este spawn permanente
-                    CreatePermanentSpawnVisual(exitWorld);
+                    // Queremos que el portal mire EN DIRECCIÓN DEL CAMINO (hacia adentro del mapa).
+                    // dirOut apunta "hacia afuera", así que usamos -dirOut como forward.
+                    Vector3 forward = new Vector3(-dirOut.x, 0f, -dirOut.y);
+                    CreatePermanentSpawnVisual(exitWorld, forward);
                 }
 
                 continue; // no agregar como exit disponible
             }
+
 
 
             // Caso normal: sí es exit disponible
@@ -384,8 +395,10 @@ public class GridGenerator : MonoBehaviour, ITileGenerator
     /// <summary>
     /// Devuelve true si inmediatamente afuera de la exit hay otra tile ocupando la siguiente celda.
     /// </summary>
-    private bool IsExitBlockedByAnotherTile(int tileIndex, Vector2Int exitCell)
+    private bool IsExitBlockedByAnotherTile(int tileIndex, Vector2Int exitCell, out Vector2Int dirOut)
     {
+        dirOut = Vector2Int.zero;
+
         var pt = chain.Get(tileIndex);
         var layout = pt.layout;
 
@@ -394,12 +407,12 @@ public class GridGenerator : MonoBehaviour, ITileGenerator
         if (!nb.HasValue) return false;
 
         // Dirección de salida en mundo (cardinal)
-        var dirOut = ClampToOrtho(orient.ApplyToDir(exitCell - nb.Value, pt.rotSteps, pt.flipped));
+        dirOut = ClampToOrtho(orient.ApplyToDir(exitCell - nb.Value, pt.rotSteps, pt.flipped));
 
         // Centro de la celda de la EXIT
         Vector3 exitWorld = pt.worldOrigin + orient.CellToWorldLocal(exitCell, layout, pt.rotSteps, pt.flipped);
 
-        // Centro de la *próxima celda fuera* (una celda más en la dirección de salida)
+        // Centro de la siguiente celda fuera del tile
         float cs = layout.cellSize;
         Vector3 nextCellWorld = exitWorld + new Vector3(dirOut.x, 0f, dirOut.y) * cs;
 
@@ -414,6 +427,8 @@ public class GridGenerator : MonoBehaviour, ITileGenerator
         return false;
     }
 
+
+
     private Transform EnsurePermanentSpawnRoot()
     {
         if (permanentSpawnRoot) return permanentSpawnRoot;
@@ -422,11 +437,53 @@ public class GridGenerator : MonoBehaviour, ITileGenerator
         return permanentSpawnRoot;
     }
 
-    private void CreatePermanentSpawnVisual(Vector3 worldPos)
+    /// <summary>
+    /// Revisa TODAS las exits abiertas. Si ahora alguna quedó bloqueada por otro tile,
+    /// la convierte en spawn permanente y marca la exit como Cerrada.
+    /// </summary>
+    private void UpdatePermanentSpawnPointsForAllExits()
+    {
+        if (exits == null || chain == null) return;
+
+        for (int i = 0; i < exits.Count; i++)
+        {
+            var rec = exits.Get(i);
+
+            // Solo nos importan las que todavía están abiertas
+            if (rec.Used || rec.Closed)
+                continue;
+
+            // Ahora necesitamos también la dirección de salida
+            if (IsExitBlockedByAnotherTile(rec.tileIndex, rec.cell, out var dirOut))
+            {
+                var pt = chain.Get(rec.tileIndex);
+                Vector3 exitWorld = pt.worldOrigin +
+                                    orient.CellToWorldLocal(rec.cell, pt.layout, pt.rotSteps, pt.flipped);
+
+                // Evitar duplicados de spawn
+                if (!_permanentSpawnPoints.Any(p => Vector3.Distance(p, exitWorld) < 0.05f))
+                {
+                    _permanentSpawnPoints.Add(exitWorld);
+
+                    // Queremos que el portal mire HACIA ADENTRO del mapa:
+                    // dirOut apunta hacia afuera, así que usamos -dirOut.
+                    Vector3 forward = new Vector3(-dirOut.x, 0f, -dirOut.y);
+                    CreatePermanentSpawnVisual(exitWorld, forward);
+                }
+
+                // Cerramos la exit para que no vuelva a aparecer en la UI
+                exits.MarkClosed(i, "SPAWN_PERMANENTE");
+            }
+        }
+    }
+
+
+
+    private void CreatePermanentSpawnVisual(Vector3 worldPos, Vector3 forwardDir)
     {
         if (!permanentSpawnPrefab) return;
 
-        // Evita duplicados
+        // Evita duplicados por posición
         foreach (var existing in _spawnPrefabsInScene)
         {
             if (existing && Vector3.Distance(existing.transform.position, worldPos) < 0.05f)
@@ -435,9 +492,16 @@ public class GridGenerator : MonoBehaviour, ITileGenerator
 
         var parent = EnsurePermanentSpawnRoot();
         var pos = worldPos + Vector3.up * permanentSpawnYOffset;
-        var go = Instantiate(permanentSpawnPrefab, pos, Quaternion.identity, parent);
+
+        // Normalizamos la dirección por las dudas
+        if (forwardDir.sqrMagnitude < 0.0001f)
+            forwardDir = Vector3.forward;
+
+        var rot = Quaternion.LookRotation(forwardDir.normalized, Vector3.up);
+        var go = Instantiate(permanentSpawnPrefab, pos, rot, parent);
         _spawnPrefabsInScene.Add(go);
     }
+
 
 
     private void ClearAll()
@@ -777,6 +841,9 @@ public class GridGenerator : MonoBehaviour, ITileGenerator
                 exits.Relabel();
 
                 AttachAndApplyDupe(parent, forced);
+                // Actualizar spawns permanentes con todas las tiles ya colocadas
+                UpdatePermanentSpawnPointsForAllExits();
+
 
                 Debug.Log($"[GridGenerator] Conectado con layout forzado {forced.name} (rot={rot * 90}°, flip={flip}). Instancias: {count}");
                 return true;
