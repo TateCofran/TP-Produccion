@@ -6,6 +6,7 @@ public interface ITurretDupeSystem
     TurretLevelData GetTurretLevelData(TurretDataSO turret);
     void AddDupe(TurretDataSO turret);
     event System.Action<TurretDataSO, TurretLevelData> OnTurretLevelUp;
+    public event System.Action<TurretDataSO> OnDupeChanged;
 }
 
 [System.Serializable]
@@ -13,7 +14,7 @@ public class TurretLevelData
 {
     public int currentLevel = 1;
     public int currentDupes = 0;
-    public int dupesRequiredForNextLevel = 1;
+    public int dupesRequiredForNextLevel = 2;
 
     public float damageMultiplier = 1f;
     public float rangeMultiplier = 1f;

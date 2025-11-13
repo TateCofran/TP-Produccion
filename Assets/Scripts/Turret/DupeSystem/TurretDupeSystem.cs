@@ -7,6 +7,7 @@ public class TurretDupeSystem : MonoBehaviour, ITurretDupeSystem
     private Dictionary<string, TurretLevelData> turretLevels = new Dictionary<string, TurretLevelData>();
 
     public event System.Action<TurretDataSO, TurretLevelData> OnTurretLevelUp;
+    public event System.Action<TurretDataSO> OnDupeChanged;
 
     public TurretLevelData GetTurretLevelData(TurretDataSO turret)
     {
@@ -33,6 +34,7 @@ public class TurretDupeSystem : MonoBehaviour, ITurretDupeSystem
         int previousLevel = levelData.currentLevel;
 
         levelData.AddDupe();
+        OnDupeChanged?.Invoke(turret);
 
         if (levelData.currentLevel > previousLevel)
         {

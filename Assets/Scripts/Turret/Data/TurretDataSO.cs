@@ -11,7 +11,7 @@ public class TurretDataSO : ScriptableObject
     public string type;               // "attack", "aoe", "slow", etc.
 
     [Header("Stats")]
-    public string displayName;
+    public string displayName; //aca se guarda el tipo de torreta
     //public Sprite icon;
 
     public float damage;
