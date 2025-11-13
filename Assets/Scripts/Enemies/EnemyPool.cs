@@ -19,6 +19,12 @@ public class EnemyPool : MonoBehaviour
     [SerializeField] private GameObject miniBossPrefab2;
     [SerializeField] private GameObject bossPrefab2;
 
+    [Header("Prefabs por tipo")]
+    [SerializeField] private GameObject minionEnemyPrefab3;
+    [SerializeField] private GameObject sprintEnemyPrefab3;
+    [SerializeField] private GameObject bigEnemyPrefab3;
+    [SerializeField] private GameObject miniBossPrefab3;
+    [SerializeField] private GameObject bossPrefab3;
     [Header("Pool")]
     [SerializeField] private int initialSizePerType = 10;
     [SerializeField] private Transform poolRoot;
@@ -50,6 +56,12 @@ public class EnemyPool : MonoBehaviour
         prefabMap[EnemyType.Big2] = bigEnemyPrefab2;
         prefabMap[EnemyType.MiniBoss2] = miniBossPrefab2;
         prefabMap[EnemyType.Boss2] = bossPrefab2;
+
+        prefabMap[EnemyType.Minion3] = minionEnemyPrefab3;
+        prefabMap[EnemyType.Sprint3] = sprintEnemyPrefab3;
+        prefabMap[EnemyType.Big3] = bigEnemyPrefab3;
+        prefabMap[EnemyType.MiniBoss3] = miniBossPrefab3;
+        prefabMap[EnemyType.Boss3] = bossPrefab3;
         foreach (var kv in prefabMap)
         {
             var type = kv.Key;

@@ -310,15 +310,15 @@ MonoBehaviour:
   - waveNumber: 16
     steps:
     - enemyType: 7
-      count: 7
+      count: 2
       interval: 1.5
       waitAfterStep: 1
     - enemyType: 7
-      count: 7
+      count: 2
       interval: 1
       waitAfterStep: 0.7
     - enemyType: 7
-      count: 7
+      count: 3
       interval: 0.7
       waitAfterStep: 0.7
   - waveNumber: 17

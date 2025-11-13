@@ -2161,6 +2161,11 @@ MonoBehaviour:
   bigEnemyPrefab2: {fileID: 5019013483156572802, guid: 6c3c9fab13150704cb0d65bd10a35285, type: 3}
   miniBossPrefab2: {fileID: 5019013483156572802, guid: cfe83ca5f9656664b91fcd02fa01c1eb, type: 3}
   bossPrefab2: {fileID: 5019013483156572802, guid: 197ba61de064d59488355ff62b2dbf9b, type: 3}
+  minionEnemyPrefab3: {fileID: 5019013483156572802, guid: d92574c2687ed7e498b0aba10948d070, type: 3}
+  sprintEnemyPrefab3: {fileID: 5019013483156572802, guid: 84574a41def98f24781707fa03d5520b, type: 3}
+  bigEnemyPrefab3: {fileID: 5019013483156572802, guid: 1df7879a6ca7a3546b7e700bb111a099, type: 3}
+  miniBossPrefab3: {fileID: 5019013483156572802, guid: e4ff9201af9f1b543a7e4c0303f6a181, type: 3}
+  bossPrefab3: {fileID: 5019013483156572802, guid: 552450befbeeeb74daf068900e5a638b, type: 3}
   initialSizePerType: 10
   poolRoot: {fileID: 0}
 --- !u!1001 &1719122247218854891
@@ -4612,10 +4617,10 @@ MonoBehaviour:
   pausePanelTag: PausePanel
   pausePanelName: PausePanel
   resultScene: ResultScene
-  wavesToWin: 20
+  wavesToWin: 46
   mainMenuScene: Menu
   gameplayScene: GameScene
-  debugWaveToJump: 16
+  debugWaveToJump: 31
 --- !u!114 &4762079939036527471
 MonoBehaviour:
   m_ObjectHideFlags: 0

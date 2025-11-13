@@ -155,7 +155,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 231b860c4f77bf64f9280358fd06cfc6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  data: {fileID: 11400000, guid: a0a307e689490fa4ea4371942b22b61f, type: 2}
+  data: {fileID: 11400000, guid: 63232ef3b26be5d4b8c413dd164ce3ea, type: 2}
   waypointTolerance: 0.03
   faceDirection: 0
 --- !u!114 &-7749096586298701241
