@@ -56,7 +56,9 @@ public class TurretSelector : MonoBehaviour
         }
 
         if (selectedTurret != null)
-            selectedTurret.HideRange();
+        {
+            selectedTurret.HideRange(); // esto además apaga todos los demás gracias al visualizador
+        }
 
         selectedTurret = turret;
         selectedTurret.ShowRange();

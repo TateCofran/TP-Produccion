@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   enemyName: Skeleton
   maxHealth: 50
-  defense: 5
+  defense: 0
   moveSpeed: 1.25
   damageToCore: 1
   type: 5

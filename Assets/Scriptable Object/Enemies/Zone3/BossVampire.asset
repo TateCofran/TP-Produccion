@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   enemyName: BossVampire
   maxHealth: 5000
-  defense: 25
+  defense: 0
   moveSpeed: 1
   damageToCore: 100
   type: 14

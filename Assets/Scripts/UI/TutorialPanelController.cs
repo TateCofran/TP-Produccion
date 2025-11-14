@@ -13,25 +13,29 @@ public sealed class TutorialPanelController : MonoBehaviour
     private void Reset()
     {
         // Auto-guess en caso de agregar el script desde el inspector
-        if (panel == null) panel = gameObject;
+        if (panel == null)
+            panel = gameObject;
+
         if (closeButton == null)
-            closeButton = GetComponentInChildren<Button>(true);
+            closeButton = GetComponentInChildren<Button>();
     }
 
     private void Awake()
     {
-        if (panel == null) panel = gameObject;
+        // Asegurarnos de que el panel arranca cerrado
+        if (panel != null)
+            panel.SetActive(false);
+
+        _isOpen = false;
+
         if (closeButton != null)
         {
-            closeButton.onClick.RemoveAllListeners();
+            closeButton.onClick.RemoveListener(CloseTutorial);
             closeButton.onClick.AddListener(CloseTutorial);
         }
-
-        // Aseguramos que arranque oculto
-        if (panel.activeSelf)
+        else
         {
-            panel.SetActive(false);
-            _isOpen = false;
+            Debug.LogWarning("[TutorialPanelController] Falta asignar 'closeButton' en el inspector.");
         }
     }
 
@@ -40,13 +44,14 @@ public sealed class TutorialPanelController : MonoBehaviour
         if (_isOpen) return;
         _isOpen = true;
 
-        if (panel != null) panel.SetActive(true);
+        if (panel != null)
+            panel.SetActive(true);
 
-        // Pausar el juego
+        // Pausar el juego SIN abrir el panel de pausa
         if (GameManager.Instance != null)
-            GameManager.Instance.PauseGame();
+            GameManager.Instance.PauseOnly();
         else
-            Time.timeScale = 0f; // fallback
+            Time.timeScale = 0f; // fallback si no hay GameManager
     }
 
     public void CloseTutorial()
@@ -54,9 +59,10 @@ public sealed class TutorialPanelController : MonoBehaviour
         if (!_isOpen) return;
         _isOpen = false;
 
-        if (panel != null) panel.SetActive(false);
+        if (panel != null)
+            panel.SetActive(false);
 
-        // Reanudar el juego
+        // Reanudar el juego usando la lógica normal del GameManager
         if (GameManager.Instance != null)
             GameManager.Instance.ResumeGame();
         else

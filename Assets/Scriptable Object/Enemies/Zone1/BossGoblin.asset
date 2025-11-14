@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   enemyName: BossGoblin
   maxHealth: 1000
-  defense: 9
+  defense: 0
   moveSpeed: 0.5
   damageToCore: 100
   type: 4

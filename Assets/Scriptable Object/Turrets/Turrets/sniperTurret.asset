@@ -10,13 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 661c8973de2a86f43b198472e907ca0d, type: 3}
-  m_Name: TeslaTurret
+  m_Name: sniperTurret
   m_EditorClassIdentifier: 
-  id: tesla_Turret
+  id: sniper_Turret
   type: 
-  displayName: Turret Tesla
-  damage: 2
-  range: 5
-  fireRate: 1
+  displayName: Turret Sniper
+  damage: 15
+  range: 10
+  fireRate: 0.1
   projectileSpeed: 1
   prefab: {fileID: 7333658948748976991, guid: f4ec192a3a35b5f42a0059935148bbe8, type: 3}

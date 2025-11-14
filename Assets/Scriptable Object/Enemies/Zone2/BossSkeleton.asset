@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   enemyName: BossSkeleton
   maxHealth: 2000
-  defense: 18
+  defense: 0
   moveSpeed: 0.8
   damageToCore: 100
   type: 9

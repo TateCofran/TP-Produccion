@@ -33,7 +33,6 @@ public class GameManager : MonoBehaviour
 
     private bool subscribedToWave = false;
 
-    // === DEBUG / TESTEO EN INSPECTOR ===
     [Header("Debug / Testeo")]
     [Tooltip("Oleada a la que saltará el botón de testeo.")]
     [Min(1), SerializeField] private int debugWaveToJump = 1;
@@ -79,13 +78,10 @@ public class GameManager : MonoBehaviour
 
     private void HandleSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        // Cada vez que entra a una escena, reintenta enlazar el Pause Panel
         TryBindPausePanel();
-        // Si entramos a la escena de juego, reseteamos estado de run
         if (scene.name == gameplayScene)
             ResetRunState(false);
 
-        // Limpiamos referencia al Core y la reobtendremos cuando haga falta
         cachedCore = null;
 
         StartCoroutine(SubscribeWhenReady());
@@ -118,9 +114,7 @@ public class GameManager : MonoBehaviour
     }
 
     #region Pause Panel Binding
-    /// <summary>
-    /// Permite que el panel se registre solo (usado por PausePanelBinder).
-    /// </summary>
+
     public void RegisterPausePanel(GameObject panel)
     {
         pausePanel = panel;
@@ -132,12 +126,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Intenta enlazar el Pause Panel si la referencia está vacía.
-    /// 1) Por referencia ya serializada
-    /// 2) Por Tag (pausePanelTag)
-    /// 3) Por nombre exacto (pausePanelName)
-    /// </summary>
+
     private void TryBindPausePanel()
     {
         if (pausePanel != null) return;
@@ -155,7 +144,7 @@ public class GameManager : MonoBehaviour
             }
         }
 
-        // 2) Intento por nombre
+
         if (!string.IsNullOrEmpty(pausePanelName))
         {
             var allRoots = SceneManager.GetActiveScene().GetRootGameObjects();
@@ -191,6 +180,14 @@ public class GameManager : MonoBehaviour
     #endregion
 
     #region Pausa
+    public void PauseOnly()
+    {
+        if (isPaused) return;       // si ya está pausado, no hacer nada
+        isPaused = true;
+        Time.timeScale = 0f;
+        AudioListener.pause = true;
+    }
+
     public void PauseGame()
     {
         if (isPaused) return;
@@ -267,8 +264,8 @@ public class GameManager : MonoBehaviour
         var essences = FindFirstObjectByType<WorldSwitchPoints>();
         if (essences != null)
         {
-            essences.AddBlueEssence(-essences.TotalBlue); //poner a 0
-            essences.AddRedEssence(-essences.TotalRed);   //poner a 0
+            essences.AddBlueEssence(-essences.TotalBlue); 
+            essences.AddRedEssence(-essences.TotalRed);   
         }
 
         SceneManager.LoadScene(gameplayScene);
@@ -283,8 +280,7 @@ public class GameManager : MonoBehaviour
         Time.timeScale = 1f;
         AudioListener.pause = false;
         subscribedToWave = false;
-        // No forzamos aquí SetActive(false) porque el panel puede no estar enlazado aún;
-        // se alinea en TryBindPausePanel() cuando cargue la escena.
+
     }
 
     // ====== DEBUG BUTTONS EXISTENTES ======
@@ -338,12 +334,6 @@ public class GameManager : MonoBehaviour
                          "Agregá en WaveManager: public void JumpToWave(int wave).");
     }
 
-    // ====== NUEVOS BOTONES DEBUG ======
-
-    /// <summary>
-    /// Botón de inspector: mata todos los enemigos en pantalla
-    /// y completa la oleada actual notificando a WaveManager.
-    /// </summary>
     public void Debug_Editor_CompleteCurrentWaveAndKillEnemies()
     {
         var wm = WaveManager.Instance;
@@ -383,9 +373,6 @@ public class GameManager : MonoBehaviour
                   $"y notificados {enemiesAliveBefore} kills a WaveManager.");
     }
 
-    /// <summary>
-    /// Obtiene (y cachea) la referencia al Core en la escena actual.
-    /// </summary>
     private Core GetCoreInstance()
     {
         if (cachedCore == null)
@@ -397,9 +384,6 @@ public class GameManager : MonoBehaviour
         return cachedCore;
     }
 
-    /// <summary>
-    /// Botón de inspector: alterna el estado de vida infinita del Core.
-    /// </summary>
     public void Debug_Editor_ToggleCoreInfiniteHealth()
     {
         var core = GetCoreInstance();
@@ -415,10 +399,6 @@ public class GameManager : MonoBehaviour
         Debug.Log($"[GameManager] Core vida infinita: {(coreInfiniteHealth ? "ACTIVADA" : "DESACTIVADA")}.");
     }
 
-    /// <summary>
-    /// Por si querés tener un botón separado de "activar" o "desactivar" directo,
-    /// este método se puede usar también desde el editor.
-    /// </summary>
     public void Debug_Editor_SetCoreInfiniteHealth(bool enabled)
     {
         var core = GetCoreInstance();

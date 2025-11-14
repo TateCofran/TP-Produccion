@@ -15,8 +15,8 @@ MonoBehaviour:
   id: fire_Turret
   type: 
   displayName: Fire Turret
-  damage: 10
-  range: 2
+  damage: 3
+  range: 3
   fireRate: 1
   projectileSpeed: 1
   prefab: {fileID: 7333658948748976991, guid: 9665098fa95d16949b4d13b5a72e859e, type: 3}

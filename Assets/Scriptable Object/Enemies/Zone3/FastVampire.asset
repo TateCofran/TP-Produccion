@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   enemyName: FastVampire
   maxHealth: 50
-  defense: 5
+  defense: 0
   moveSpeed: 5
   damageToCore: 1
   type: 11

@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   enemyName: MiniBossSkeleton
   maxHealth: 750
-  defense: 15
+  defense: 0
   moveSpeed: 1.7
   damageToCore: 5
   type: 8

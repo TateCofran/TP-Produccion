@@ -3,7 +3,7 @@ using System.Linq;
 using UnityEngine;
 
 [DisallowMultipleComponent]
-public class Enemy : MonoBehaviour, IEnemyDeathHandler // <- implementamos el handler
+public class Enemy : MonoBehaviour, IEnemyDeathHandler
 {
     [SerializeField] private EnemyData data;
     public EnemyData Data => data;
@@ -26,9 +26,8 @@ public class Enemy : MonoBehaviour, IEnemyDeathHandler // <- implementamos el ha
     private EnemyEffects _effects;
     private List<IEnemyAbility> _abilities;
 
-
     // Evita notificar muerte más de una vez (pooling / Destroy / llegada al core)
-    private bool _removedFromWave; // renombrado para contemplar ambas causas
+    private bool _removedFromWave;
 
     private void Awake()
     {
@@ -57,7 +56,6 @@ public class Enemy : MonoBehaviour, IEnemyDeathHandler // <- implementamos el ha
 
         HealthBar?.Initialize(transform, Health != null ? Health.GetMaxHealth() : 1f);
 
-        // ?? Inicializamos las habilidades
         var ctx = new AbilityContext
         {
             Enemy = this,
@@ -78,7 +76,6 @@ public class Enemy : MonoBehaviour, IEnemyDeathHandler // <- implementamos el ha
     private void Update()
     {
         if (_route.Count == 0 || _idx >= _route.Count) return;
-
         if (_effects != null && _effects.IsStunned) return;
 
         var current = transform.position;
@@ -101,26 +98,22 @@ public class Enemy : MonoBehaviour, IEnemyDeathHandler // <- implementamos el ha
 
         float speedMultiplier = 1f;
         if (_effects != null)
-            speedMultiplier = Mathf.Clamp(_effects.CurrentSpeedMultiplier, 0f, 3f); // 0..3 (o el cap que quieras)
+            speedMultiplier = Mathf.Clamp(_effects.CurrentSpeedMultiplier, 0f, 3f);
 
         float step = data.moveSpeed * speedMultiplier * Time.deltaTime;
         transform.position = Vector3.MoveTowards(current, target, step);
 
         if (faceDirection && dir.sqrMagnitude > 0.0001f)
         {
-            // Invertimos la dirección porque el modelo mira "al revés"
             var forward = -new Vector3(dir.x, 0f, dir.z);
             var look = Quaternion.LookRotation(forward, Vector3.up);
             transform.rotation = Quaternion.Slerp(transform.rotation, look, 0.25f);
         }
 
-
-        // ?? Tick de habilidades
         float dt = Time.deltaTime;
         for (int i = 0; i < _abilities.Count; i++)
             _abilities[i].Tick(dt);
     }
-
 
     private void OnTriggerEnter(Collider other)
     {
@@ -130,7 +123,8 @@ public class Enemy : MonoBehaviour, IEnemyDeathHandler // <- implementamos el ha
         {
             hasHitCore = true;
             core.TakeDamage(data.damageToCore);
-            ReturnToPoolOrDisable();
+            // Al impactar el núcleo, este enemigo cuenta como eliminado de la oleada
+            NotifyDeath();
         }
     }
 
@@ -148,13 +142,11 @@ public class Enemy : MonoBehaviour, IEnemyDeathHandler // <- implementamos el ha
         UnsuscribeHealthEvents();
     }
 
-
     private void SuscribeHealthEvents()
     {
         if (Health == null) Health = GetComponent<EnemyHealth>();
         if (Health == null) return;
 
-        // Compat: si sólo tenés OnDamaged(current,max)
         Health.OnDamaged += HandleOnDamagedCompat;
     }
 
@@ -166,7 +158,6 @@ public class Enemy : MonoBehaviour, IEnemyDeathHandler // <- implementamos el ha
 
     private void HandleOnDamagedCompat(float current, float max)
     {
-        // Versión compatible: no sabemos "amount" ni "source", pero SprintOnLowHP sólo usa currentHP
         for (int i = 0; i < _abilities.Count; i++)
             _abilities[i].OnDamaged(0f, current, null);
     }
@@ -179,20 +170,17 @@ public class Enemy : MonoBehaviour, IEnemyDeathHandler // <- implementamos el ha
         foreach (var ab in _abilities)
             ab.OnArrivedToCore();
 
-        RemoveFromWaveOnce();
-        ReturnToPoolOrDisable();
+        // Llegó al núcleo: también cuenta como enemigo eliminado
+        NotifyDeath();
     }
-
 
     public void ResetEnemy()
     {
-        // Asegurar dependencias
         var health = GetComponent<EnemyHealth>();
         if (health == null) health = gameObject.AddComponent<EnemyHealth>();
         var healthBar = GetComponent<EnemyHealthBar>();
         if (healthBar == null) healthBar = gameObject.AddComponent<EnemyHealthBar>();
 
-        // Reset de stats
         if (Data != null)
         {
             health.SetMaxHealth(Data.maxHealth);
@@ -205,11 +193,9 @@ public class Enemy : MonoBehaviour, IEnemyDeathHandler // <- implementamos el ha
             health.SetCurrentHealth(health.GetMaxHealth());
         }
 
-        // Inicializar barra
         healthBar.Initialize(this.transform, health.GetMaxHealth());
         healthBar.UpdateHealthBar(health.GetCurrentHealth(), health.GetMaxHealth());
 
-        // Reset de flags/movimiento
         hasHitCore = false;
         _removedFromWave = false;
         _idx = 0;
@@ -219,37 +205,34 @@ public class Enemy : MonoBehaviour, IEnemyDeathHandler // <- implementamos el ha
     {
         if (e != this) return;
 
-        //Notificar habilidades antes de pool
         foreach (var ab in _abilities)
             ab.OnDeath();
 
         NotifyDeath();
     }
 
-
     public void NotifyDeath()
     {
         if (_removedFromWave) return;
 
+        _removedFromWave = true;
+
         OnAnyEnemyKilled?.Invoke(this);
-        RemoveFromWaveOnce();
-        ReturnToPoolOrDisable(); // NO Destroy
+
+        ReturnToPoolOrDisable();
     }
 
     private void RemoveFromWaveOnce()
     {
         if (_removedFromWave) return;
         _removedFromWave = true;
-        WaveManager.Instance?.NotifyEnemyKilled();
     }
 
     private void ReturnToPoolOrDisable()
     {
-        // Devolver al pool si existe; si no, como mínimo desactivar para no romper refs
         if (EnemyPool.Instance != null)
             EnemyPool.Instance.ReturnEnemy(gameObject);
         else
             gameObject.SetActive(false);
     }
-
 }

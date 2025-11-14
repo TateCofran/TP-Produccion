@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   enemyName: FastGoblin
   maxHealth: 15
-  defense: 1
+  defense: 0
   moveSpeed: 1
   damageToCore: 1
   type: 1

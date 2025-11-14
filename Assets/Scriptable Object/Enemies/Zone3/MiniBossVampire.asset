@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   enemyName: MiniBossVampire
   maxHealth: 1500
-  defense: 20
+  defense: 0
   moveSpeed: 1.7
   damageToCore: 5
   type: 13

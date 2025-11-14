@@ -15,7 +15,7 @@ MonoBehaviour:
   id: energy_Turret
   type: 
   displayName: Energy Turret
-  damage: 10
+  damage: 2
   range: 2
   fireRate: 1
   projectileSpeed: 1
