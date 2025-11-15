@@ -9,6 +9,7 @@ public class DupeBarUI : MonoBehaviour
     [SerializeField] private Transform dupeContainer;      // Contenedor donde se instancian las imágenes dupe
     [SerializeField] private GameObject dupeImagePrefab;   // Prefab de la imagen roja de dupe
     [SerializeField] private TextMeshProUGUI turretType;   // Texto con el nombre de la torreta
+    [SerializeField] private TextMeshProUGUI turretLevelText;
 
     private List<GameObject> activeDupes = new List<GameObject>();
 
@@ -56,7 +57,7 @@ public class DupeBarUI : MonoBehaviour
             RectTransform rt = dupeImg.GetComponent<RectTransform>();
 
             // Ajustar tamaño
-            rt.sizeDelta = new Vector2(ancho, rt.sizeDelta.y);
+            rt.sizeDelta = new Vector2(ancho, 9f);
 
             // Si no está dentro del número actual de dupes, lo atenuamos
             Image img = dupeImg.GetComponent<Image>();
@@ -66,6 +67,11 @@ public class DupeBarUI : MonoBehaviour
                 img.color = new Color(img.color.r, img.color.g, img.color.b, 1f);   // lleno
 
             activeDupes.Add(dupeImg);
+        }
+
+        if (turretLevelText != null)
+        {
+            turretLevelText.text = data.level.ToString();
         }
 
         Debug.Log($"[{typeName}] Dupes UI generada: {data.currentDupes}/{data.maxDupes} (ancho {ancho})");

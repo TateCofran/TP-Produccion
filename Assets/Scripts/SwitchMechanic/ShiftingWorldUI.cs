@@ -426,11 +426,9 @@ private void OnExitButtonClicked(string exitLabel)
         selectedTurret = so;
 
         if (placeWithUI)
-        {
-            turretPlacingMode = true;
+        { 
             // Ocultar SOLO el panel de selección de torretas para entrar en modo colocación
-            if (turretPanelRoot) turretPanelRoot.SetActive(false);
-            Debug.Log($"[ShiftingWorldUI] Elegiste torreta: {so.displayName}. Seleccioná una celda.");
+            StartCoroutine(DelayedTurretSelectFlow(selectedTurret));
         }
         else
         {
@@ -439,12 +437,28 @@ private void OnExitButtonClicked(string exitLabel)
             OnTurretChosen?.Invoke(so);
 
             // Ocultar el panel de selección de torretas para ver el ghost, pero NO cerrar tiles
-            if (turretPanelRoot) turretPanelRoot.SetActive(false);
+            // if (turretPanelRoot) turretPanelRoot.SetActive(false);
+            StartCoroutine(DelayedTurretSelectFlow(selectedTurret));
 
             Debug.Log($"[ShiftingWorldUI] Torreta seleccionada: {so.displayName}. " +
                       $"Cerrará el panel de torretas al confirmar colocación (NotifyTurretPlaced).");
         }
     }
+
+    private IEnumerator DelayedTurretSelectFlow(TurretDataSO selectedTurret)
+    {
+        turretPlacingMode = true;
+
+        //Esperar para que se vea el aumento de dupes
+        yield return new WaitForSeconds(1.5f);
+
+        // cerrar el panel
+        if (turretPanelRoot)
+            turretPanelRoot.SetActive(false);
+
+        Debug.Log($"[ShiftingWorldUI] Elegiste torreta: {selectedTurret.displayName}. Seleccioná una celda.");
+    }
+
 
     private void HandleTurretPlacementMode()
     {
@@ -482,7 +496,7 @@ private void OnExitButtonClicked(string exitLabel)
                     OnTurretPlacedSuccessfully?.Invoke(World.Otro);
 
                     EndTurretPlacement();
-                    CloseTurretPanelOnly(); // ← cerrar SOLO el panel/flujo de torretas
+                    StartCoroutine(CloseTurretPanelDelayed()); // ← cerrar SOLO el panel/flujo de torretas
                 }
                 else
                 {
@@ -491,6 +505,15 @@ private void OnExitButtonClicked(string exitLabel)
             }
         }
     }
+
+    private IEnumerator CloseTurretPanelDelayed(float delay = 1.5f)
+    {
+        // Esperá para que el jugador vea el aumento de dupes
+        yield return new WaitForSeconds(delay);
+
+        CloseTurretPanelOnly();
+    }
+
 
     private void EndTurretPlacement()
     {
