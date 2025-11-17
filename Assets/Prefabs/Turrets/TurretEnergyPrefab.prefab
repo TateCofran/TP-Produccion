@@ -169,11 +169,10 @@ GameObject:
   - component: {fileID: -4348509830824525796}
   - component: {fileID: 7168626268269157596}
   - component: {fileID: 906546261642617732}
-  - component: {fileID: 8929675874967746669}
-  - component: {fileID: 3369169618138913759}
   - component: {fileID: 3016174081750687623}
   - component: {fileID: 8679034718608688099}
-  - component: {fileID: 6077594682194984695}
+  - component: {fileID: 6804497375593463370}
+  - component: {fileID: 6405480139700245470}
   m_Layer: 8
   m_Name: TurretEnergyPrefab
   m_TagString: Turret
@@ -231,7 +230,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 0}
+  - {fileID: 2100000, guid: 6f96e5be52378df40893837cdfe4a79c, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -496,32 +495,6 @@ MonoBehaviour:
     damageMultiplier: 1
     rangeMultiplier: 1
     fireRateMultiplier: 1
---- !u!114 &8929675874967746669
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7333658948748976991}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5645dea72fb83084086e47b7e2b653f7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  firePoint: {fileID: 5886391253151756493}
---- !u!114 &3369169618138913759
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7333658948748976991}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0675791cc56e2804aa1f51fb031fe303, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  mode: 0
 --- !u!114 &3016174081750687623
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -557,7 +530,7 @@ MonoBehaviour:
   stats: {fileID: -4348509830824525796}
   showRangeOnStart: 1
   isPlaced: 0
---- !u!114 &6077594682194984695
+--- !u!114 &6804497375593463370
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -566,10 +539,28 @@ MonoBehaviour:
   m_GameObject: {fileID: 7333658948748976991}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 49e2302128e82f04687315beb5f3b13e, type: 3}
+  m_Script: {fileID: 11500000, guid: 55b3dd8fb65754641a6522c7d6627f6e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  firePoint: {fileID: 5886391253151756493}
+  baseEnergyPerSecond: 0.5
+  perLevelMultiplier: 0.5
+--- !u!114 &6405480139700245470
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7333658948748976991}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1704a3517db7dd34fad3f1ef92d45356, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  worldMechanic: {fileID: 0}
+  targetRenderers: []
+  normalWorldMaterial: {fileID: 2100000, guid: 0106843ffc6bdc6448333075a3a200b4, type: 2}
+  otherWorldMaterial: {fileID: 2100000, guid: 0ad5eb029c0276b41980b76a23ef9cb2, type: 2}
+  useMaterialInstance: 0
 --- !u!1001 &4662902394126388533
 PrefabInstance:
   m_ObjectHideFlags: 0

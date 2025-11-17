@@ -48,7 +48,6 @@ public class ShiftingWorldMechanic : MonoBehaviour
 
     private void Start()
     {
-        // Sincronizar Fog al estado inicial del mundo
         if (fogWorld != null)
         {
             bool startInOther = (currentWorld == World.Otro);
@@ -59,13 +58,11 @@ public class ShiftingWorldMechanic : MonoBehaviour
 
     private void Update()
     {
-        // ↓↓↓ COOLDOWN del cambio de mundo ↓↓↓
         if (toggleCooldownLeft > 0f)
         {
             toggleCooldownLeft = Mathf.Max(0f, toggleCooldownLeft - Time.deltaTime);
         }
 
-        // (UI) mostrar progreso de cooldown como “recarga” 0→1
         if (ui != null)
         {
             float cooldownNormalized = (toggleCooldownSeconds <= 0f)
@@ -74,7 +71,6 @@ public class ShiftingWorldMechanic : MonoBehaviour
             ui.SetWorldToggleCooldown(cooldownNormalized);
         }
 
-        // Cambio de mundo (solo si cooldown terminó)
         if (Input.GetKeyDown(toggleKey) && toggleCooldownLeft <= 0f)
         {
             currentWorld = (currentWorld == World.Normal) ? World.Otro : World.Normal;
@@ -89,35 +85,37 @@ public class ShiftingWorldMechanic : MonoBehaviour
             if (fogWorld != null)
                 fogWorld.SetWorld(isOtherWorld);
 
-            toggleCooldownLeft = Mathf.Max(0.01f, toggleCooldownSeconds); // arranca cooldown
+            toggleCooldownLeft = Mathf.Max(0.01f, toggleCooldownSeconds); 
             Debug.Log($"[ShiftingWorldMechanic] Cambié de mundo → {currentWorld}. Cooldown: {toggleCooldownSeconds:0.##}s");
 
             if (ui != null)
                 ui.SetWorldIcon(currentWorld);
 
-            // NOTA: no se resetean progresos ni se cierran paneles.
         }
 
-        // Cálculo de deltas
         float dt = Time.deltaTime;
         float activeDelta = speedPerSecond * dt;
         float passiveDelta = speedPerSecond * passiveMultiplier * dt;
 
-        // Ambos mundos suben siempre (activo normal, inactivo reducido)
+        float extraEnergyPerSecond = WorldEnergyRegistry.GetTotalChargePerSecond();
+        float extraDelta = extraEnergyPerSecond * dt;
+
+
         if (currentWorld == World.Normal)
         {
             if (!normalWaitingChoice)
-                normalProgress = Mathf.Min(100f, normalProgress + activeDelta);
+                normalProgress = Mathf.Min(100f, normalProgress + activeDelta + extraDelta);
             if (!otherWaitingChoice)
                 otherProgress = Mathf.Min(100f, otherProgress + passiveDelta);
         }
         else
         {
             if (!otherWaitingChoice)
-                otherProgress = Mathf.Min(100f, otherProgress + activeDelta);
+                otherProgress = Mathf.Min(100f, otherProgress + activeDelta + extraDelta);
             if (!normalWaitingChoice)
                 normalProgress = Mathf.Min(100f, normalProgress + passiveDelta);
         }
+
 
         // (UI) actualizar barras de progreso (0..1)
         if (ui != null)

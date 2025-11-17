@@ -19,4 +19,4 @@ MonoBehaviour:
   range: 10
   fireRate: 0.1
   projectileSpeed: 1
-  prefab: {fileID: 7333658948748976991, guid: f4ec192a3a35b5f42a0059935148bbe8, type: 3}
+  prefab: {fileID: 7333658948748976991, guid: 9d1f7e2d5d4260340bc6b3affb0ada3c, type: 3}

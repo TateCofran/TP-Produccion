@@ -15,8 +15,8 @@ public class Turret : MonoBehaviour
     [SerializeField] private bool showRangeOnStart = false; // mejor oculto hasta seleccionar
 
     [Header("Placement Gate")]
-    [Tooltip("Se pone en true cuando la torreta quedó colocada en una celda válida.")]
     [SerializeField] private bool isPlaced = false;
+    public bool IsPlaced => isPlaced;
 
     private void Awake()
     {
