@@ -1,5 +1,4 @@
-﻿// TileLevelApplier.cs
-using UnityEngine;
+﻿using UnityEngine;
 
 [RequireComponent(typeof(TileStats))]
 public class TileLevelApplier : MonoBehaviour
@@ -19,30 +18,30 @@ public class TileLevelApplier : MonoBehaviour
     public void Initialize(TileDataSO data)
     {
         tileData = data;
+
         if (dupeSystem != null)
         {
+
             levelData = dupeSystem.GetTileLevelData(data);
-            ApplyLevelBonuses();
         }
+
+        ApplyBaseStats();
     }
 
-    private void ApplyLevelBonuses()
+    private void ApplyBaseStats()
     {
-        if (tileStats == null || levelData == null) return;
+        if (tileStats == null || tileData == null) return;
 
         float baseValue = tileData.value;
         float baseSpawnChance = tileData.spawnChance;
         float baseSize = tileData.size;
 
-        float finalValue = baseValue * levelData.valueMultiplier;
-        float finalSpawnChance = baseSpawnChance * levelData.spawnChanceMultiplier;
-        float finalSize = baseSize * levelData.sizeMultiplier;
-
-        tileStats.ApplyLevelModifiers(finalValue, finalSpawnChance, finalSize);
+        tileStats.ApplyLevelModifiers(baseValue, baseSpawnChance, baseSize);
     }
 
     public string GetLevelStatus()
     {
+
         return levelData?.GetStatusText() ?? "Nvl 1";
     }
 }

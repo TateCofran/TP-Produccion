@@ -1,4 +1,4 @@
-﻿// TileDupeSystem.cs
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -6,36 +6,71 @@ public interface ITileDupeSystem
 {
     TileLevelData GetTileLevelData(TileDataSO tile);
     void AddDupe(TileDataSO tile);
-    event System.Action<TileDataSO, TileLevelData> OnTileLevelUp;
-}
-public class TileDupeSystem : MonoBehaviour, ITileDupeSystem
-{
-    private Dictionary<string, TileLevelData> tileLevels = new Dictionary<string, TileLevelData>();
 
-    public event System.Action<TileDataSO, TileLevelData> OnTileLevelUp;
+
+    event Action<TileDataSO, TileLevelData> OnTileLevelUp;
+
+    event Action<TileDataSO> OnDupeChanged;
+}
+
+public sealed class TileDupeSystem : MonoBehaviour, ITileDupeSystem
+{
+    private readonly Dictionary<string, TileLevelData> tileLevels = new();
+
+    public event Action<TileDataSO, TileLevelData> OnTileLevelUp;
+    public event Action<TileDataSO> OnDupeChanged;
+
     private void Awake()
     {
-        // Registrar provider de leveleo
-        var levelingProvider = FindFirstObjectByType<TileLevelingPermissionProvider>();
-        TileLevelData.SetLevelingProvider(levelingProvider);
+        var provider = FindFirstObjectByType<TileLevelingPermissionProvider>();
+        if (provider != null)
+        {
+            TileLevelData.SetLevelingProvider(provider);
+        }
+        else
+        {
+            Debug.LogWarning("[TileDupeSystem] No TileLevelingPermissionProvider found in scene.");
+        }
     }
 
     public TileLevelData GetTileLevelData(TileDataSO tile)
     {
-        string tileId = GetTileId(tile);
-        if (tileLevels.ContainsKey(tileId)) return tileLevels[tileId];
-        return new TileLevelData();
+        if (tile == null)
+        {
+            Debug.LogWarning("[TileDupeSystem] GetTileLevelData called with null tile.");
+            return new TileLevelData();
+        }
+
+        string id = GetTileId(tile);
+
+        if (!tileLevels.TryGetValue(id, out var data))
+        {
+            data = new TileLevelData();
+            tileLevels[id] = data;
+        }
+
+        return data;
     }
 
     public void AddDupe(TileDataSO tile)
     {
-        string tileId = GetTileId(tile);
-        if (!tileLevels.ContainsKey(tileId)) tileLevels[tileId] = new TileLevelData();
+        if (tile == null)
+        {
+            Debug.LogWarning("[TileDupeSystem] AddDupe called with null tile.");
+            return;
+        }
 
-        TileLevelData levelData = tileLevels[tileId];
-        int previousLevel = levelData.currentLevel;
-        levelData.AddDupe();
-        if (levelData.currentLevel > previousLevel) OnTileLevelUp?.Invoke(tile, levelData);
+        var data = GetTileLevelData(tile);
+        int previousLevel = data.currentLevel;
+
+        data.AddDupe();
+
+        OnDupeChanged?.Invoke(tile);
+
+        if (data.currentLevel > previousLevel)
+        {
+            OnTileLevelUp?.Invoke(tile, data);
+        }
     }
 
     private string GetTileId(TileDataSO tile)

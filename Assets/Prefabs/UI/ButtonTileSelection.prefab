@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 2324416796028159000}
   - component: {fileID: 2952476093778208829}
   m_Layer: 5
-  m_Name: ButtonTurretSelection
+  m_Name: ButtonTileSelection
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -294,7 +294,7 @@ GameObject:
   - component: {fileID: 3765463465018897055}
   - component: {fileID: 2952392135419255373}
   - component: {fileID: 955881294120885893}
-  - component: {fileID: 8343943286939086907}
+  - component: {fileID: 2248917290119684236}
   m_Layer: 5
   m_Name: BarContainer
   m_TagString: Untagged
@@ -385,7 +385,7 @@ MonoBehaviour:
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
---- !u!114 &8343943286939086907
+--- !u!114 &2248917290119684236
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -394,14 +394,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 6033838133856791255}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 72546964a3600a142bd04ec38e5a76cf, type: 3}
+  m_Script: {fileID: 11500000, guid: b29368093ee5e5c4c8e4f55497dd8c5b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   dupeContainer: {fileID: 7232624877418787003}
   activeDupeImage: {fileID: 1940810416020690298, guid: 5329fd97d7a220c4c99d754227db7f1a, type: 3}
   inactiveDupeImage: {fileID: 5388496833463313223, guid: a48564f4f31109c4f907f9d304a3cf13, type: 3}
-  turretType: {fileID: 1236571774929121765}
-  turretLevelText: {fileID: 3581669760522801426}
+  tileTypeText: {fileID: 1236571774929121765}
+  tileLevelText: {fileID: 3581669760522801426}
 --- !u!1 &7418530556607330302
 GameObject:
   m_ObjectHideFlags: 0
@@ -532,7 +532,7 @@ MonoBehaviour:
   m_VertexBufferAutoSizeReduction: 0
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: 3.2358398, y: 10.160706, z: 2.744873, w: 49.052795}
+  m_margin: {x: 0, y: 11.475586, z: 0, w: 40.435303}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   m_hasFontAssetChanged: 0
