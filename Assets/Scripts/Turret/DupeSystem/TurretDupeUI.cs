@@ -23,7 +23,6 @@ public class TurretDupeUI : MonoBehaviour
         InitializeData();
     }
 
-    //  NUEVO: método público para conectar el sistema de dupes
     public void ConnectToSystem(TurretDupeSystem system)
     {
         if (system == null) return;
@@ -49,6 +48,7 @@ public class TurretDupeUI : MonoBehaviour
         turretData["Energy Turret"] = (1, 0, 2);
         turretData["Fire Turret"] = (1, 0, 2);
         turretData["Turret Tesla"] = (1, 0, 2);
+        turretData["Turret Sniper"] = (1, 0, 2);
     }
 
     private void HandleDupeChanged(TurretDataSO turret)
