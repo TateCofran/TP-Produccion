@@ -31,6 +31,10 @@ public class SpawnManager : MonoBehaviour
 
     private Coroutine runningWaveCo;
 
+    private HashSet<EnemyType> shownTypes = new HashSet<EnemyType>();
+    [SerializeField] private List<EnemyData> enemyDatabase;
+    public event System.Action<EnemyData> OnFirstTimeEnemySpawned;
+
     private void Reset()
     {
         if (!waveManager) waveManager = FindFirstObjectByType<WaveManager>();
@@ -58,6 +62,11 @@ public class SpawnManager : MonoBehaviour
             waveManager.OnWaveEnded -= HandleWaveEnded;
         }
         Enemy.OnAnyEnemyKilled -= HandleAnyEnemyKilled;
+    }
+
+    private EnemyData GetDataFromType(EnemyType type)
+    {
+        return enemyDatabase.FirstOrDefault(e => e.type == type);
     }
 
     private void HandleAnyEnemyKilled(Enemy e)
@@ -131,6 +140,15 @@ public class SpawnManager : MonoBehaviour
 
     private void SpawnOne(EnemyType type)
     {
+
+        EnemyData data = GetDataFromType(type);
+
+        if (data != null && !shownTypes.Contains(type))
+        {
+            shownTypes.Add(type);
+            OnFirstTimeEnemySpawned?.Invoke(data);
+        }
+
         // 1) Elegimos EXIT desde el Grid (round-robin natural de tu sistema)
         Vector3 exit = grid.GetNextSpawnRoundRobin();
         if (exit == Vector3.zero)

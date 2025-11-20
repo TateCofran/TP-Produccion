@@ -17,4 +17,6 @@ MonoBehaviour:
   defense: 0
   moveSpeed: 0.5
   damageToCore: 100
+  abilityDescription: The Orc King has the highest amount of health and moves extremely
+    slowly, but its ability spawns 3 goblins every 5 seconds.
   type: 4

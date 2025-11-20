@@ -17,4 +17,6 @@ MonoBehaviour:
   defense: 0
   moveSpeed: 0.5
   damageToCore: 3
+  abilityDescription: Its ability gives 50% more movement speed to allies within
+    its range.
   type: 2

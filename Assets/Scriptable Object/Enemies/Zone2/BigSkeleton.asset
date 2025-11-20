@@ -17,4 +17,6 @@ MonoBehaviour:
   defense: 0
   moveSpeed: 0.8
   damageToCore: 3
+  abilityDescription: Its ability gives a shield equal to 50% of HP to allies in
+    its range.
   type: 7

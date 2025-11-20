@@ -17,4 +17,5 @@ MonoBehaviour:
   defense: 0
   moveSpeed: 1
   damageToCore: 3
+  abilityDescription: Its ability heals 10% HP every 5 seconds to allies in its range.
   type: 12

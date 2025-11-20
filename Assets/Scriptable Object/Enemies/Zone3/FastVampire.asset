@@ -17,4 +17,5 @@ MonoBehaviour:
   defense: 0
   moveSpeed: 5
   damageToCore: 1
+  abilityDescription: When its health reaches 50%, it doubles its movement speed.
   type: 11

@@ -17,4 +17,6 @@ MonoBehaviour:
   defense: 0
   moveSpeed: 1.7
   damageToCore: 5
+  abilityDescription: The Black Knight has a lot of health and moves slowly. When
+    it dies, it transforms into a ghost that has only 50% HP but moves much faster.
   type: 8

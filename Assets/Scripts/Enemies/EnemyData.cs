@@ -8,7 +8,7 @@ public class EnemyData : ScriptableObject
     public float defense;
     public float moveSpeed;
     public int damageToCore;
-
+    public string abilityDescription;
     // Si querés más control:
     public EnemyType type; // Enum opcional si querés diferenciar visualmente
 }

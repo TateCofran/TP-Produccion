@@ -17,4 +17,5 @@ MonoBehaviour:
   defense: 0
   moveSpeed: 1.25
   damageToCore: 1
+  abilityDescription: The skeleton is the normal enemy, it has no abilities.
   type: 5

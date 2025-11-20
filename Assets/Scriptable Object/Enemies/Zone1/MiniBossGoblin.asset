@@ -17,4 +17,6 @@ MonoBehaviour:
   defense: 0
   moveSpeed: 1.5
   damageToCore: 5
+  abilityDescription: The orc has a lot of health and moves slowly. Its ability grants
+    itself a shield equal to 100% of its health when it reaches 25% HP.
   type: 3
