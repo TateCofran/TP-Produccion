@@ -10,6 +10,9 @@ public class EnemyPopupUI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI popupText;
     [SerializeField] private Button popupButton;
 
+    [SerializeField] private Image popupIcon;                    
+    [SerializeField] private EnemySpriteData[] enemySprites;     
+
     [Header("Panel de info")]
     [SerializeField] private GameObject infoPanelObject;
     [SerializeField] private EnemyInfoPanel infoPanel;
@@ -32,7 +35,9 @@ public class EnemyPopupUI : MonoBehaviour
     {
         currentData = data;
 
-        popupText.text = $"New enemy type: {data.enemyName}";
+        //popupText.text = $"New enemy type: {data.enemyName}";
+        popupIcon.sprite = GetSprite(data.enemyName);
+
         popupObject.SetActive(true);
 
 
@@ -61,4 +66,22 @@ public class EnemyPopupUI : MonoBehaviour
         infoPanelObject.SetActive(false);
         Time.timeScale = 1f;
     }
+
+    private Sprite GetSprite(string enemyName)
+    {
+        foreach (var e in enemySprites)
+        {
+            if (e.enemyName == enemyName)
+                return e.sprite;
+        }
+        Debug.LogWarning($"No hay sprite definido para {enemyName}");
+        return null;
+    }
+}
+
+[System.Serializable]
+public class EnemySpriteData
+{
+    public string enemyName;
+    public Sprite sprite;
 }
