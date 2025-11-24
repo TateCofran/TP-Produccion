@@ -1,8 +1,9 @@
-﻿using UnityEngine;
-using TMPro;
-using UnityEngine.UI;
-using System;
+﻿using System;
 using System.Collections;
+using TMPro;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class TutorialManager : MonoBehaviour
 {
@@ -30,7 +31,8 @@ public class TutorialManager : MonoBehaviour
 
     private TutorialStep[] steps;
 
-    // ==== NUEVO: API pública de paso actual ====
+    [SerializeField] private string mainMenuSceneName = "Menu";
+
     public int CurrentStepIndex => currentStep;
 
     public TutorialEventType CurrentStepType
@@ -38,27 +40,17 @@ public class TutorialManager : MonoBehaviour
         get
         {
             if (steps == null || currentStep < 0 || currentStep >= steps.Length)
-                return TutorialEventType.Manual; // valor por defecto
+                return TutorialEventType.Manual;
             return steps[currentStep].eventType;
         }
     }
-
-    /// <summary>
-    /// Devuelve true si el tutorial está corriendo y el paso actual es del tipo dado.
-    /// </summary>
     public bool IsCurrentStep(TutorialEventType type)
     {
         if (!running) return false;
         if (steps == null || currentStep < 0 || currentStep >= steps.Length) return false;
         return steps[currentStep].eventType == type;
     }
-
-    /// <summary>
-    /// Evento opcional para que otros sistemas reaccionen cuando cambia el paso.
-    /// (int = índice actual, TutorialStep = datos del paso)
-    /// </summary>
     public event Action<int, TutorialStep> OnStepChanged;
-    // ===========================================
 
     #region Action Locks for Other Systems
     public bool AllowPlaceTiles { get; private set; } = true;
@@ -87,12 +79,12 @@ public class TutorialManager : MonoBehaviour
 
     private void OnEnable()
     {
-        // Ahora el manager solo escucha al EventHub centralizado
         TutorialEventHub.TilePlaced += HandleTilePlaced;
         TutorialEventHub.TurretPlaced += HandleTurretPlaced;
         TutorialEventHub.WaveStarted += HandleWaveStarted;
         TutorialEventHub.CoreDamaged += HandleCoreDamaged;
         TutorialEventHub.WorldSwitched += HandleWorldSwitched;
+        TutorialEventHub.WaveCompleted += HandleWaveCompleted;
     }
 
     private void OnDisable()
@@ -102,20 +94,46 @@ public class TutorialManager : MonoBehaviour
         TutorialEventHub.WaveStarted -= HandleWaveStarted;
         TutorialEventHub.CoreDamaged -= HandleCoreDamaged;
         TutorialEventHub.WorldSwitched -= HandleWorldSwitched;
+        TutorialEventHub.WaveCompleted -= HandleWaveCompleted;
     }
 
     private void Start()
     {
-        if (autoStart)
+        bool shouldRunTutorial =
+            TutorialProgress.ForceTutorialThisRun ||
+            !TutorialProgress.IsCompleted;
+
+        if (autoStart && shouldRunTutorial)
+        {
             StartTutorial();
-        else if (panelRoot != null)
+        }
+        else
+        {
+            running = false;
             panelRoot.SetActive(false);
+
+            // desbloquear todo
+            AllowPlaceTiles = true;
+            AllowPlaceTurrets = true;
+            AllowStartWave = true;
+            AllowWorldSwitch = true;
+        }
+
+        // Resetear flag para no repetir
+        TutorialProgress.ForceTutorialThisRun = false;
     }
+
 
     private TutorialStep[] BuildSteps()
     {
         return new TutorialStep[]
         {
+            new TutorialStep(
+                "Bienvenido",
+                "Te enseñaré cómo defender el núcleo.",
+                TutorialEventType.Manual,
+                allowTiles:false, allowTurrets:false, allowWave:false, allowWorld:false
+            ),
             new TutorialStep(
                 "Control de Cámara",
                 "Usá WASD (o las flechas) para mover la cámara.\n" +
@@ -124,14 +142,6 @@ public class TutorialManager : MonoBehaviour
                 TutorialEventType.Manual,
                 allowTiles:false, allowTurrets:false, allowWave:false, allowWorld:false
             ),
-
-            new TutorialStep(
-                "Bienvenido",
-                "Te enseñaré cómo defender el núcleo.",
-                TutorialEventType.Manual,
-                allowTiles:false, allowTurrets:false, allowWave:false, allowWorld:false
-            ),
-
             new TutorialStep(
                 "Colocá tu primer Tile",
                 "Elegí un Tile y colocá un Camino.",
@@ -181,6 +191,12 @@ public class TutorialManager : MonoBehaviour
                 TutorialEventType.Manual,
                 allowTiles:true, allowTurrets:true, allowWave:true, allowWorld:true
             ),
+            new TutorialStep(
+                "Sobreviví una oleada",
+                "Defendé tu núcleo hasta que termine la oleada en curso.",
+                TutorialEventType.WaveCompleted,
+                allowTiles:true, allowTurrets:true, allowWave:true, allowWorld:true
+            ),
         };
     }
 
@@ -200,6 +216,9 @@ public class TutorialManager : MonoBehaviour
         AllowPlaceTurrets = true;
         AllowStartWave = true;
         AllowWorldSwitch = true;
+
+        TutorialProgress.MarkCompleted();
+
     }
 
     public void NextStep()
@@ -255,8 +274,18 @@ public class TutorialManager : MonoBehaviour
             if (swUI != null)
                 swUI.ForceOpenTilePanel();
         }
+        if (s.eventType == TutorialEventType.WaveCompleted)
+        {
+            StartCoroutine(AutoHideStepMessage());
+        }
     }
+    private IEnumerator AutoHideStepMessage()
+    {
+        yield return new WaitForSecondsRealtime(3f);
 
+        // Ocultamos el panel del tutorial mientras la oleada sigue
+        HidePanel();
+    }
 
     private void HandleTilePlaced()
     {
@@ -282,7 +311,10 @@ public class TutorialManager : MonoBehaviour
     {
         CheckEvent(TutorialEventType.WorldSwitched);
     }
-
+    private void HandleWaveCompleted()
+    {
+        CheckEvent(TutorialEventType.WaveCompleted);
+    }
     public void NotifyCoreDamaged()
     {
         CheckEvent(TutorialEventType.CoreDamaged);
@@ -294,10 +326,72 @@ public class TutorialManager : MonoBehaviour
         if (currentStep < 0 || currentStep >= steps.Length) return;
 
         var s = steps[currentStep];
-        if (s.eventType == evt)
+        if (s.eventType != evt)
+            return;
+
+        if (evt == TutorialEventType.WaveCompleted && currentStep == steps.Length - 1)
+        {
+            HandleFinalTutorialReward();
+        }
+        else
+        {
             NextStep();
+        }
+    }
+    private void HandleFinalTutorialReward()
+    {
+        running = false;
+
+        ShowPanel();
+
+        bool isFirstTime = !TutorialProgress.IsCompleted;
+
+        TutorialProgress.MarkCompleted();
+
+        if (isFirstTime)
+        {
+            if (titleText != null)
+                titleText.text = "¡Tutorial completado!";
+            if (descText != null)
+                descText.text =
+                    "Sobreviviste a la oleada.\n\n" +
+                    "Ganaste <b>10 esencias del Mundo Normal</b>.\n" +
+                    "Volviendo al menú...";
+
+            EssenceBank.Add(10, 0);
+        }
+        else
+        {
+            if (titleText != null)
+                titleText.text = "Tutorial completado";
+            if (descText != null)
+                descText.text =
+                    "¡Bien hecho!\n" +
+                    "Volviendo al menú...";
+        }
+
+        if (continueButton != null) continueButton.gameObject.SetActive(false);
+        if (skipButton != null) skipButton.gameObject.SetActive(false);
+
+        StartCoroutine(ReturnToMenuAfterDelay(3f));
+    }
+    public void ForceStartTutorial()
+    {
+        // Reset interno y forzar inicio aunque ya esté completado
+        running = true;
+        currentStep = -1;
+
+        panelRoot.SetActive(false);
+        NextStep();
     }
 
+    private IEnumerator ReturnToMenuAfterDelay(float delay)
+    {
+        yield return new WaitForSecondsRealtime(delay);
+
+        if (!string.IsNullOrEmpty(mainMenuSceneName))
+            SceneManager.LoadScene(mainMenuSceneName);
+    }
     private void ShowPanel()
     {
         if (panelRoot != null)

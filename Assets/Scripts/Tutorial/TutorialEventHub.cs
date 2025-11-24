@@ -22,4 +22,7 @@ public static class TutorialEventHub
 
     public static event Action WorldSwitched;
     public static void RaiseWorldSwitched() => WorldSwitched?.Invoke();
+
+    public static event Action WaveCompleted;
+    public static void RaiseWaveCompleted() => WaveCompleted?.Invoke();
 }

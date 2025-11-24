@@ -5,7 +5,8 @@
     TurretPlaced,
     WaveStarted,
     CoreDamaged,
-    WorldSwitched
+    WorldSwitched,
+    WaveCompleted
 }
 
 [System.Serializable]

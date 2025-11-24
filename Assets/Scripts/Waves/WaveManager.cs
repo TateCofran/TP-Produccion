@@ -209,7 +209,9 @@ public class WaveManager : MonoBehaviour
             Debug.Log($"[WaveManager] Oleada {currentWave} finalizada.");
             waveStarted = false;
             OnWaveEnded?.Invoke();
-            // Arrancar contador hacia la próxima oleada
+
+            TutorialEventHub.RaiseWaveCompleted();
+
             if (nextWaveCountdownCo != null) StopCoroutine(nextWaveCountdownCo);
             nextWaveCountdownCo = StartCoroutine(NextWaveCountdownRoutine());
         }
