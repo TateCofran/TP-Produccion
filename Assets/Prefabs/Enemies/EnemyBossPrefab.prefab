@@ -741,8 +741,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   spawnType: 0
-  countPerWave: 3
-  periodSeconds: 2
+  countPerWave: 1
+  periodSeconds: 10
   spreadRadius: 0.75
   spawnOnStart: 1
   maxWaves: 0
