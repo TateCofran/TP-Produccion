@@ -13,7 +13,7 @@ public class EnemyInfoPanel : MonoBehaviour
     //[SerializeField] private Image iconImage; 
     [SerializeField] private TextMeshProUGUI abilityText;
 
-    public void Display(EnemyData data)
+    /*public void Display(EnemyData data)
     {
         nameText.text = data.enemyName;
         healthText.text = $"Health: {data.maxHealth}";
@@ -22,7 +22,17 @@ public class EnemyInfoPanel : MonoBehaviour
         damageText.text = $"Damage to core: {data.damageToCore}";
 
         abilityText.text = $"Ability: {data.abilityDescription}";
-    }
+    }*/
 
-    
+    public void Display(EnemyData data)
+    {
+        nameText.text = data.enemyName;
+
+        healthText.text = $"<b><color=#D19A21>Health:</color></b> <color=white>{data.maxHealth}</color>";
+        defenseText.text = $"<b><color=#D19A21>Defense:</color></b> <color=white>{data.defense}</color>";
+        speedText.text = $"<b><color=#D19A21>Speed:</color></b> <color=white>{data.moveSpeed}</color>";
+        damageText.text = $"<b><color=#D19A21>Damage to core:</color></b> <color=white>{data.damageToCore}</color>";
+
+        abilityText.text = $"Ability: {data.abilityDescription}";
+    }
 }
