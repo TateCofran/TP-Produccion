@@ -93,6 +93,9 @@ public class WaveManager : MonoBehaviour
     {
         if (!autoStartOnPlacement) return;
 
+        if (TutorialManager.Instance != null && !TutorialManager.Instance.AllowStartWave)
+            return;
+
         if (Time.unscaledTime < _nextAllowedPlacementStartTime) return;
         _nextAllowedPlacementStartTime = Time.unscaledTime + placementCooldown;
 
@@ -130,6 +133,9 @@ public class WaveManager : MonoBehaviour
         Debug.Log($"[WaveManager] Oleada {currentWave} iniciada con {enemiesThisWave} enemigos.");
         OnWaveStarted?.Invoke(currentWave, enemiesThisWave);
 
+        TutorialEventHub.RaiseWaveStarted();
+
+
         // (si tenías un countdown en curso, lo cancelás)
         if (nextWaveCountdownCo != null) { StopCoroutine(nextWaveCountdownCo); nextWaveCountdownCo = null; }
 
@@ -141,6 +147,8 @@ public class WaveManager : MonoBehaviour
     }
     public void ForceStartNextWave()
     {
+        if (TutorialManager.Instance != null && !TutorialManager.Instance.AllowStartWave)
+            return;
         // Si hay una oleada activa o ya se alcanzó la última, no hacemos nada
         if (waveStarted || WaveInProgress || IsLastWave())
         {

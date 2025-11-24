@@ -53,10 +53,6 @@ public class Core : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Activa o desactiva vida infinita desde cheats / GameManager.
-    /// Resetea la vida al máximo y actualiza la UI.
-    /// </summary>
     public void SetInfiniteHealth(bool enabled)
     {
         infiniteHealth = enabled;
@@ -66,7 +62,6 @@ public class Core : MonoBehaviour
 
     public void TakeDamage(int amount)
     {
-        // Si NO tiene vida infinita, se aplica el daño normalmente
         if (!infiniteHealth)
         {
             currentHealth -= amount;
@@ -74,19 +69,18 @@ public class Core : MonoBehaviour
         }
         else
         {
-            // Con vida infinita mantenemos siempre la vida al máximo
             currentHealth = maxHealth;
         }
 
         UIController.Instance.UpdateCoreHealth(currentHealth, maxHealth);
 
-        // Screen shake con Cinemachine Impulse
         if (impulseSource != null)
         {
             impulseSource.GenerateImpulse();
         }
 
-        // Flash rojo en los bordes con Vignette
+        TutorialEventHub.RaiseCoreDamaged();
+
         if (vignette != null)
         {
             if (vignetteCoroutine != null)
@@ -95,7 +89,6 @@ public class Core : MonoBehaviour
             vignetteCoroutine = StartCoroutine(HitVignetteRoutine());
         }
 
-        // Solo puede morir si NO tiene vida infinita
         if (!infiniteHealth && currentHealth <= 0)
         {
             Debug.Log("Core destroyed!");
@@ -106,10 +99,8 @@ public class Core : MonoBehaviour
 
     private IEnumerator HitVignetteRoutine()
     {
-        // Subimos de golpe la intensidad
         vignette.intensity.value = hitVignetteIntensity;
 
-        // Fade hacia 0
         while (vignette.intensity.value > 0f)
         {
             float newValue = Mathf.MoveTowards(

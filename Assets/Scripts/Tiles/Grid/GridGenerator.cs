@@ -198,7 +198,7 @@ public class GridGenerator : MonoBehaviour, ITileGenerator
         AttachAndApplyDupe(group, initialLayout);
 
         int abiertos = exits.IndicesDisponibles().Count();
-        Debug.Log($"[GridGenerator] Primer tile instanciado ({count} celdas). Exits disponibles: {abiertos}");
+        //Debug.Log($"[GridGenerator] Primer tile instanciado ({count} celdas). Exits disponibles: {abiertos}");
         // Re-scan de exits por si el primer tile ya bloquea alguna (raro pero por las dudas)
         UpdatePermanentSpawnPointsForAllExits();
 
@@ -303,10 +303,8 @@ public class GridGenerator : MonoBehaviour, ITileGenerator
             var parent = CreateChild(tilesRoot, $"{tileGroupBaseName}{chain.Count}");
             int count = instantiator.InstantiateLayout(candidate, newOrigin, rot, flip, parent);
 
-            // Animación escalonada para el tile recién agregado
             if (placementSequencer != null)
             {
-                // Delay opcional por índice de tile para separar entre tiles
                 float startDelay = placementSequencer.GetNextTileStartDelay(chain.Count);
                 placementSequencer.PlayForGroup(parent, startDelay);
             }
@@ -315,12 +313,11 @@ public class GridGenerator : MonoBehaviour, ITileGenerator
             chain.Add(placed); overlap.Add(placed, chain.Count - 1);
             AddTileExitsToPool(chain.Count - 1, candidate.entry);
             AttachAndApplyDupe(parent, candidate);
-            // ⚠️ IMPORTANTE: cada vez que agregamos un tile,
-            // revisamos todas las exits abiertas por si ahora alguna quedó bloqueada
+    
             UpdatePermanentSpawnPointsForAllExits();
             Debug.Log($"[GridGenerator] Conectado via EXIT {chosen.label} → Nuevo tile #{chain.Count - 1} (rot={rot * 90}°, flip={flip}). Instancias: {count}");
-           
 
+            TutorialEventHub.RaiseTilePlaced();
             return true;
         }
         return false;
@@ -845,7 +842,7 @@ public class GridGenerator : MonoBehaviour, ITileGenerator
                 UpdatePermanentSpawnPointsForAllExits();
 
 
-                Debug.Log($"[GridGenerator] Conectado con layout forzado {forced.name} (rot={rot * 90}°, flip={flip}). Instancias: {count}");
+                TutorialEventHub.RaiseTilePlaced();
                 return true;
             }
         }

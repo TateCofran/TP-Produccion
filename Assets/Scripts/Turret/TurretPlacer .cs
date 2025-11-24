@@ -5,14 +5,14 @@ using static ShiftingWorldMechanic;
 public class TurretPlacer : MonoBehaviour
 {
     [Header("Refs")]
-    [SerializeField] private ShiftingWorldUI ui;      // arrastrá tu ShiftingWorldUI
-    [SerializeField] private Camera cam;              // si es null usa Camera.main
+    [SerializeField] private ShiftingWorldUI ui;     
+    [SerializeField] private Camera cam;             
 
     [Header("Preview (opcional)")]
     [SerializeField] private Vector3 ghostOffset = new Vector3(0f, 0.01f, 0f);
 
     [Header("Raycast")]
-    [SerializeField] private LayerMask cellLayers = ~0;  // qué capas rayo detecta
+    [SerializeField] private LayerMask cellLayers = ~0;  
 
     private TurretDataSO _selectedTurret;
     private GameObject _ghost;
@@ -24,7 +24,6 @@ public class TurretPlacer : MonoBehaviour
 
     private void Awake()
     {
-        // Nos suscribimos a la elección de torreta desde la UI (delegado)
         if (ui != null) ui.OnTurretChosen += HandleTurretChosen;
     }
 
@@ -43,30 +42,24 @@ public class TurretPlacer : MonoBehaviour
     {
         _placing = (_selectedTurret != null);
 
-        // Destruimos cualquier ghost anterior
         if (_ghost != null)
         {
             Destroy(_ghost);
             _ghost = null;
         }
 
-        // Creamos el ghost usando EL MISMO PREFAB de la torreta seleccionada
         if (_placing && _selectedTurret != null && _selectedTurret.prefab != null)
         {
             _ghost = Instantiate(_selectedTurret.prefab);
 
-            // Opcional pero recomendado:
-            // Desactivar colisionadores para que el raycast siga detectando la celda
+
             var colliders = _ghost.GetComponentsInChildren<Collider>();
             foreach (var col in colliders)
             {
                 col.enabled = false;
             }
 
-            // Opcional: si tus torretas disparan al instanciarse, acá podrías
-            // desactivar sus behaviours específicos, por ejemplo:
-            // var shooting = _ghost.GetComponentInChildren<IShootingBehavior>();
-            // if (shooting != null) (shooting as MonoBehaviour).enabled = false;
+
         }
     }
 
@@ -84,7 +77,11 @@ public class TurretPlacer : MonoBehaviour
 
     private void Update()
     {
-        // Modo remover (clic medio o Shift+Click izq)
+        if (TutorialManager.Instance != null && !TutorialManager.Instance.AllowPlaceTurrets)
+        {
+            return;
+        }
+
         if ((removeWithMiddleClick && Input.GetMouseButtonDown(2)) ||
             (Input.GetKey(KeyCode.LeftShift) && Input.GetMouseButtonDown(0)))
         {
@@ -114,21 +111,18 @@ public class TurretPlacer : MonoBehaviour
         var cameraToUse = cam ? cam : Camera.main;
         if (!cameraToUse) return;
 
-        // Cancelar colocación
+
         if (Input.GetKeyDown(KeyCode.Escape) || Input.GetMouseButtonDown(1))
         {
             ExitPlacementMode();
             return;
         }
-
-        // Evitar clicks a través de la UI
         if (EventSystem.current && EventSystem.current.IsPointerOverGameObject())
         {
             if (_ghost) _ghost.SetActive(false);
             return;
         }
 
-        // Raycast al mouse
         Ray ray = cameraToUse.ScreenPointToRay(Input.mousePosition);
         if (Physics.Raycast(ray, out var hit, 500f, cellLayers))
         {
@@ -169,7 +163,10 @@ public class TurretPlacer : MonoBehaviour
                     {
                         Debug.Log($"[TurretPlacer] Torreta colocada en {slot.name}");
 
-                        // Avisar al sistema de oleadas (si corresponde en tu proyecto)
+                        // Tutorial EventHub
+                        TutorialEventHub.RaiseTurretPlaced();   // << NUEVO
+
+                        // Avisar al sistema de oleadas
                         PlacementEvents.RaiseTurretPlaced(new PlacementEvents.TurretPlacedInfo
                         {
                             turretInstance = prefab,
@@ -177,7 +174,7 @@ public class TurretPlacer : MonoBehaviour
                             turretId = _selectedTurret ? _selectedTurret.name : ""
                         });
 
-                        // AVISAR A LA UI (cierra SOLO su panel y notifica al Mechanic internamente)
+                        // Avisar a la UI
                         if (ui != null)
                             ui.NotifyTurretPlaced(World.Otro);
 

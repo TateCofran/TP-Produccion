@@ -69,6 +69,6 @@ public class TileDupeBarUI : MonoBehaviour
             tileLevelText.text = data.level.ToString();
         }
 
-        Debug.Log($"[TileDupeBarUI] {typeName}: {data.currentDupes}/{data.maxDupes} dupes (level {data.level}).");
+        //Debug.Log($"[TileDupeBarUI] {typeName}: {data.currentDupes}/{data.maxDupes} dupes (level {data.level}).");
     }
 }

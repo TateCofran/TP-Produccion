@@ -6,9 +6,9 @@ public class ShiftingWorldMechanic : MonoBehaviour
 
     [Header("Refs")]
     [SerializeField] private GridGenerator grid;
-    [SerializeField] private ShiftingWorldUI ui;   // ← La UI mostrará barras
+    [SerializeField] private ShiftingWorldUI ui;  
     [SerializeField] private ShiftingWorldAudio shiftingWorldAudio;
-    [SerializeField] private FogWorldMaterialSwitcher fogWorld; // ← NUEVO
+    [SerializeField] private FogWorldMaterialSwitcher fogWorld;
 
     [Header("Estado")]
     [SerializeField] private World currentWorld = World.Normal;
@@ -25,9 +25,8 @@ public class ShiftingWorldMechanic : MonoBehaviour
     [SerializeField] private KeyCode toggleKey = KeyCode.J;
     [SerializeField, Tooltip("Segundos de cooldown para volver a cambiar de mundo")]
     private float toggleCooldownSeconds = 5f;
-    private float toggleCooldownLeft = 0f; // 0 = listo para cambiar
+    private float toggleCooldownLeft = 0f;
 
-    // Flags de panel/espera (se mantienen como antes)
     private bool normalPanelOpen = false;
     private bool otherPanelOpen = false;
     private bool normalWaitingChoice = false;
@@ -58,6 +57,7 @@ public class ShiftingWorldMechanic : MonoBehaviour
 
     private void Update()
     {
+
         if (toggleCooldownLeft > 0f)
         {
             toggleCooldownLeft = Mathf.Max(0f, toggleCooldownLeft - Time.deltaTime);
@@ -70,27 +70,28 @@ public class ShiftingWorldMechanic : MonoBehaviour
                 : 1f - (toggleCooldownLeft / toggleCooldownSeconds); // 1 = listo
             ui.SetWorldToggleCooldown(cooldownNormalized);
         }
-
         if (Input.GetKeyDown(toggleKey) && toggleCooldownLeft <= 0f)
         {
-            currentWorld = (currentWorld == World.Normal) ? World.Otro : World.Normal;
+            if (TutorialManager.Instance != null && !TutorialManager.Instance.AllowWorldSwitch)
+                return;
 
+            currentWorld = (currentWorld == World.Normal) ? World.Otro : World.Normal;
             isOtherWorld = (currentWorld == World.Otro);
 
-            // sonido de cambio de mundo
             if (shiftingWorldAudio != null)
                 shiftingWorldAudio.PlayWorldSound(isOtherWorld);
 
-            // avisar al Fog
             if (fogWorld != null)
                 fogWorld.SetWorld(isOtherWorld);
-
-            toggleCooldownLeft = Mathf.Max(0.01f, toggleCooldownSeconds); 
-            Debug.Log($"[ShiftingWorldMechanic] Cambié de mundo → {currentWorld}. Cooldown: {toggleCooldownSeconds:0.##}s");
 
             if (ui != null)
                 ui.SetWorldIcon(currentWorld);
 
+            toggleCooldownLeft = Mathf.Max(0.01f, toggleCooldownSeconds);
+
+            Debug.Log($"[ShiftingWorldMechanic] Cambié de mundo → {currentWorld}");
+
+            TutorialEventHub.RaiseWorldSwitched();
         }
 
         float dt = Time.deltaTime;
@@ -116,12 +117,9 @@ public class ShiftingWorldMechanic : MonoBehaviour
                 normalProgress = Mathf.Min(100f, normalProgress + passiveDelta);
         }
 
-
-        // (UI) actualizar barras de progreso (0..1)
         if (ui != null)
             ui.SetWorldProgress(normalProgress / 100f, otherProgress / 100f);
 
-        // Chequeos de thresholds (como ya lo tenías)
         TryFireNormalReached();
         TryFireOtherReached();
     }

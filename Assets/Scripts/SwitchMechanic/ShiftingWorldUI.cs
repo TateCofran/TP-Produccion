@@ -154,11 +154,11 @@ public class ShiftingWorldUI : MonoBehaviour
 
     }
 
-    // ============================
-    // API pública para mostrar paneles (ambos pueden estar activos a la vez)
-    // ============================
     public void ShowNormalReached(Action closedCb = null)
     {
+        if (TutorialManager.Instance != null && !TutorialManager.Instance.AllowPlaceTiles)
+            return;
+
         tileChoiceLocked = false;
         onTileClosed = closedCb;
 
@@ -166,23 +166,21 @@ public class ShiftingWorldUI : MonoBehaviour
 
         if (tilePanelRoot) tilePanelRoot.SetActive(true);
         
-        // ¡NO ocultamos turretPanelRoot!
-        HideExitButtons(); // limpio por si venimos de un intento previo
+        HideExitButtons(); 
     }
 
     public void ShowOtherReached(Action closedCb = null)
     {
+        if (TutorialManager.Instance != null && !TutorialManager.Instance.AllowPlaceTurrets)
+            return;
+
         onTurretClosed = closedCb;
 
         BuildOtherOptions();
 
         if (turretPanelRoot) turretPanelRoot.SetActive(true);
-        // ¡NO ocultamos tilePanelRoot!
     }
 
-    // ============================
-    // Lógica de selección y colocación de TILE (Normal)
-    // ============================
     private void BuildNormalOptions()
     {
         currentTileOptions.Clear();
@@ -700,5 +698,13 @@ private void OnExitButtonClicked(string exitLabel)
         }
 
         target.localScale = originalScale;
+    }
+
+    public void ForceOpenTilePanel()
+    {
+        tileChoiceLocked = false;
+        onTileClosed = null;
+        BuildNormalOptions();
+        if (tilePanelRoot) tilePanelRoot.SetActive(true);
     }
 }
