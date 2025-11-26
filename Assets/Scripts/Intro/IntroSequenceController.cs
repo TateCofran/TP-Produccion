@@ -60,10 +60,6 @@ public sealed class IntroSequenceController : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Here we generate the texts entirely from code.
-    /// You can change, translate or expand them.
-    /// </summary>
     private void BuildTexts()
     {
         slideTexts.Clear();
@@ -82,8 +78,8 @@ public sealed class IntroSequenceController : MonoBehaviour
 
         // Slide 2
         slideTexts.Add(
-            "You are the last line of defense. Build turrets, place tiles, " +
-            "shift between worlds and protect the Core at all costs."
+            "You are the last line of defense."
+
         );
     }
 
