@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using static Unity.VisualScripting.Member;
 
 public class EnemyHealth : MonoBehaviour, IDamageable
 {
@@ -7,7 +6,12 @@ public class EnemyHealth : MonoBehaviour, IDamageable
     [SerializeField] private float maxHealth;
     [SerializeField] private float defense;
     [SerializeField] private float currentHealth;
-    [SerializeField] private float shieldCurrent; // cantidad de escudo actual
+
+    // Para que la Shield Aura de HP solo afecte una vez por enemigo
+    [SerializeField] private bool shieldAuraApplied = false;
+
+    // Para habilidades tipo escudo indestructible (invulnerable total)
+    [SerializeField] private bool invulnerable = false;
 
     private bool isDead = false;
 
@@ -16,20 +20,23 @@ public class EnemyHealth : MonoBehaviour, IDamageable
     private IHealthDisplay healthBarDisplay;
     private IEnemyDeathHandler deathHandler;
 
-    // NUEVO: acceso concreto para popup
+    // Opcional: para popups de daño si los usas
     private EnemyHealthBar healthBarConcrete;
 
     public event System.Action<float, float> OnDamaged; // (current, max)
     public event System.Action OnDied;
-    public float GetShield() => shieldCurrent;
 
+    // Devuelve true = alguna habilidad cancelo la muerte (segunda vida, etc.)
+    public event System.Func<bool> OnPreDeath;
+
+    public void SetInvulnerable(bool value) => invulnerable = value;
+    public bool IsInvulnerable() => invulnerable;
 
     private void Awake()
     {
         CacheDependencies();
         if (healthBarConcrete == null)
             healthBarConcrete = GetComponent<EnemyHealthBar>();
-
     }
 
     private void OnEnable()
@@ -66,18 +73,21 @@ public class EnemyHealth : MonoBehaviour, IDamageable
         currentHealth = this.maxHealth;
         isDead = false;
 
-        shieldCurrent = 0f; // 🔹 reset escudo
+        // Reset flags para pooling
+        shieldAuraApplied = false;
+        invulnerable = false;
 
         CacheDependenciesIfMissing();
         healthBarDisplay?.UpdateHealthBar(currentHealth, this.maxHealth);
-        // si tu barra soporta overlay de escudo:
-        (healthBarDisplay as EnemyHealthBar)?.SetShieldOverlay(0f);
     }
-
 
     public void InitializeFromData(EnemyData data)
     {
-        if (data == null) { Initialize(10f, 0f); return; }
+        if (data == null)
+        {
+            Initialize(10f, 0f);
+            return;
+        }
         Initialize(data.maxHealth, data.defense);
     }
 
@@ -101,13 +111,23 @@ public class EnemyHealth : MonoBehaviour, IDamageable
     {
         isDead = false;
         currentHealth = Mathf.Max(1f, maxHealth);
+
+        // Si queres que al revivir puedan ser buffeados de nuevo por Shield Aura:
+        shieldAuraApplied = false;
+
         healthBarDisplay?.UpdateHealthBar(currentHealth, maxHealth);
-        shieldCurrent = 0f;
     }
 
     public void TakeDamage(float amount)
     {
         if (isDead) return;
+
+        // Invulnerabilidad total (para habilidades tipo escudo indestructible)
+        if (invulnerable)
+        {
+            OnDamaged?.Invoke(currentHealth, maxHealth);
+            return;
+        }
 
         float modAmount = amount;
         if (GameModifiersManager.Instance != null)
@@ -121,47 +141,34 @@ public class EnemyHealth : MonoBehaviour, IDamageable
 
         healthBarDisplay?.UpdateHealthBar(currentHealth, maxHealth);
 
-        // --- NUEVO: popup de daño (usa el realDamage) ---
-        healthBarConcrete?.ShowDamageText(realDamage);
+        // Popup de daño si lo usas
+        // healthBarConcrete?.ShowDamageText(realDamage, transform);
 
         OnDamaged?.Invoke(currentHealth, maxHealth);
 
-        if (currentHealth <= 0f) Die();
+        if (currentHealth <= 0f)
+            Die();
+    }
 
-        // ... después de calcular realDamage ...
-        float damageLeft = realDamage;
+    // "Escudo trucho": subir max HP y rellenar la diferencia UNA sola vez por enemigo
+    public bool TryApplyShieldAuraBoost(float multiplier)
+    {
+        if (shieldAuraApplied) return false;
+        shieldAuraApplied = true;
 
-        // 🔹 Escudo absorbe primero
-        if (shieldCurrent > 0f)
-        {
-            float absorbed = Mathf.Min(shieldCurrent, damageLeft);
-            shieldCurrent -= absorbed;
-            damageLeft -= absorbed;
+        multiplier = Mathf.Max(0.01f, multiplier);
 
-            // actualizar overlay
-            var hb = healthBarDisplay as EnemyHealthBar;
-            if (hb != null) hb.SetShieldOverlay(Mathf.Clamp01(shieldCurrent / Mathf.Max(1f, maxHealth)));
+        float oldMax = maxHealth;
+        float newMax = Mathf.Round(oldMax * multiplier);
+        if (newMax < 1f) newMax = 1f;
 
-            // si absorbió todo, no pasa a la vida
-            if (damageLeft <= 0f)
-            {
-                OnDamaged?.Invoke(currentHealth, maxHealth);
-                return;
-            }
-        }
+        float extra = newMax - oldMax;
 
-        // 🔹 Lo que queda sí daña la vida
-        currentHealth -= damageLeft;
-        if (currentHealth < 0f) currentHealth = 0f;
+        maxHealth = newMax;
+        currentHealth = Mathf.Min(maxHealth, currentHealth + extra);
 
         healthBarDisplay?.UpdateHealthBar(currentHealth, maxHealth);
-        // popup: si preferís mostrar solo lo que dañó vida, usá damageLeft en vez de realDamage
-        //healthBarConcrete?.ShowDamageText(damageLeft, transform);
-
-        OnDamaged?.Invoke(currentHealth, maxHealth);
-
-        if (currentHealth <= 0f) Die();
-
+        return true;
     }
 
     public void Heal(float amount)
@@ -182,39 +189,31 @@ public class EnemyHealth : MonoBehaviour, IDamageable
         healthBarDisplay?.UpdateHealthBar(currentHealth, maxHealth);
     }
 
-    public void AddShield(float amount)
-    {
-        if (amount <= 0f) return;
-        shieldCurrent += amount;
-        var hb = healthBarDisplay as EnemyHealthBar;
-        if (hb != null) hb.SetShieldOverlay(Mathf.Clamp01(shieldCurrent / Mathf.Max(1f, maxHealth)));
-    }
-
-    public void SetShield(float amount)
-    {
-        shieldCurrent = Mathf.Max(0f, amount);
-        var hb = healthBarDisplay as EnemyHealthBar;
-        if (hb != null) hb.SetShieldOverlay(Mathf.Clamp01(shieldCurrent / Mathf.Max(1f, maxHealth)));
-    }
-
-    public void ClearShield()
-    {
-        if (shieldCurrent <= 0f) return;
-        shieldCurrent = 0f;
-        var hb = healthBarDisplay as EnemyHealthBar;
-        if (hb != null) hb.SetShieldOverlay(0f);
-    }
-
-
     public void Die()
     {
+        // Hook para segunda vida / berserk
+        if (OnPreDeath != null)
+        {
+            foreach (System.Func<bool> handler in OnPreDeath.GetInvocationList())
+            {
+                try
+                {
+                    if (handler())
+                        return; // alguna habilidad cancelo la muerte
+                }
+                catch (System.Exception ex)
+                {
+                    Debug.LogException(ex);
+                }
+            }
+        }
+
         if (isDead) return;
         isDead = true;
 
         healthBarDisplay?.DestroyBar();
         deathHandler?.OnEnemyDeath(enemyReference);
         OnDied?.Invoke();
-        shieldCurrent = 0f;
     }
 
     public bool IsDead() => isDead;

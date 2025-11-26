@@ -402,7 +402,7 @@ GameObject:
   - component: {fileID: 6389810080675335840}
   - component: {fileID: 5853219867421442648}
   - component: {fileID: 9097782072539495588}
-  - component: {fileID: 6644806382769497884}
+  - component: {fileID: -8511161701407430256}
   m_Layer: 6
   m_Name: EnemyHeavyPrefab2
   m_TagString: Enemy
@@ -557,6 +557,8 @@ MonoBehaviour:
   maxHealth: 0
   defense: 0
   currentHealth: 0
+  shieldCurrent: 0
+  invulnerable: 0
 --- !u!114 &6389810080675335840
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -599,7 +601,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   health: {fileID: -7749096586298701241}
---- !u!114 &6644806382769497884
+--- !u!114 &-8511161701407430256
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -608,14 +610,16 @@ MonoBehaviour:
   m_GameObject: {fileID: 5019013483156572802}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 94acec857777c334b95b59d67266b606, type: 3}
+  m_Script: {fileID: 11500000, guid: 7ebd46a7c90525044b68089bef856697, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  radius: 6
-  speedMultiplier: 300
-  refreshInterval: 0.05
-  affectSelf: 0
+  radius: 5
+  percentOfMaxHP: 0.5
+  refreshInterval: 0.3
+  affectSelf: 1
   drawGizmos: 1
+  shieldPulseVfx: {fileID: 0}
+  vfxCooldown: 0.25
 --- !u!1 &5561792141900268098
 GameObject:
   m_ObjectHideFlags: 0

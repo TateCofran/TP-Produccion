@@ -18,6 +18,9 @@ GameObject:
   - component: {fileID: -3860705843057971811}
   - component: {fileID: 7671586546552071002}
   - component: {fileID: 7591455121023013617}
+  - component: {fileID: -5660446382885354279}
+  - component: {fileID: 4320420991730501823}
+  - component: {fileID: -8631007942341539038}
   m_Layer: 6
   m_Name: EnemyBossPrefab3
   m_TagString: Enemy
@@ -173,6 +176,7 @@ MonoBehaviour:
   defense: 0
   currentHealth: 0
   shieldCurrent: 0
+  invulnerable: 0
 --- !u!114 &-3860705843057971811
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -215,6 +219,64 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   health: {fileID: 3273943754081973009}
+--- !u!114 &-5660446382885354279
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5019013483156572802}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: acac8c5d025966d499b500f5fbb6ede9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  radius: 6
+  empDuration: 5
+  cooldownSeconds: 15
+  useLayerMask: 1
+  towerLayers:
+    serializedVersion: 2
+    m_Bits: 256
+  towerTag: Turret
+  empCastVfxPrefab: {fileID: 0}
+  empCastVfxLifetime: 2
+--- !u!114 &4320420991730501823
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5019013483156572802}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 617666a6ef36ccf43a86a620aacf6c74, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  hpThresholdPercent: 0.25
+  onlyOncePerSpawn: 1
+  turretLayers:
+    serializedVersion: 2
+    m_Bits: 256
+  searchRadius: 200
+  destroyVfxPrefab: {fileID: 0}
+  vfxLifetime: 2
+--- !u!114 &-8631007942341539038
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5019013483156572802}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a993740a094ea494297a68cd6d3ac32e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  threshold: 0.25
+  multiplier: 2
+  duration: 3000
+  cooldown: 0.1
 --- !u!1001 &7993442428391934142
 PrefabInstance:
   m_ObjectHideFlags: 0

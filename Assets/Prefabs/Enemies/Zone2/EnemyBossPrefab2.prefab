@@ -1245,6 +1245,7 @@ GameObject:
   - component: {fileID: -3860705843057971811}
   - component: {fileID: 7671586546552071002}
   - component: {fileID: 7591455121023013617}
+  - component: {fileID: 1313600094022032413}
   m_Layer: 6
   m_Name: EnemyBossPrefab2
   m_TagString: Enemy
@@ -1399,6 +1400,8 @@ MonoBehaviour:
   maxHealth: 0
   defense: 0
   currentHealth: 0
+  shieldCurrent: 0
+  invulnerable: 0
 --- !u!114 &-3860705843057971811
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1441,6 +1444,24 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   health: {fileID: 3273943754081973009}
+--- !u!114 &1313600094022032413
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5019013483156572802}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4394fe6cf04c5b9448d27a3a26e70687, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  linkedMinionType: 0
+  minionCount: 5
+  spawnSpreadRadius: 1.5
+  spawnVfxPrefab: {fileID: 0}
+  shieldActiveVfxPrefab: {fileID: 0}
+  vfxLifetime: 2
 --- !u!1 &5068079882888418334
 GameObject:
   m_ObjectHideFlags: 0

@@ -12,17 +12,17 @@ public class EnemyHealthBar : MonoBehaviour, IHealthDisplay
 
     [SerializeField] private float damageTextYOffset = 2f; // separación arriba de la barra
     [SerializeField] private float damageTextXOffset = -30f;
-    
+
     [SerializeField] private float reduceSpeed = 6f;
 
     private GameObject healthBarInstance;
     private Image healthBarFill;
-    
+
     private float currentFill = 1f;
     private float targetFill = 1f;
     //
     private Coroutine smoothBarRoutine;
-    // 🔹 Nuevo overlay para el escudo
+    // Nuevo overlay para el escudo
     private Image shieldOverlayFill;
     private float shieldAlpha = 0.35f; // opacidad del overlay (puede ajustarse)
 
@@ -57,7 +57,7 @@ public class EnemyHealthBar : MonoBehaviour, IHealthDisplay
         }
 
         UpdateHealthBar(maxHealth, maxHealth);
-        
+
         healthBarFill.color = new Color(0.26f, 0.54f, 0.27f, 1f);
     }
 
@@ -72,7 +72,7 @@ public class EnemyHealthBar : MonoBehaviour, IHealthDisplay
             StopCoroutine(smoothBarRoutine);
 
         if (gameObject.activeInHierarchy) smoothBarRoutine = StartCoroutine(SmoothFill());
-        
+
     }
 
     private IEnumerator SmoothFill()
@@ -159,5 +159,18 @@ public class EnemyHealthBar : MonoBehaviour, IHealthDisplay
             healthBarInstance.SetActive(false);
             UpdateHealthBar(1, 1);
         }
+    }
+
+    // Hace que la barra SIEMPRE mire a la cámara
+    private void LateUpdate()
+    {
+        if (healthBarInstance == null) return;
+        if (Camera.main == null) return;
+
+        Transform cam = Camera.main.transform;
+
+        // Hacemos que la barra mire hacia la cámara
+        Vector3 dir = (healthBarInstance.transform.position - cam.position).normalized;
+        healthBarInstance.transform.rotation = Quaternion.LookRotation(dir, Vector3.up);
     }
 }

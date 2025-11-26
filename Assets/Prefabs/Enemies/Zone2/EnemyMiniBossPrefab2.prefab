@@ -458,6 +458,7 @@ GameObject:
   - component: {fileID: -1345943419562490293}
   - component: {fileID: 1848116458589269432}
   - component: {fileID: -1349126979923562057}
+  - component: {fileID: 6185773737149695495}
   m_Layer: 6
   m_Name: EnemyMiniBossPrefab2
   m_TagString: Enemy
@@ -612,6 +613,8 @@ MonoBehaviour:
   maxHealth: 0
   defense: 0
   currentHealth: 0
+  shieldCurrent: 0
+  invulnerable: 0
 --- !u!114 &-1345943419562490293
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -654,6 +657,23 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   health: {fileID: 6440740474934862740}
+--- !u!114 &6185773737149695495
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5019013483156572802}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ec87358615f95874d816e04081f758d8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  revivePercent: 0.5
+  onlyOncePerSpawn: 1
+  speedMultiplier: 5
+  speedBuffDuration: 0
+  reviveVfx: {fileID: 0}
 --- !u!1 &5112449945689161648
 GameObject:
   m_ObjectHideFlags: 0

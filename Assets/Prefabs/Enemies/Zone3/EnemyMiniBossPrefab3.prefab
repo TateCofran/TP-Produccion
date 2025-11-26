@@ -18,6 +18,8 @@ GameObject:
   - component: {fileID: -1345943419562490293}
   - component: {fileID: 1848116458589269432}
   - component: {fileID: -1349126979923562057}
+  - component: {fileID: -1213496661714406543}
+  - component: {fileID: -11714259353008517}
   m_Layer: 6
   m_Name: EnemyMiniBossPrefab3
   m_TagString: Enemy
@@ -173,6 +175,7 @@ MonoBehaviour:
   defense: 0
   currentHealth: 0
   shieldCurrent: 0
+  invulnerable: 0
 --- !u!114 &-1345943419562490293
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -215,6 +218,40 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   health: {fileID: 6440740474934862740}
+--- !u!114 &-1213496661714406543
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5019013483156572802}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 709a8a3faa8667044befdc40accb22fb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  spawnType: 0
+  countOnDeath: 3
+  spreadRadius: 0.75
+  onlyOnce: 1
+  spawnVfxPrefab: {fileID: 0}
+  vfxLifetime: 2
+--- !u!114 &-11714259353008517
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5019013483156572802}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 46aab20d29c6d6743b8b05a5d072c85b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  healPercentOfMaxHP: 0.1
+  intervalSeconds: 5
+  healVfxPrefab: {fileID: 0}
+  vfxLifetime: 1.5
 --- !u!1001 &2592796536908171727
 PrefabInstance:
   m_ObjectHideFlags: 0
