@@ -511,7 +511,7 @@ MonoBehaviour:
       count: 4
       interval: 0.1
       waitAfterStep: 2
-    - enemyType: 2
+    - enemyType: 7
       count: 4
       interval: 0.1
       waitAfterStep: 2
