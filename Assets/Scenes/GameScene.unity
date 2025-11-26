@@ -7668,7 +7668,7 @@ MonoBehaviour:
   pausePanelTag: PausePanel
   pausePanelName: PausePanel
   resultScene: ResultScene
-  wavesToWin: 46
+  wavesToWin: 45
   mainMenuScene: Menu
   gameplayScene: GameScene
   debugWaveToJump: 31
