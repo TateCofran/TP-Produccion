@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: UpgradeRangeTurret
   m_EditorClassIdentifier: 
   upgradeId: turret_global_range
-  displayName: Turret ange
+  displayName: Turret Range
   description: Increase Range of all turrets
   category: 1
   maxLevel: 5

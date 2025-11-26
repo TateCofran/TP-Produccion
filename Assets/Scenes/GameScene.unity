@@ -6456,12 +6456,16 @@ MonoBehaviour:
   normalWorldFill: {fileID: 8296576713939227880}
   otherWorldFill: {fileID: 4873997717838269139}
   worldToggleCooldownFill: {fileID: 4785880011866820785}
+  meterGraphic: {fileID: 4785880011866820785}
+  meterValue: 0.523
   worldIcon: {fileID: 4785880011866820785}
   normalWorldSprite: {fileID: 21300000, guid: 11280c14b45b11742bcb3456a060abc0, type: 3}
   otherWorldSprite: {fileID: 21300000, guid: 8ca198d934481ed44b65324829353f9d, type: 3}
   pulseScale: 1.2
   pulseSpeed: 2.5
   uiContainer: {fileID: 417707442287562383}
+  blinkSpeed: 0.6
+  blinkColor: {r: 1.5, g: 1.5, b: 1.5, a: 1.5}
   buttonWorldYOffset: 1
   buttonScreenYOffset: 24
   buttonPivotBottom: 1
@@ -7773,15 +7777,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Material: {fileID: 2100000, guid: 690a807caf68b654ba39a9f991f81975, type: 2}
+  m_Color: {r: 0.019607842, g: 0.12890336, b: 0.7647059, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 11280c14b45b11742bcb3456a060abc0, type: 3}
+  m_Sprite: {fileID: 0}
   m_Type: 3
   m_PreserveAspect: 0
   m_FillCenter: 1
