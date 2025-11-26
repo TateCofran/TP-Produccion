@@ -24,10 +24,13 @@ public class UpgradeListUI : MonoBehaviour
     {
         Clear();
 
+        UpgradeSO first = null;
+
         foreach (var up in repository.GetByCategory(category))
         {
+            if (first == null) first = up;   // Guardamos el primero de la categoría
+
             var btn = Instantiate(itemButtonPrefab, contentParent);
-       
             var rect = btn.GetComponent<RectTransform>();
             rect.sizeDelta = new Vector2(380f, 120f);
 
@@ -43,7 +46,15 @@ public class UpgradeListUI : MonoBehaviour
 
             btn.onClick.AddListener(() => OnItemSelected?.Invoke(up));
         }
+
+        // ---- NUEVO ----
+        // Si hay al menos una mejora en esta categoría, mostrarla por defecto
+        if (first != null)
+        {
+            OnItemSelected?.Invoke(first);
+        }
     }
+
 
     public void RefreshLevels()
     {

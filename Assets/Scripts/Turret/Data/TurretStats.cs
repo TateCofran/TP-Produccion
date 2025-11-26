@@ -57,7 +57,15 @@ public class TurretStats : MonoBehaviour, ITurretStats
         baseRange = Mathf.Round(so.range * 10f) / 10f;
         baseFireRate = Mathf.Round(so.fireRate * 10f) / 10f;
 
-        RecalculateStats();      // esto llama UpdateRangeVisualizer adentro
+        // === APLICAR UPGRADES PERMANENTES ===
+        TurretPermanentUpgrades.ApplyPermanentUpgrades(
+            ref baseDamage,
+            ref baseRange,
+            ref baseFireRate
+        );
+        // ===================================
+
+        RecalculateStats();
         UpdateRangeVisualizer();
     }
 
