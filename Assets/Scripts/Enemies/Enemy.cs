@@ -16,6 +16,7 @@ public class Enemy : MonoBehaviour, IEnemyDeathHandler
     [Header("Settings")]
     [SerializeField] private float waypointTolerance = 0.03f;
     [SerializeField] private bool faceDirection = true;
+    [SerializeField] private Vector3 facingOffsetEuler = Vector3.zero;
 
     private readonly List<Vector3> _route = new List<Vector3>();
     private int _idx;
@@ -105,10 +106,17 @@ public class Enemy : MonoBehaviour, IEnemyDeathHandler
 
         if (faceDirection && dir.sqrMagnitude > 0.0001f)
         {
-            var forward = -new Vector3(dir.x, 0f, dir.z);
+            var forward = new Vector3(dir.x, 0f, dir.z);
+
+            // Rotación base hacia la dirección de movimiento
             var look = Quaternion.LookRotation(forward, Vector3.up);
-            transform.rotation = Quaternion.Slerp(transform.rotation, look, 0.25f);
+
+            // Aplico offset extra para este prefab (0, 180, 0 si mira para atrás)
+            var finalRotation = look * Quaternion.Euler(facingOffsetEuler);
+
+            transform.rotation = Quaternion.Slerp(transform.rotation, finalRotation, 0.25f);
         }
+
 
         float dt = Time.deltaTime;
         for (int i = 0; i < _abilities.Count; i++)

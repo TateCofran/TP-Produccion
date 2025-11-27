@@ -175,7 +175,7 @@ MonoBehaviour:
   maxHealth: 0
   defense: 0
   currentHealth: 0
-  shieldCurrent: 0
+  shieldAuraApplied: 0
   invulnerable: 0
 --- !u!114 &-3860705843057971811
 MonoBehaviour:
@@ -231,14 +231,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: acac8c5d025966d499b500f5fbb6ede9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  radius: 6
+  radius: 20
   empDuration: 5
   cooldownSeconds: 15
   useLayerMask: 1
   towerLayers:
     serializedVersion: 2
     m_Bits: 256
-  towerTag: Turret
+  towerTag: 
   empCastVfxPrefab: {fileID: 0}
   empCastVfxLifetime: 2
 --- !u!114 &4320420991730501823
