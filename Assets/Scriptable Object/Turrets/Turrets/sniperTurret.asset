@@ -15,7 +15,7 @@ MonoBehaviour:
   id: sniper_Turret
   type: 
   displayName: Turret Sniper
-  damage: 15
+  damage: 30
   range: 10
   fireRate: 0.1
   projectileSpeed: 1

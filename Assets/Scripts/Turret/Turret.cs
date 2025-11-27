@@ -129,4 +129,10 @@ public class Turret : MonoBehaviour
         var turretShooter = GetComponent<TurretShooter>();
         if (turretShooter) turretShooter.SetCombatEnabled(enabledCombat);
     }
+
+    public void SetCombatEnabled(bool value)
+    {
+        ToggleCombat(value);
+    }
+
 }

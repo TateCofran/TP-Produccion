@@ -174,7 +174,7 @@ MonoBehaviour:
   maxHealth: 0
   defense: 0
   currentHealth: 0
-  shieldCurrent: 0
+  shieldAuraApplied: 0
   invulnerable: 0
 --- !u!114 &-1345943419562490293
 MonoBehaviour:
@@ -231,7 +231,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   spawnType: 0
-  countOnDeath: 3
+  countOnDeath: 1
   spreadRadius: 0.75
   onlyOnce: 1
   spawnVfxPrefab: {fileID: 0}

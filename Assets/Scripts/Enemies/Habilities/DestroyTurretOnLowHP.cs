@@ -4,16 +4,19 @@ using UnityEngine;
 public class Ability_DestroyRandomTurretOnLowHP : MonoBehaviour, IEnemyAbility
 {
     [Header("Trigger")]
-    [SerializeField, Range(0.05f, 0.9f)] private float hpThresholdPercent = 0.25f; // 25%
-    [SerializeField] private bool onlyOncePerSpawn = true;
+    [SerializeField, Range(0.05f, 0.9f)]
+    private float hpThresholdPercent = 0.25f; // 25%
+
+    [SerializeField]
+    private bool onlyOncePerSpawn = true;
 
     [Header("Turrets")]
-    [SerializeField] private LayerMask turretLayers; // pon aca la layer "Turret"
-    [SerializeField, Min(10f)] private float searchRadius = 200f; // bastante grande para agarrar todo el mapa
+    [SerializeField] private LayerMask turretLayers;   // layer "Turrets"
+    [SerializeField, Min(10f)] private float searchRadius = 200f;
 
     [Header("FX (optional)")]
     [SerializeField] private GameObject destroyVfxPrefab;
-    [SerializeField, Min(0f)] private float vfxLifetime = 2f;
+    [SerializeField] private float vfxLifetime = 2f;
 
     private AbilityContext _ctx;
     private bool _used;
@@ -26,18 +29,20 @@ public class Ability_DestroyRandomTurretOnLowHP : MonoBehaviour, IEnemyAbility
 
     public void Tick(float dt)
     {
-        // no necesita lógica por frame
+        // no-op
     }
 
     public void OnDamaged(float dmg, float currentHP, object source)
     {
         if (_used && onlyOncePerSpawn) return;
-        if (_ctx.Health == null) return;
+        if (_ctx.Health == null) return;   // AbilityContext es struct, solo chequeamos campos
 
-        float max = Mathf.Max(1f, _ctx.Health.GetMaxHealth());
+        float max = _ctx.Health.GetMaxHealth();
+        if (max <= 0f) return;
+
         float thresholdHP = max * hpThresholdPercent;
 
-        // Solo cuando la vida actual ya está por debajo del umbral
+        // Solo cuando la vida ya esta por debajo del umbral
         if (currentHP > thresholdHP) return;
 
         if (DestroyRandomTurret())
@@ -46,20 +51,9 @@ public class Ability_DestroyRandomTurretOnLowHP : MonoBehaviour, IEnemyAbility
         }
     }
 
-    public void OnDeath()
-    {
-        // no-op
-    }
-
-    public void OnArrivedToCore()
-    {
-        // no-op
-    }
-
-    public void OnWaypoint(int index)
-    {
-        // no-op
-    }
+    public void OnDeath() { }
+    public void OnArrivedToCore() { }
+    public void OnWaypoint(int index) { }
 
     public void ResetRuntime()
     {
@@ -67,7 +61,7 @@ public class Ability_DestroyRandomTurretOnLowHP : MonoBehaviour, IEnemyAbility
     }
 
     // ---------------------------
-    // Lógica de destruir torreta
+    // Logica de destruir torreta
     // ---------------------------
     private bool DestroyRandomTurret()
     {
@@ -80,31 +74,33 @@ public class Ability_DestroyRandomTurretOnLowHP : MonoBehaviour, IEnemyAbility
         if (_ctx.Transform == null)
             return false;
 
-        // Buscamos colliders de torretas en un radio grande desde el jefe
+        // Buscamos colliders en la layer de torretas dentro de un radio grande
         Collider[] hits = Physics.OverlapSphere(_ctx.Transform.position, searchRadius, turretLayers);
         if (hits == null || hits.Length == 0)
             return false;
 
-        // Nos quedamos con los root GameObjects, activos y unicos
-        List<GameObject> candidates = new List<GameObject>();
+        List<Turret> candidates = new List<Turret>();
+
         for (int i = 0; i < hits.Length; i++)
         {
-            var col = hits[i];
+            Collider col = hits[i];
             if (col == null) continue;
 
-            GameObject root = col.transform.root.gameObject;
-            if (!root.activeInHierarchy) continue;
+            Turret turret = col.GetComponentInParent<Turret>();
+            if (turret == null) continue;
 
-            if (!candidates.Contains(root))
-                candidates.Add(root);
+            GameObject go = turret.gameObject;
+            if (!go.activeInHierarchy) continue;
+
+            if (!candidates.Contains(turret))
+                candidates.Add(turret);
         }
 
         if (candidates.Count == 0)
             return false;
 
-        // Elegimos una al azar
         int index = Random.Range(0, candidates.Count);
-        GameObject target = candidates[index];
+        Turret target = candidates[index];
 
         Vector3 pos = target.transform.position;
 
@@ -115,26 +111,19 @@ public class Ability_DestroyRandomTurretOnLowHP : MonoBehaviour, IEnemyAbility
             Object.Destroy(vfx, vfxLifetime);
         }
 
-        // Destruimos la torreta
-        Object.Destroy(target);
+        Debug.Log("[DestroyRandomTurret] Destruyendo torreta: " + target.name);
 
-        // Debug opcional
-        // Debug.Log("[Ability_DestroyRandomTurretOnLowHP] Torreta destruida: " + target.name);
+        // ACA es donde antes volabas el mapa entero (TileChainRoot).
+        // Ahora destruimos SOLO la torreta.
+        Object.Destroy(target.gameObject);
 
         return true;
     }
 
     private void OnDrawGizmosSelected()
     {
-        if (_ctx.Transform != null)
-        {
-            Gizmos.color = Color.red;
-            Gizmos.DrawWireSphere(_ctx.Transform.position, searchRadius);
-        }
-        else
-        {
-            Gizmos.color = Color.red;
-            Gizmos.DrawWireSphere(transform.position, searchRadius);
-        }
+        Transform t = _ctx.Transform != null ? _ctx.Transform : transform;
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(t.position, searchRadius);
     }
 }

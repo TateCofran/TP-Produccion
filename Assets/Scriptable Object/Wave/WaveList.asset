@@ -1155,23 +1155,7 @@ MonoBehaviour:
       waitAfterStep: 1
   - waveNumber: 45
     steps:
-    - enemyType: 10
-      count: 30
-      interval: 0.7
-      waitAfterStep: 0.7
-    - enemyType: 10
-      count: 30
-      interval: 0.7
-      waitAfterStep: 0.7
-    - enemyType: 12
-      count: 30
-      interval: 0.5
-      waitAfterStep: 1
-    - enemyType: 13
-      count: 10
-      interval: 0.5
-      waitAfterStep: 1
     - enemyType: 14
       count: 1
-      interval: 0.5
-      waitAfterStep: 0.5
+      interval: 0.7
+      waitAfterStep: 0.7
