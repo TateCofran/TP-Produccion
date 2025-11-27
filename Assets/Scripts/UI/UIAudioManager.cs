@@ -1,17 +1,38 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Audio;
 using UnityEngine.UI;
 
 [RequireComponent(typeof(AudioSource))]
 public class UIAudioManager : MonoBehaviour
 {
+    public static UIAudioManager instance;
+
     [Header("Sonido de click")]
     [SerializeField] private AudioClip clickSound;
+
+
 
     private AudioSource audioSource;
 
     //para registrar botones solo una vez, sin repetidos
     private readonly HashSet<Button> registeredButtons = new();
+
+    /*private void Awake()
+    {
+        if (instance == null)
+        {
+            instance = this;
+            DontDestroyOnLoad(gameObject);
+
+            ApplyVolumes();
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+    }*/
+
 
     private void Start()
     {
@@ -52,5 +73,6 @@ public class UIAudioManager : MonoBehaviour
         if (clickSound && audioSource)
             audioSource.PlayOneShot(clickSound);
     }
+
 }
 
