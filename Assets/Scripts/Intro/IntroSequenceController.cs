@@ -11,6 +11,7 @@ public sealed class IntroSequenceController : MonoBehaviour
     [SerializeField] private TextMeshProUGUI slideText;
     [SerializeField] private Button nextButton;
     [SerializeField] private Button skipButton;
+    public TextPopIn textPopIn;
 
     [Header("Slides")]
     [Tooltip("Assign the 3 intro images here in order.")]
@@ -103,6 +104,7 @@ public sealed class IntroSequenceController : MonoBehaviour
         if (slideText != null && slideTexts.Count > currentIndex)
         {
             slideText.text = slideTexts[currentIndex];
+            textPopIn.PlayPopIn();
         }
 
         // Button label (Next / Start)
