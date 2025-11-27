@@ -183,7 +183,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1430331253403263130}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 1, z: 0, w: 0}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0.35, z: 0}
   m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
   m_ConstrainProportionsScale: 0
@@ -191,7 +191,7 @@ Transform:
   - {fileID: 6462084647791823418}
   - {fileID: 6971773869253310701}
   m_Father: {fileID: 3303128213975013384}
-  m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1940553633651723773
 GameObject:
   m_ObjectHideFlags: 0
@@ -639,6 +639,8 @@ MonoBehaviour:
   damageTextYOffset: 2
   damageTextXOffset: -30
   reduceSpeed: 6
+  usarAlturaDesdeCollider: 1
+  extraAltura: 1
 --- !u!114 &-8332236753500028849
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -654,7 +656,8 @@ MonoBehaviour:
   maxHealth: 0
   defense: 0
   currentHealth: 0
-  shieldCurrent: 0
+  shieldAuraApplied: 0
+  invulnerable: 0
 --- !u!114 &-1633866569161232141
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -670,6 +673,7 @@ MonoBehaviour:
   data: {fileID: 11400000, guid: e6127cb92ab6f1a48a59a4beb2ed39b4, type: 2}
   waypointTolerance: 0.03
   faceDirection: 1
+  facingOffsetEuler: {x: 0, y: 0, z: 0}
 --- !u!114 &8162415360288955088
 MonoBehaviour:
   m_ObjectHideFlags: 0

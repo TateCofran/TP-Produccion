@@ -119,7 +119,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 927041517507357336}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 1, z: 0, w: 0}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0.35, z: 0}
   m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
   m_ConstrainProportionsScale: 0
@@ -127,7 +127,7 @@ Transform:
   - {fileID: 5823249649925065588}
   - {fileID: 8873928169125257404}
   m_Father: {fileID: 3303128213975013384}
-  m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1224597466916580908
 GameObject:
   m_ObjectHideFlags: 0
@@ -605,6 +605,7 @@ MonoBehaviour:
   data: {fileID: 11400000, guid: 8501f4f7e03344a4490d9a95a4ed1190, type: 2}
   waypointTolerance: 0.03
   faceDirection: 1
+  facingOffsetEuler: {x: 0, y: 0, z: 0}
 --- !u!114 &6440740474934862740
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -620,7 +621,8 @@ MonoBehaviour:
   maxHealth: 0
   defense: 0
   currentHealth: 0
-  shieldCurrent: 0
+  shieldAuraApplied: 0
+  invulnerable: 0
 --- !u!114 &-1345943419562490293
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -638,6 +640,8 @@ MonoBehaviour:
   damageTextYOffset: 2
   damageTextXOffset: -30
   reduceSpeed: 6
+  usarAlturaDesdeCollider: 1
+  extraAltura: 1.2
 --- !u!114 &1848116458589269432
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -676,9 +680,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   thresholdPercent: 0.327
-  shieldFactor: 1
+  hpMultiplier: 1.5
   onlyOnce: 1
   shieldVfxPrefab: {fileID: 7545125283789541297, guid: 6e731817035973c4580f6dcc716d645e, type: 3}
+  vfxLifetime: 3
 --- !u!1 &5523276896673312851
 GameObject:
   m_ObjectHideFlags: 0

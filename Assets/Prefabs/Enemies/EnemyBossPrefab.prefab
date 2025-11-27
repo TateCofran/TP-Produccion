@@ -631,6 +631,7 @@ MonoBehaviour:
   data: {fileID: 11400000, guid: 75d8e61eadce8d4409a84c3427fbad30, type: 2}
   waypointTolerance: 0.03
   faceDirection: 1
+  facingOffsetEuler: {x: 0, y: 0, z: 0}
 --- !u!114 &3273943754081973009
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -665,6 +666,8 @@ MonoBehaviour:
   damageTextYOffset: 2
   damageTextXOffset: -30
   reduceSpeed: 6
+  usarAlturaDesdeCollider: 1
+  extraAltura: 1.5
 --- !u!114 &7671586546552071002
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1129,7 +1132,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8284615199968297800}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 1, z: 0, w: 0}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0.35, z: 0}
   m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
   m_ConstrainProportionsScale: 0
@@ -1137,7 +1140,7 @@ Transform:
   - {fileID: 5813172394670603305}
   - {fileID: 361370297702680940}
   m_Father: {fileID: 3303128213975013384}
-  m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &8339233508004614517
 GameObject:
   m_ObjectHideFlags: 0

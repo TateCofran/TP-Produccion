@@ -671,6 +671,8 @@ MonoBehaviour:
   damageTextYOffset: 2
   damageTextXOffset: -30
   reduceSpeed: 6
+  usarAlturaDesdeCollider: 1
+  extraAltura: 1.5
 --- !u!114 &1848116458589269432
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -914,7 +916,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6208868326273239893}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 1, z: 0, w: 0}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 0.3, y: 0.3, z: 0.3}
   m_ConstrainProportionsScale: 1
@@ -922,7 +924,7 @@ Transform:
   - {fileID: 8984880192995484052}
   - {fileID: 7570589346223196810}
   m_Father: {fileID: 3303128213975013384}
-  m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!95 &8301898795416352637
 Animator:
   serializedVersion: 7

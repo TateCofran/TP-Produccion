@@ -803,6 +803,8 @@ MonoBehaviour:
   damageTextYOffset: 2
   damageTextXOffset: -30
   reduceSpeed: 6
+  usarAlturaDesdeCollider: 1
+  extraAltura: 1
 --- !u!114 &-2998138191193648476
 MonoBehaviour:
   m_ObjectHideFlags: 0
