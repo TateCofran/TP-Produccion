@@ -44,7 +44,7 @@ Material:
     m_Floats:
     - _QueueControl: 0
     - _QueueOffset: 0
-    - _Transparency: 0.193
+    - _Transparency: 0.515
     m_Colors:
     - _BackFace: {r: 0.4072403, g: 0, b: 0.011612245, a: 1}
     - _FrontFace: {r: 0.4056604, g: 0, b: 0.011676447, a: 0}

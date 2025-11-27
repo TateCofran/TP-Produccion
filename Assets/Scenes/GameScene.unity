@@ -4518,7 +4518,6 @@ MonoBehaviour:
   panelRoot: {fileID: 9167013338207335923}
   nameText: {fileID: 7504520715855722499}
   damageText: {fileID: 3374351957384343435}
-  dpsText: {fileID: 1231824441868173062}
   rangeText: {fileID: 3524535392432838492}
   levelText: {fileID: 6348321095125314132}
   targetModeText: {fileID: 316310567399804807}

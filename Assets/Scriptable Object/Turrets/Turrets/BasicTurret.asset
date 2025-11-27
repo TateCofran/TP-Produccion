@@ -15,7 +15,7 @@ MonoBehaviour:
   id: basic_Turret
   type: 
   displayName: Turret Basic
-  damage: 30
+  damage: 7
   range: 2
   fireRate: 1
   projectileSpeed: 1
