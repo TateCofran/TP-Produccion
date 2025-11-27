@@ -6,6 +6,11 @@ public class ScreenSettings : MonoBehaviour
     [Header("UI")]
     public TMP_Dropdown displayModeDropdown;
 
+    private void Awake()
+    {
+        Screen.fullScreenMode = FullScreenMode.ExclusiveFullScreen;
+    }
+
     private void Start()
     {
         PlayerPrefs.DeleteKey("displayMode");
@@ -35,7 +40,18 @@ public class ScreenSettings : MonoBehaviour
         //Screen.fullScreen = !Screen.fullScreen;
         //Screen.fullScreen = !Screen.fullScreen;
 
-        PlayerPrefs.SetInt("displayMode", index);
+        StartCoroutine(ForceDisplayRefresh());
+
+        //-- si se rompe el display mode en pausa quitar el  StartCoroutine(ForceDisplayRefresh()); y dejar esta linea de abajo de player prefs!!
+
+        //PlayerPrefs.SetInt("displayMode", index); 
+    }
+
+    private System.Collections.IEnumerator ForceDisplayRefresh()
+    {
+        yield return null; // esperar 1 frame
+        Screen.SetResolution(Screen.width, Screen.height, Screen.fullScreenMode);
+
     }
 
     private int GetCurrentDisplayModeIndex()

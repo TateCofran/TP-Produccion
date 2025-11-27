@@ -8727,6 +8727,18 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+      - m_Target: {fileID: 7755046732605695223}
+        m_TargetAssemblyTypeName: UnityEngine.AudioSource, UnityEngine
+        m_MethodName: PlayOneShot
+        m_Mode: 2
+        m_Arguments:
+          m_ObjectArgument: {fileID: 8300000, guid: 05ee351777f7b014ebe70f26387e5f5e, type: 3}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.AudioClip, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 1
 --- !u!114 &1866317021
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -11012,7 +11024,7 @@ AudioSource:
   m_GameObject: {fileID: 5839791558648149287}
   m_Enabled: 1
   serializedVersion: 4
-  OutputAudioMixerGroup: {fileID: 0}
+  OutputAudioMixerGroup: {fileID: -2450876291375155754, guid: 35365a7189f9c0b4d9a86469aaf529ad, type: 2}
   m_audioClip: {fileID: 0}
   m_Resource: {fileID: 0}
   m_PlayOnAwake: 0
@@ -12932,7 +12944,7 @@ GameObject:
   - component: {fileID: 7755046732605695223}
   - component: {fileID: 7755046732605695224}
   - component: {fileID: 7755046732605695225}
-  - component: {fileID: 7755046732605695228}
+  - component: {fileID: 7755046732605695229}
   m_Layer: 0
   m_Name: UI
   m_TagString: Untagged
@@ -13616,7 +13628,7 @@ AudioSource:
   m_GameObject: {fileID: 2295714525419204106}
   m_Enabled: 1
   serializedVersion: 4
-  OutputAudioMixerGroup: {fileID: 0}
+  OutputAudioMixerGroup: {fileID: -2450876291375155754, guid: 35365a7189f9c0b4d9a86469aaf529ad, type: 2}
   m_audioClip: {fileID: 0}
   m_Resource: {fileID: 0}
   m_PlayOnAwake: 0
@@ -17552,9 +17564,9 @@ AudioSource:
   m_GameObject: {fileID: 2754465925057442717}
   m_Enabled: 1
   serializedVersion: 4
-  OutputAudioMixerGroup: {fileID: 0}
-  m_audioClip: {fileID: 0}
-  m_Resource: {fileID: 0}
+  OutputAudioMixerGroup: {fileID: -2450876291375155754, guid: 35365a7189f9c0b4d9a86469aaf529ad, type: 2}
+  m_audioClip: {fileID: 8300000, guid: 05ee351777f7b014ebe70f26387e5f5e, type: 3}
+  m_Resource: {fileID: 8300000, guid: 05ee351777f7b014ebe70f26387e5f5e, type: 3}
   m_PlayOnAwake: 0
   m_Volume: 1
   m_Pitch: 1
@@ -17731,7 +17743,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   musicSlider: {fileID: 200097799}
   sfxSlider: {fileID: 2034786011}
---- !u!114 &7755046732605695228
+--- !u!114 &7755046732605695229
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -17740,10 +17752,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 2754465925057442717}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ef7a33a30502801438a92bc7e3653207, type: 3}
+  m_Script: {fileID: 11500000, guid: b6ebabe96a0dea641bc76cdf606ad651, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  masterMixer: {fileID: 24100000, guid: 35365a7189f9c0b4d9a86469aaf529ad, type: 2}
+  displayModeDropdown: {fileID: 902611693}
 --- !u!114 &7777724727891339170
 MonoBehaviour:
   m_ObjectHideFlags: 0
