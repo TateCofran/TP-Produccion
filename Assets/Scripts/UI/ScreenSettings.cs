@@ -8,9 +8,10 @@ public class ScreenSettings : MonoBehaviour
 
     private void Start()
     {
+        PlayerPrefs.DeleteKey("displayMode");
         // Cargar el modo actual del sistema en el dropdown
         displayModeDropdown.value = GetCurrentDisplayModeIndex();
-        displayModeDropdown.onValueChanged.AddListener(SetDisplayMode);
+        displayModeDropdown.onValueChanged.AddListener(SetDisplayMode);     
     }
 
     public void SetDisplayMode(int index)
@@ -30,7 +31,10 @@ public class ScreenSettings : MonoBehaviour
                 break;
         }
 
-        // Opcional: guardar preferencia
+        // Fuerza refresh incluso en pausa
+        //Screen.fullScreen = !Screen.fullScreen;
+        //Screen.fullScreen = !Screen.fullScreen;
+
         PlayerPrefs.SetInt("displayMode", index);
     }
 
@@ -48,4 +52,5 @@ public class ScreenSettings : MonoBehaviour
         }
     }
 }
+
 

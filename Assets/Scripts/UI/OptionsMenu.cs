@@ -32,5 +32,15 @@ public class OptionsMenu : MonoBehaviour
     {
         panel.SetActive(false);
     }
+
+    public void closepause(GameObject panel)
+    {
+        panel.SetActive(false);
+    }
+
+    public void returntopause(GameObject panel)
+    {
+        panel.SetActive(true);
+    }
 }
 
