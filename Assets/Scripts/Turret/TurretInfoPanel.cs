@@ -12,7 +12,7 @@ public class TurretInfoPanel : MonoBehaviour
     [Header("Texts")]
     [SerializeField] private TMP_Text nameText;
     [SerializeField] private TMP_Text damageText;
-    [SerializeField] private TMP_Text dpsText;
+    //[SerializeField] private TMP_Text dpsText;
     [SerializeField] private TMP_Text rangeText;
     [SerializeField] private TMP_Text levelText;
     [SerializeField] private TMP_Text targetModeText;
@@ -138,14 +138,14 @@ public class TurretInfoPanel : MonoBehaviour
         float rng = _stats.Range;
 
         if (damageText) damageText.text = $"Daño: {dmg:0}";
-        if (dpsText) dpsText.text = $"DPS: {dps:0.##}";
+        //if (dpsText) dpsText.text = $"DPS: {dps:0.##}";
         if (rangeText) rangeText.text = $"Rango: {rng:0.##}";
     }
 
     private void PutNumbersNA()
     {
         if (damageText) damageText.text = "Daño: N/A";
-        if (dpsText) dpsText.text = "DPS: N/A";
+        //if (dpsText) dpsText.text = "DPS: N/A";
         if (rangeText) rangeText.text = "Rango: N/A";
     }
 
