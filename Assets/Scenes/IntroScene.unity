@@ -1266,7 +1266,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   texto: {fileID: 1239664776}
-  duration: 0.25
+  duration: 0.75
 --- !u!1 &1299766492
 GameObject:
   m_ObjectHideFlags: 0
