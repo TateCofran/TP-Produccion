@@ -86,7 +86,10 @@ public class FireTurret : MonoBehaviour, IShootingBehavior
 
     public void Shoot(Transform firePointIgnored, Transform target, ITurretStats statsParam)
     {
-        if (!firePoint || target == null || stats == null) return;
+        if (!firePoint || target == null) return;
+
+        ITurretStats effectiveStats = statsParam ?? stats;
+        if (effectiveStats == null) return;
 
         Vector3 o = firePoint.position;
         Vector3 predicted = target.position + targetOffset;
@@ -94,9 +97,19 @@ public class FireTurret : MonoBehaviour, IShootingBehavior
         float dist = dir.magnitude;
         if (dist <= 0.001f) return;
 
+        float maxRange = effectiveStats.Range;
+        if (dist > maxRange)
+        {
+            if (debugDraw)
+            {
+                Vector3 ndirDebug = dir / dist;
+                Debug.DrawLine(o, o + ndirDebug * maxRange, Color.yellow, 0.1f);
+            }
+            return; 
+        }
+
         Vector3 ndir = dir / dist;
 
-        // Línea de visión opcional
         if (losBlockers != 0 &&
             Physics.Raycast(o, ndir, dist, losBlockers, QueryTriggerInteraction.Ignore))
         {
@@ -104,24 +117,21 @@ public class FireTurret : MonoBehaviour, IShootingBehavior
             return;
         }
 
-        // 1) Intento con Raycast fino
-        if (Physics.Raycast(o, ndir, out RaycastHit hit, dist + 0.25f, hittableLayers, QueryTriggerInteraction.Ignore))
+        float maxRayDist = Mathf.Min(dist + 0.25f, maxRange);
+
+        if (Physics.Raycast(o, ndir, out RaycastHit hit, maxRayDist, hittableLayers, QueryTriggerInteraction.Ignore))
         {
             HandleAcquiredHit(o, ndir, hit);
             return;
         }
 
-        // 2) Fallback con SphereCast (más ancho)
         if (sphereCastRadius > 0f &&
-            Physics.SphereCast(o, sphereCastRadius, ndir, out RaycastHit shit, dist + 0.25f, hittableLayers, QueryTriggerInteraction.Ignore))
+            Physics.SphereCast(o, sphereCastRadius, ndir, out RaycastHit shit, maxRayDist, hittableLayers, QueryTriggerInteraction.Ignore))
         {
             HandleAcquiredHit(o, ndir, shit);
             return;
         }
 
-        // Si no impactó nada, opcionalmente podríamos disparar a un punto “vacío”,
-        // pero el requerimiento pide que el fireball vaya al punto de impacto real del raycast,
-        // así que si no hay impacto, no disparamos fireball.
     }
 
     private void HandleAcquiredHit(Vector3 origin, Vector3 shotDir, RaycastHit hit)
@@ -129,14 +139,12 @@ public class FireTurret : MonoBehaviour, IShootingBehavior
         Enemy enemy = null;
         TryGetEnemy(hit.collider.transform, out enemy);
 
-        // Disparar el fireball hacia el punto de impacto detectado por el raycast.
         if (fireballPrefab != null)
         {
             StartCoroutine(FireballTravel(origin, hit, enemy));
         }
         else
         {
-            // Si no hay prefab, al menos mantener el comportamiento previo (impact VFX + DoT).
             SpawnImpactVfx(hit, shotDir);
             if (enemy != null) StartOrRefreshBurn(enemy);
         }

@@ -7,13 +7,13 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: M_FillRed
-  m_Shader: {fileID: -6465566751694194690, guid: 53c6819536c5299498fc9a194fd2021a, type: 3}
+  m_Name: M_Shield 2
+  m_Shader: {fileID: -6465566751694194690, guid: e5da4adae0fb4ca45a3eb8e9bbe69265, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
   m_InvalidKeywords: []
-  m_LightmapFlags: 4
+  m_LightmapFlags: 2
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
   m_CustomRenderQueue: -1
@@ -24,6 +24,10 @@ Material:
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
+    - _BaseTexture:
+        m_Texture: {fileID: 2800000, guid: 2674fbd24674a004880dae2020d8cd22, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - unity_Lightmaps:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
@@ -38,15 +42,15 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _FillPercent: 0.55
     - _QueueControl: 0
     - _QueueOffset: 0
+    - _Transparency: 0.193
     m_Colors:
-    - _Color: {r: 0.3207547, g: 0, b: 0, a: 0}
-    - _OffColor: {r: 0, g: 0, b: 0, a: 0}
+    - _BackFace: {r: 0.4072403, g: 0, b: 0.011612245, a: 1}
+    - _FrontFace: {r: 0.4056604, g: 0, b: 0.011676447, a: 0}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
---- !u!114 &7462803479521879038
+--- !u!114 &2446920437554379734
 MonoBehaviour:
   m_ObjectHideFlags: 11
   m_CorrespondingSourceObject: {fileID: 0}
