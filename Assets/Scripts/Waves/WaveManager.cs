@@ -6,31 +6,30 @@ public class WaveManager : MonoBehaviour
 {
     public static WaveManager Instance { get; private set; }
 
-    [Header("Receta de oleadas (SO)")]
+    [Header("Wave Recipes (SO)")]
     [SerializeField] private WaveRecipeList recipeList;
     public WaveRecipeList RecipeList => recipeList;
 
-    [Header("Multiplicador global de cantidad de enemigos")]
+    [Header("Global Enemy Count Multiplier")]
     [Range(0.5f, 3f)]
     [SerializeField] private float enemyCountMultiplier = 1f;
     public float EnemyCountMultiplier => enemyCountMultiplier;
 
-    [Header("Configuración")]
+    [Header("Settings")]
     [SerializeField] private int maxWaves = 45;
 
     [Header("Autostart")]
-    [Tooltip("Si está activo, al colocar un tile/torreta con éxito y no hay oleada en curso, arranca la siguiente.")]
+    [Tooltip("If enabled, placing a tile or turret while no wave is running starts the next wave.")]
     [SerializeField] private bool autoStartOnPlacement = true;
 
-    [Tooltip("Anti-rebote para múltiples eventos de colocación casi simultáneos.")]
+    [Tooltip("Debounce for several placement events in quick succession.")]
 
     [SerializeField] private float placementCooldown = 0.15f;
 
     public int MaxWaves => maxWaves;
 
-    // ===== Delay para la próxima oleada (contador en UI) =====
-    [Header("Próxima oleada")]
-    [SerializeField] private float nextWaveDelaySeconds = 10f;   // ajustá desde el inspector
+    [Header("Next Wave")]
+    [SerializeField] private float nextWaveDelaySeconds = 10f;
     private Coroutine nextWaveCountdownCo;
 
     private float _nextAllowedPlacementStartTime = 0f;
@@ -39,7 +38,7 @@ public class WaveManager : MonoBehaviour
     private int enemiesAlive = 0;
     private int enemiesThisWave = 0;
     private int consecutiveOtherWorldWaves = 0;
-    private int totalEnemiesKilled = 0; // total de enemigos eliminados durante la partida
+    private int totalEnemiesKilled = 0;
     public int GetTotalEnemiesKilled() => totalEnemiesKilled;
 
     public bool WaveInProgress => enemiesAlive > 0;
@@ -50,18 +49,17 @@ public class WaveManager : MonoBehaviour
     private bool waveStarted = false;
 
     public event Action<int, int> OnWaveStarted;
-    public event Action OnWaveEnded; 
-    public event System.Action<int> OnEnemiesRemainingChanged;  // enemigos vivos/restantes
-    public event System.Action<float> OnNextWaveCountdownTick;  // segundos restantes para la próxima
-    public event System.Action OnNextWaveReady;                 // countdown terminó, listo para botón
-    public event System.Action<int> OnWaveNumberChanged;        // si cambiás la wave fuera de Start
+    public event Action OnWaveEnded;
+    public event System.Action<int> OnEnemiesRemainingChanged;
+    public event System.Action<float> OnNextWaveCountdownTick;
+    public event System.Action OnNextWaveReady;
+    public event System.Action<int> OnWaveNumberChanged;
 
     private void Awake()
     {
         if (Instance == null) Instance = this;
         else Destroy(gameObject);
 
-        // UI inicial (oleada 0 / enemigos 0)
         UIController.Instance?.UpdateWave(currentWave, maxWaves);
         UIController.Instance?.UpdateEnemiesRemaining(enemiesAlive);
     }
@@ -78,7 +76,6 @@ public class WaveManager : MonoBehaviour
         PlacementEvents.OnTileApplied -= HandleTileApplied;
     }
 
-    // ====== AUTOSTART DESDE COLOCACIÓN ======
     private void HandleTurretPlaced(PlacementEvents.TurretPlacedInfo info)
     {
         TryAutoStartAfterPlacement("TurretPlaced");
@@ -102,11 +99,10 @@ public class WaveManager : MonoBehaviour
         if (waveStarted || WaveInProgress) return;
         if (IsLastWave()) return;
 
-        Debug.Log($"[WaveManager] Autostart por {source}. Oleada actual: {currentWave}, enemigos vivos: {enemiesAlive}.");
+        Debug.Log($"[WaveManager] Autostart from {source}. Current wave: {currentWave}, enemies alive: {enemiesAlive}");
         StartNextWave();
     }
 
-    // ====== API PÚBLICA ======
     public void TryStartFirstWave()
     {
         if (!waveStarted && currentWave == 0)
@@ -118,7 +114,7 @@ public class WaveManager : MonoBehaviour
         if (waveStarted) return;
         if (IsLastWave())
         {
-            Debug.Log("[WaveManager] Ya se alcanzó la última oleada.");
+            Debug.Log("[WaveManager] The last wave has already been reached");
             return;
         }
 
@@ -130,83 +126,85 @@ public class WaveManager : MonoBehaviour
         enemiesAlive = enemiesThisWave;
         OnEnemiesRemainingChanged?.Invoke(enemiesAlive);
 
-        Debug.Log($"[WaveManager] Oleada {currentWave} iniciada con {enemiesThisWave} enemigos.");
+        Debug.Log($"[WaveManager] Wave {currentWave} started with {enemiesThisWave} enemies");
         OnWaveStarted?.Invoke(currentWave, enemiesThisWave);
 
         TutorialEventHub.RaiseWaveStarted();
 
-
-        // (si tenías un countdown en curso, lo cancelás)
         if (nextWaveCountdownCo != null) { StopCoroutine(nextWaveCountdownCo); nextWaveCountdownCo = null; }
 
-
-        // UI: mostrar oleada y enemigos al inicio
         UIController.Instance?.UpdateWave(currentWave, maxWaves);
         UIController.Instance?.UpdateEnemiesRemaining(enemiesAlive);
-
     }
     public void ForceStartNextWave()
     {
         if (TutorialManager.Instance != null && !TutorialManager.Instance.AllowStartWave)
             return;
-        // Si hay una oleada activa o ya se alcanzó la última, no hacemos nada
+
         if (waveStarted || WaveInProgress || IsLastWave())
         {
-            Debug.Log("[WaveManager] No se puede forzar una nueva oleada ahora.");
+            Debug.Log("[WaveManager] Cannot force a new wave right now");
             return;
         }
 
-        // Cancelar countdown si estaba corriendo
         if (nextWaveCountdownCo != null)
         {
             StopCoroutine(nextWaveCountdownCo);
             nextWaveCountdownCo = null;
         }
 
-        Debug.Log("[WaveManager] Iniciando siguiente oleada manualmente (botón StartWaveButton).");
+        Debug.Log("[WaveManager] Starting the next wave manually");
         StartNextWave();
     }
     public void JumpToWave(int wave)
     {
         int target = Mathf.Clamp(wave, 1, maxWaves);
 
-        // Cancelar cualquier countdown hacia la próxima
         if (nextWaveCountdownCo != null)
         {
             StopCoroutine(nextWaveCountdownCo);
             nextWaveCountdownCo = null;
         }
 
-        // Reset de estado de oleada actual
         waveStarted = false;
         enemiesAlive = 0;
         enemiesThisWave = 0;
         OnEnemiesRemainingChanged?.Invoke(enemiesAlive);
 
-        // Ajustar índice: StartNextWave() incrementa, por eso dejamos currentWave en target - 1
         currentWave = target - 1;
 
-        // UI provisional antes de iniciar (muestra el índice actual)
         UIController.Instance?.UpdateWave(currentWave, maxWaves);
         UIController.Instance?.UpdateEnemiesRemaining(enemiesAlive);
 
-        Debug.Log($"[WaveManager] JumpToWave({wave}) → preparando e iniciando oleada {target}.");
+        Debug.Log($"[WaveManager] JumpToWave({wave}): starting wave {target}");
         StartNextWave();
     }
 
-    public void NotifyEnemyKilled()
+    public void RegisterExtraEnemies(int count)
+    {
+        if (!waveStarted || count <= 0) return;
+
+        enemiesAlive += count;
+        enemiesThisWave += count;
+
+        OnEnemiesRemainingChanged?.Invoke(enemiesAlive);
+        UIController.Instance?.UpdateEnemiesRemaining(enemiesAlive);
+    }
+
+    public void NotifyEnemyKilled() => NotifyEnemyRemoved(true);
+
+    public void NotifyEnemyRemoved(bool wasKilled)
     {
         enemiesAlive = Mathf.Max(0, enemiesAlive - 1);
-        totalEnemiesKilled++;
+        if (wasKilled) totalEnemiesKilled++;
 
         OnEnemiesRemainingChanged?.Invoke(enemiesAlive);
 
-        //UI: actualizar enemigos restantes
         UIController.Instance?.UpdateEnemiesRemaining(enemiesAlive);
 
         if (waveStarted && enemiesAlive <= 0)
         {
-            Debug.Log($"[WaveManager] Oleada {currentWave} finalizada.");
+            Debug.Log($"[WaveManager] Wave {currentWave} finished");
             waveStarted = false;
             OnWaveEnded?.Invoke();
 
@@ -238,14 +236,14 @@ public class WaveManager : MonoBehaviour
     {
         if (recipeList == null)
         {
-            Debug.LogWarning("[WaveManager] No se asignó el WaveRecipeList.");
+            Debug.LogWarning("[WaveManager] WaveRecipeList is not assigned");
             return 0;
         }
 
         var recipe = recipeList.waveRecipes.Find(r => r.waveNumber == currentWave);
         if (recipe == null)
         {
-            Debug.LogWarning($"No hay receta configurada para la ronda {currentWave}");
+            Debug.LogWarning($"[WaveManager] No recipe configured for wave {currentWave}");
             return 0;
         }
 
@@ -253,7 +251,7 @@ public class WaveManager : MonoBehaviour
         foreach (var step in recipe.steps)
             total += Mathf.CeilToInt(step.count * enemyCountMultiplier);
 
-        Debug.Log($"[WaveManager] Total enemigos esta oleada: {total} (SO + x{enemyCountMultiplier})");
+        Debug.Log($"[WaveManager] Total enemies this wave: {total} (x{enemyCountMultiplier})");
         return total;
     }
 
@@ -266,9 +264,8 @@ public class WaveManager : MonoBehaviour
         enemiesAlive = 0;
         enemiesThisWave = 0;
         waveStarted = false;
-        totalEnemiesKilled = 0; 
+        totalEnemiesKilled = 0;
 
-        // UI reset
         UIController.Instance?.UpdateWave(currentWave, maxWaves);
         UIController.Instance?.UpdateEnemiesRemaining(enemiesAlive);
     }

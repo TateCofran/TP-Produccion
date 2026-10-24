@@ -1,12 +1,11 @@
-// TilePlacementAnimator.cs
-using System.Collections;
+ï»¿using System.Collections;
 using UnityEngine;
 
 [DisallowMultipleComponent]
 public class TilePlacementAnimator : MonoBehaviour
 {
     [Header("Playback")]
-    [SerializeField] private bool autoPlayOnEnable = false; // ahora por defecto NO auto-play
+    [SerializeField] private bool autoPlayOnEnable = false;
     [SerializeField, Min(0.05f)] private float duration = 0.35f;
     [SerializeField] private AnimationCurve scaleCurve = AnimationCurve.EaseInOut(0, 0, 1, 1);
 
@@ -24,7 +23,6 @@ public class TilePlacementAnimator : MonoBehaviour
             Play(0f);
     }
 
-    /// <summary>Dispara la animación con un retraso opcional.</summary>
     public void Play(float delaySeconds = 0f)
     {
         if (!isActiveAndEnabled) return;
@@ -36,7 +34,6 @@ public class TilePlacementAnimator : MonoBehaviour
     {
         if (delay > 0f) yield return new WaitForSeconds(delay);
 
-        // estado inicial
         var targetScale = _initialScale == Vector3.zero ? Vector3.one : _initialScale;
         transform.localScale = Vector3.zero;
 

@@ -1,16 +1,16 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 public class Ability_LinkedShield : MonoBehaviour, IEnemyAbility
 {
-    [Header("Minions vinculados")]
+    [Header("Linked Minions")]
     [SerializeField] private EnemyType linkedMinionType = EnemyType.Minion;
     [SerializeField, Min(1)] private int minionCount = 5;
     [SerializeField, Min(0f)] private float spawnSpreadRadius = 1.5f;
 
-    [Header("FX (opcional)")]
+    [Header("FX (optional)")]
     [SerializeField] private GameObject spawnVfxPrefab;
-    [SerializeField] private GameObject shieldActiveVfxPrefab;  // por ejemplo, un aura grande
+    [SerializeField] private GameObject shieldActiveVfxPrefab;
     [SerializeField, Min(0f)] private float vfxLifetime = 2f;
 
     private AbilityContext _ctx;
@@ -36,23 +36,16 @@ public class Ability_LinkedShield : MonoBehaviour, IEnemyAbility
 
         if (shieldActiveVfxPrefab != null && _ctx.Transform != null)
         {
-            _shieldVfxInstance = Object.Instantiate(
-                shieldActiveVfxPrefab,
-                _ctx.Transform.position,
-                Quaternion.identity,
-                _ctx.Transform
-            );
+            _shieldVfxInstance = VfxPool.Spawn(shieldActiveVfxPrefab, _ctx.Transform.position, Quaternion.identity, 0f, _ctx.Transform);
         }
     }
 
     public void Tick(float dt)
     {
-        // Si queres que el VFX siga la posicion, ya es hijo del enemigo, asi que no hace falta nada aca
     }
 
     public void OnDamaged(float dmg, float currentHP, object source)
     {
-        // no-op
     }
 
     public void OnDeath()
@@ -67,7 +60,6 @@ public class Ability_LinkedShield : MonoBehaviour, IEnemyAbility
 
     public void OnWaypoint(int index)
     {
-        // no-op
     }
 
     public void ResetRuntime()
@@ -84,7 +76,7 @@ public class Ability_LinkedShield : MonoBehaviour, IEnemyAbility
 
         if (_shieldVfxInstance != null)
         {
-            Object.Destroy(_shieldVfxInstance);
+            VfxPool.Release(_shieldVfxInstance);
             _shieldVfxInstance = null;
         }
 
@@ -131,6 +123,7 @@ public class Ability_LinkedShield : MonoBehaviour, IEnemyAbility
             {
                 var route = MakeChildRoute(spawnPos);
                 enemy.Init(route);
+                WaveManager.Instance?.RegisterExtraEnemies(1);
                 _linkedMinions.Add(enemy);
             }
             else
@@ -140,8 +133,7 @@ public class Ability_LinkedShield : MonoBehaviour, IEnemyAbility
 
             if (spawnVfxPrefab != null)
             {
-                var vfx = Object.Instantiate(spawnVfxPrefab, spawnPos, Quaternion.identity);
-                Object.Destroy(vfx, vfxLifetime);
+                VfxPool.Spawn(spawnVfxPrefab, spawnPos, Quaternion.identity, vfxLifetime);
             }
         }
     }
@@ -162,11 +154,9 @@ public class Ability_LinkedShield : MonoBehaviour, IEnemyAbility
 
             if (_shieldVfxInstance != null)
             {
-                Object.Destroy(_shieldVfxInstance);
+                VfxPool.Release(_shieldVfxInstance);
                 _shieldVfxInstance = null;
             }
-
-            // Aqui se podria meter un VFX de "escudo roto"
         }
     }
 }

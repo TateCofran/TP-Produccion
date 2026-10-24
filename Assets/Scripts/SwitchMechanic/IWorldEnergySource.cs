@@ -1,4 +1,4 @@
-public interface IWorldEnergySource
+﻿public interface IWorldEnergySource
 {
 
     float GetChargePerSecond();

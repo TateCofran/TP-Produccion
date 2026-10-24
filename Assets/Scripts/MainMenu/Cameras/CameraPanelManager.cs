@@ -1,5 +1,4 @@
-// CameraPanelManager.cs
-using System;
+ï»¿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,31 +14,31 @@ public class CameraPanelManager : MonoBehaviour
     [Serializable]
     public class Entry
     {
-        [Header("Identificador lógico")]
-        public string key; // Ej.: "CameraStart", "CameraPlay", "CameraMechanic", "CameraLab"
+        [Header("Logical Identifier")]
+        public string key;
 
-        [Header("Cámara a activar")]
+        [Header("Camera To Activate")]
         public CinemachineCamera camera;
 
-        [Header("Panel asociado a esta cámara")]
+        [Header("Panel Linked To This Camera")]
         public GameObject panel;
 
-        [Header("UI opcional dentro del panel")]
+        [Header("Optional UI Inside The Panel")]
         public Button startGameButton;
         public string sceneToLoad = "GameScene";
 
-        [Header("Alembic opcional (antes de mostrar el panel)")]
+        [Header("Optional Alembic (before showing the panel)")]
         public AlembicStreamPlayer alembic;
         [Min(0f)] public float alembicDurationFallback = 2.0f;
 
-        [Header("Animación opcional (Start - Play)")]
-        [Tooltip("Animator del objeto que debe animarse al entrar en esta Entry.")]
+        [Header("Optional Animation (Start - Play)")]
+        [Tooltip("Animator of the object that animates when entering this entry.")]
         public Animator panelAnimator;
-        [Tooltip("Trigger para iniciar la animación.")]
+        [Tooltip("Trigger that starts the animation.")]
         public string panelAnimatorTrigger = "Play";
-        [Tooltip("Si está activo y esta key requiere togglePanel, se espera al fin de animación para mostrar el toggle.")]
+        [Tooltip("If enabled and this key requires the toggle panel, waits for the animation to end before showing it.")]
         public bool waitToggleUntilAnimEnds = false;
-        [Tooltip("Tiempo máximo de espera de animación (0 = sin límite).")]
+        [Tooltip("Maximum time to wait for the animation (0 = no limit).")]
         public float animationTimeoutSeconds = 0f;
     }
 
@@ -55,28 +54,26 @@ public class CameraPanelManager : MonoBehaviour
     [SerializeField] private CinemachineBlenderSettings customBlends;
     [SerializeField] private bool restoreBlendAfterSwap = true;
 
-    [Header("Flujo")]
-    [Tooltip("Esperar fin del blend antes de reproducir Alembic y mostrar paneles.")]
+    [Header("Flow")]
+    [Tooltip("Wait for the blend to finish before playing Alembic and showing panels.")]
     [SerializeField] private bool waitBlendBeforeAlembicAndPanel = true;
 
-    [Header("Entradas (cámaras/paneles)")]
+    [Header("Entries (cameras/panels)")]
     [SerializeField] private List<Entry> entries = new();
 
-    [Header("Toggle Panel persistente")]
-    [Tooltip("Panel que debe permanecer activo en ciertas cámaras. No incluirlo en UIPanelController.panels.")]
+    [Header("Persistent Toggle Panel")]
+    [Tooltip("Panel that stays active on some cameras. Do not include it in UIPanelController.panels.")]
     [SerializeField] private GameObject togglePanel;
 
-    [Tooltip("Key de Start para detectar regreso al estado inicial.")]
+    [Tooltip("Start key used to detect a return to the initial state.")]
     [SerializeField] private string startKeyName = "CameraStart";
 
-    [Tooltip("Keys en las que el TogglePanel debe estar SIEMPRE activo (salvo que se gatee por animación).")]
+    [Tooltip("Keys where the toggle panel is always active (unless gated by an animation).")]
     [SerializeField] private string[] toggleOnKeys = new[] { "CameraPlay", "CameraMechanic", "CameraLab" };
 
-    // Dependencias
     [SerializeField] private CinemachineCameraActivator cameraActivator;
     [SerializeField] private UIPanelController panelController;
 
-    // Servicios
     private IBlendController _blendController;
     private IAlembicPlayer _alembicPlayer;
     private IAnimationWaiter _animationWaiter;
@@ -105,14 +102,13 @@ public class CameraPanelManager : MonoBehaviour
         _alembicPlayer = new AlembicManualPlayer();
         _animationWaiter = new AnimatorTriggerWaiter();
 
-        // Ocultar paneles controlados, sin tocar el togglePanel
         if (panelController != null)
             panelController.HideAllExcept(togglePanel);
 
         if (!string.IsNullOrWhiteSpace(defaultKey))
         {
             _currentKey = defaultKey;
-            // No encendemos el toggle aún; lo decidirá Activate según la key
+
             Activate(defaultKey);
         }
     }
@@ -130,25 +126,20 @@ public class CameraPanelManager : MonoBehaviour
         bool targetNeedsToggle = toggleOnKeys != null &&
                                  toggleOnKeys.Any(k => string.Equals(k, _currentKey, StringComparison.OrdinalIgnoreCase));
 
-        // 0) Si esta Entry requiere gatear el toggle por animación, lo apagamos por ahora
         if (togglePanel != null && targetNeedsToggle && target.waitToggleUntilAnimEnds)
             togglePanel.SetActive(false);
 
-        // 1) Activar cámara
         cameraActivator?.SetActive(target.camera, activePriority, inactivePriority);
 
-        // 2) Lanzar animación EN PARALELO al blend (si corresponde)
         Coroutine animRoutine = null;
         if (target.panelAnimator != null && !string.IsNullOrEmpty(target.panelAnimatorTrigger))
         {
-            // Disparo y espero más adelante (en paralelo con el blend)
             animRoutine = StartCoroutine(_animationWaiter.TriggerAndWait(
                 target.panelAnimator,
                 target.panelAnimatorTrigger,
                 target.animationTimeoutSeconds));
         }
 
-        // 3) Blend
         if (brain != null)
         {
             if (waitBlendBeforeAlembicAndPanel)
@@ -161,11 +152,9 @@ public class CameraPanelManager : MonoBehaviour
             }
         }
 
-        // 4) Alembic (opcional)
         if (target.alembic != null && target.alembicDurationFallback > 0f)
             yield return _alembicPlayer.Play(target.alembic, target.alembicDurationFallback);
 
-        // 5) Mostrar panel de la entrada, sin apagar el togglePanel
         if (panelController != null)
         {
             panelController.HideAllExcept(togglePanel);
@@ -176,23 +165,19 @@ public class CameraPanelManager : MonoBehaviour
             target.panel.SetActive(true);
         }
 
-        // 6) Si el toggle está gateado por animación, esperar a que termine para encenderlo
         if (togglePanel != null && targetNeedsToggle)
         {
             if (animRoutine != null && target.waitToggleUntilAnimEnds)
-                yield return animRoutine; // espera real al final de la animación
+                yield return animRoutine;
 
-            // Encender ahora (o encender directamente si no se gateó)
             togglePanel.SetActive(true);
         }
         else
         {
-            // Si la key actual no necesita toggle, apagarlo
             if (togglePanel != null && string.Equals(_currentKey, startKeyName, StringComparison.OrdinalIgnoreCase))
                 togglePanel.SetActive(false);
         }
 
-        // 7) Hook botón Start Game (si existe)
         if (target.startGameButton != null && !string.IsNullOrEmpty(target.sceneToLoad))
         {
             target.startGameButton.onClick.RemoveAllListeners();

@@ -1,7 +1,6 @@
-using UnityEngine;
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
+using UnityEngine;
 
 [RequireComponent(typeof(TurretStats))]
 public class TeslaTurret : MonoBehaviour, IShootingBehavior
@@ -22,134 +21,147 @@ public class TeslaTurret : MonoBehaviour, IShootingBehavior
     [SerializeField] private bool parentVfxToHit = true;
     [SerializeField] private float impactVfxLifetime = 1.5f;
 
-    [Header("Bolt (proyectil visual)")]
+    [Header("Bolt")]
     [SerializeField] private GameObject boltPrefab;
     [SerializeField] private float boltSpeed = 28f;
-    [Tooltip("Parent opcional para los bolts.")]
-    [SerializeField] private Transform boltParent;
-    [Tooltip("Escala al instanciar (opcional).")]
+    [Tooltip("Scale applied to the bolt when spawned.")]
     [SerializeField] private Vector3 boltSpawnScale = Vector3.one;
-    [Tooltip("Vida máxima por seguridad (además del impacto).")]
+    [Tooltip("Maximum bolt lifetime as a safety net.")]
     [SerializeField] private float boltHardLifetime = 2f;
 
-    [Header("Cadena")]
-    [Tooltip("Cantidad máxima de enemigos a golpear por disparo (incluye el primero).")]
+    [Header("Chain")]
+    [Tooltip("Maximum number of enemies hit per shot, including the first one.")]
     [SerializeField] private int maxChainTargets = 3;
-    [Tooltip("Pausa breve entre saltos (solo visual).")]
+    [Tooltip("Short visual delay between hops.")]
     [SerializeField] private float chainDelay = 0.04f;
-    [Tooltip("Al buscar el siguiente objetivo, radio desde el enemigo actual (si 0 usa stats.Range).")]
+    [Tooltip("Search radius from the current enemy for the next hop. 0 uses the turret range.")]
     [SerializeField] private float perHopSearchRadius = 0f;
 
-    private ITurretStats stats;
-
     [Header("Impact Sound")]
-    [SerializeField] private AudioClip impactClip; // suena en cada impacto
+    [SerializeField] private AudioClip impactClip;
     [Range(0f, 1f)]
     [SerializeField] private float impactVolume = 1f;
     [SerializeField] private bool ensureAudioSource = true;
 
-    private AudioSource _audioSource;
-    private readonly List<Coroutine> _runningChains = new();
+    private ITurretStats stats;
+    private AudioSource audioSource;
+    private readonly List<GameObject> activeBolts = new();
+    private WaitForSeconds chainWait;
 
     private void Awake()
     {
         stats = GetComponent<ITurretStats>();
-        if (!firePoint) Debug.LogWarning("[TeslaTurret] Falta asignar firePoint.");
+        if (!firePoint) Debug.LogWarning("[TeslaTurret] firePoint is not assigned");
 
         if (ensureAudioSource)
         {
-            _audioSource = GetComponent<AudioSource>();
-            if (_audioSource == null)
+            audioSource = GetComponent<AudioSource>();
+            if (audioSource == null)
             {
-                _audioSource = gameObject.AddComponent<AudioSource>();
-                _audioSource.playOnAwake = false;
-                _audioSource.spatialBlend = 1f;
-                _audioSource.rolloffMode = AudioRolloffMode.Linear;
-                _audioSource.minDistance = 1f;
-                _audioSource.maxDistance = 20f;
-                _audioSource.dopplerLevel = 0f;
+                audioSource = gameObject.AddComponent<AudioSource>();
+                audioSource.playOnAwake = false;
+                audioSource.spatialBlend = 1f;
+                audioSource.rolloffMode = AudioRolloffMode.Linear;
+                audioSource.minDistance = 1f;
+                audioSource.maxDistance = 20f;
+                audioSource.dopplerLevel = 0f;
             }
         }
+
+        chainWait = chainDelay > 0f ? new WaitForSeconds(chainDelay) : null;
     }
 
-    /// <summary>
-    /// Dispara una cadena: primer objetivo = target (si es válido), si no el más cercano en rango.
-    /// Luego salta al enemigo vivo más cercano no visitado, hasta maxChainTargets.
-    /// </summary>
+    private void OnDisable()
+    {
+        StopAllCoroutines();
+        for (int i = 0; i < activeBolts.Count; i++)
+            VfxPool.Release(activeBolts[i]);
+        activeBolts.Clear();
+    }
+
     public void Shoot(Transform firePointIgnored, Transform target, ITurretStats statsParam)
     {
         if (stats == null || !firePoint) return;
 
-        // 1) Determinar primer objetivo
         Enemy first = ResolveInitialTarget(target);
-
         if (first == null) return;
+
         if (debugDraw) Debug.DrawLine(firePoint.position, first.transform.position + targetOffset, Color.cyan, 0.1f);
 
-        // 2) Lanzar la cadena
-        var chain = StartCoroutine(ChainLightning(first));
-        _runningChains.Add(chain);
-        // Limpieza de lista (no crítica)
-        _runningChains.RemoveAll(c => c == null);
+        StartCoroutine(ChainLightning(first));
     }
 
     private Enemy ResolveInitialTarget(Transform candidate)
     {
-        Enemy tEnemy = null;
-        if (candidate != null) TryGetEnemy(candidate, out tEnemy);
+        Enemy enemy = null;
+        if (candidate != null) TryGetEnemy(candidate, out enemy);
 
-        bool validTarget =
-            tEnemy != null &&
-            tEnemy.Health != null &&
-            !tEnemy.Health.IsDead() &&
-            Vector3.Distance(transform.position, tEnemy.transform.position) <= stats.Range;
+        float range = stats.Range;
+        bool valid = enemy != null &&
+                     enemy.Health != null &&
+                     !enemy.Health.IsDead() &&
+                     enemy.IsTargetable() &&
+                     (enemy.transform.position - transform.position).sqrMagnitude <= range * range;
 
-        if (validTarget) return tEnemy;
+        if (valid) return enemy;
 
-        // Si no llega target válido, elegimos el más cercano en rango
-        var closest = EnemyTracker.GetActiveEnemies()
-            .Where(e => e != null && e.Health != null && !e.Health.IsDead())
-            .Where(e => Vector3.Distance(transform.position, e.transform.position) <= stats.Range)
-            .OrderBy(e => Vector3.Distance(transform.position, e.transform.position))
-            .FirstOrDefault();
+        return FindClosest(transform.position, range, null);
+    }
 
-        return closest;
+    private static Enemy FindClosest(Vector3 origin, float radius, HashSet<Enemy> exclude)
+    {
+        float r2 = radius * radius;
+        Enemy best = null;
+        float bestD2 = float.MaxValue;
+
+        var list = EnemyTracker.Enemies;
+        for (int i = 0; i < list.Count; i++)
+        {
+            var e = list[i];
+            if (e == null || e.Health == null || e.Health.IsDead() || !e.IsTargetable()) continue;
+            if (exclude != null && exclude.Contains(e)) continue;
+
+            float d2 = (e.transform.position - origin).sqrMagnitude;
+            if (d2 > r2 || d2 >= bestD2) continue;
+
+            best = e;
+            bestD2 = d2;
+        }
+
+        return best;
     }
 
     private IEnumerator ChainLightning(Enemy firstTarget)
     {
-        var visited = new HashSet<Enemy>();
+        var chainVisited = new HashSet<Enemy>();
         Enemy current = firstTarget;
+        int currentSpawnId = current.SpawnId;
         Vector3 segmentOrigin = firePoint.position;
 
         for (int hop = 0; hop < maxChainTargets; hop++)
         {
-            if (current == null || current.Health == null || current.Health.IsDead()) break;
+            if (current == null || !current.IsSameSpawn(currentSpawnId) || current.Health.IsDead()) break;
 
-            // 1) Calcular raycast hacia el objetivo actual desde el origen del segmento
             if (!TryRayToEnemy(segmentOrigin, current, out RaycastHit hit, out Vector3 shotDir))
             {
-                // Si no hay línea limpia, cortamos la cadena
                 if (debugDraw) Debug.DrawLine(segmentOrigin, current.transform.position + targetOffset, Color.gray, 0.12f);
                 break;
             }
 
-            // 2) Viajar con bolt hasta el punto de impacto y resolver daño + vfx
-            yield return BoltTravelAndImpact(segmentOrigin, hit, current, shotDir);
+            yield return BoltTravelAndImpact(segmentOrigin, hit, current, currentSpawnId, shotDir);
 
-            visited.Add(current);
+            chainVisited.Add(current);
+            segmentOrigin = hit.point;
 
-            // 3) Preparar próximo salto
-            segmentOrigin = hit.point; // siguiente segmento parte desde el punto de impacto actual
-
-            // Buscar siguiente objetivo vivo más cercano no visitado
-            Enemy next = FindNextChainTarget(current, visited);
+            float radius = perHopSearchRadius > 0f ? perHopSearchRadius : stats.Range;
+            Vector3 from = current != null ? current.transform.position : hit.point;
+            Enemy next = FindClosest(from, radius, chainVisited);
             if (next == null) break;
 
-            // Delay visual opcional entre saltos
-            if (chainDelay > 0f) yield return new WaitForSeconds(chainDelay);
+            if (chainWait != null) yield return chainWait;
 
             current = next;
+            currentSpawnId = next.SpawnId;
         }
     }
 
@@ -162,112 +174,75 @@ public class TeslaTurret : MonoBehaviour, IShootingBehavior
         Vector3 dir = aim - origin;
         float dist = dir.magnitude;
         if (dist <= 0.001f) return false;
+
         Vector3 ndir = dir / dist;
         shotDir = ndir;
 
-        // Obstrucciones (LOS) opcional
         if (losBlockers != 0 &&
             Physics.Raycast(origin, ndir, dist, losBlockers, QueryTriggerInteraction.Ignore))
-        {
             return false;
-        }
 
-        // Raycast fino
         if (Physics.Raycast(origin, ndir, out hit, dist + 0.25f, hittableLayers, QueryTriggerInteraction.Ignore))
-        {
             return true;
-        }
 
-        // Fallback con spherecast
         if (sphereCastRadius > 0f &&
             Physics.SphereCast(origin, sphereCastRadius, ndir, out hit, dist + 0.25f, hittableLayers, QueryTriggerInteraction.Ignore))
-        {
             return true;
-        }
 
         return false;
     }
 
-    private IEnumerator BoltTravelAndImpact(Vector3 start, RaycastHit hit, Enemy enemyAtShotTime, Vector3 shotDir)
+    private IEnumerator BoltTravelAndImpact(Vector3 start, RaycastHit hit, Enemy enemyAtShot, int spawnIdAtShot, Vector3 shotDir)
     {
-        // Si no hay prefab, impacto inmediato
-        if (boltPrefab == null)
-        {
-            ResolveImpact(hit, enemyAtShotTime, -(hit.normal.sqrMagnitude > 0.0001f ? hit.normal : shotDir));
-            yield break;
-        }
-
-        GameObject bolt = Instantiate(boltPrefab, start, Quaternion.identity, boltParent ? boltParent : null);
-        if (boltSpawnScale != Vector3.one) bolt.transform.localScale = boltSpawnScale;
-
-        Vector3 toTarget = (hit.point - start);
+        Vector3 toTarget = hit.point - start;
         float totalDist = toTarget.magnitude;
 
-        if (totalDist <= 0.0001f)
+        if (boltPrefab == null || totalDist <= 0.0001f)
         {
-            Destroy(bolt);
-            ResolveImpact(hit, enemyAtShotTime, -(hit.normal.sqrMagnitude > 0.0001f ? hit.normal : (toTarget.sqrMagnitude > 0f ? toTarget.normalized : Vector3.forward)));
+            Vector3 fallback = totalDist > 0.0001f ? toTarget / totalDist : shotDir;
+            ResolveImpact(hit, enemyAtShot, spawnIdAtShot, -(hit.normal.sqrMagnitude > 0.0001f ? hit.normal : fallback));
             yield break;
         }
 
         Vector3 dir = toTarget / totalDist;
-        bolt.transform.rotation = Quaternion.LookRotation(dir, Vector3.up);
+        GameObject bolt = VfxPool.Spawn(boltPrefab, start, Quaternion.LookRotation(dir, Vector3.up), boltHardLifetime + 0.5f);
+        bolt.transform.localScale = boltSpawnScale;
+        activeBolts.Add(bolt);
 
-        float killAt = (boltHardLifetime > 0f) ? Time.time + boltHardLifetime : float.PositiveInfinity;
+        float killAt = boltHardLifetime > 0f ? Time.time + boltHardLifetime : float.PositiveInfinity;
         float remaining = totalDist;
 
         while (remaining > 0f)
         {
             float step = boltSpeed * Time.deltaTime;
-            if (step <= 0f) break;
-
-            float advance = Mathf.Min(step, remaining);
-            bolt.transform.position += dir * advance;
-            remaining -= advance;
+            if (step > 0f)
+            {
+                float advance = Mathf.Min(step, remaining);
+                bolt.transform.position += dir * advance;
+                remaining -= advance;
+            }
 
             if (Time.time >= killAt) break;
             yield return null;
         }
 
-        Destroy(bolt);
-        ResolveImpact(hit, enemyAtShotTime, -dir);
+        activeBolts.Remove(bolt);
+        VfxPool.Release(bolt);
+        ResolveImpact(hit, enemyAtShot, spawnIdAtShot, -dir);
 
         if (debugDraw) Debug.DrawLine(start, hit.point, Color.yellow, 0.15f);
     }
 
-    private void ResolveImpact(RaycastHit hit, Enemy enemyAtShotTime, Vector3 fallbackDir)
+    private void ResolveImpact(RaycastHit hit, Enemy enemyAtShot, int spawnIdAtShot, Vector3 fallbackDir)
     {
         SpawnImpactVfx(hit, fallbackDir);
 
-        // Aplica daño en el impacto
-        if (enemyAtShotTime != null && enemyAtShotTime.Health != null && !enemyAtShotTime.Health.IsDead())
-        {
-            int dmg = Mathf.Max(1, Mathf.RoundToInt(stats.Damage));
-            enemyAtShotTime.Health.TakeDamage(dmg);
-        }
-        else
-        {
-            // Si el reference cambió, intentamos aplicar al collider golpeado
-            ApplyDamage(hit.collider.transform, Mathf.Max(1, Mathf.RoundToInt(stats.Damage)));
-        }
+        int damage = Mathf.Max(1, Mathf.RoundToInt(stats.Damage));
 
-        if (_audioSource && impactClip) _audioSource.PlayOneShot(impactClip, impactVolume);
-    }
+        if (enemyAtShot != null && enemyAtShot.IsSameSpawn(spawnIdAtShot) && !enemyAtShot.Health.IsDead())
+            enemyAtShot.Health.TakeDamage(damage);
 
-    private Enemy FindNextChainTarget(Enemy from, HashSet<Enemy> visited)
-    {
-        if (from == null) return null;
-
-        float radius = perHopSearchRadius > 0f ? perHopSearchRadius : stats.Range;
-
-        var candidates = EnemyTracker.GetActiveEnemies()
-            .Where(e => e != null && e.Health != null && !e.Health.IsDead())
-            .Where(e => !visited.Contains(e))
-            .Where(e => Vector3.Distance(from.transform.position, e.transform.position) <= radius)
-            .OrderBy(e => Vector3.Distance(from.transform.position, e.transform.position))
-            .ToList();
-
-        return candidates.Count > 0 ? candidates[0] : null;
+        if (audioSource && impactClip) audioSource.PlayOneShot(impactClip, impactVolume);
     }
 
     private void SpawnImpactVfx(RaycastHit hit, Vector3 fallbackDir)
@@ -276,25 +251,9 @@ public class TeslaTurret : MonoBehaviour, IShootingBehavior
 
         Vector3 normal = hit.normal.sqrMagnitude > 0.0001f ? hit.normal : -fallbackDir;
         Vector3 pos = hit.point + normal * impactVfxOffsetAlongNormal;
-        Quaternion rot = Quaternion.LookRotation(normal);
-        Transform parent = parentVfxToHit ? hit.collider.transform : null;
+        Transform follow = parentVfxToHit && hit.collider != null ? hit.collider.transform : null;
 
-        GameObject fx = Instantiate(impactVfxPrefab, pos, rot, parent);
-        if (impactVfxLifetime > 0f) Destroy(fx, impactVfxLifetime);
-    }
-
-    private static void ApplyDamage(Transform hitTf, int damage)
-    {
-        if (!hitTf) return;
-
-        var h = hitTf.GetComponentInParent<EnemyHealth>();
-        if (h != null) { h.TakeDamage(damage); return; }
-
-        var dmg = hitTf.GetComponentInParent<IDamageable>();
-        if (dmg != null) { dmg.TakeDamage(damage); return; }
-
-        var e = hitTf.GetComponentInParent<Enemy>();
-        if (e != null && e.Health != null) { e.Health.TakeDamage(damage); }
+        VfxPool.Spawn(impactVfxPrefab, pos, Quaternion.LookRotation(normal), impactVfxLifetime, follow);
     }
 
     private static bool TryGetEnemy(Transform t, out Enemy enemy)
@@ -303,15 +262,7 @@ public class TeslaTurret : MonoBehaviour, IShootingBehavior
         if (!t) return false;
 
         enemy = t.GetComponentInParent<Enemy>();
-        if (enemy != null && enemy.Health != null) return true;
-
-        var health = t.GetComponentInParent<EnemyHealth>();
-        if (health != null)
-        {
-            enemy = health.GetComponentInParent<Enemy>();
-            return enemy != null && enemy.Health != null;
-        }
-        return false;
+        return enemy != null && enemy.Health != null;
     }
 
 #if UNITY_EDITOR

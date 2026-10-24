@@ -18,7 +18,7 @@ public class ShiftingWorldUI : MonoBehaviour
     [SerializeField] private TMP_Text[] tileLabels;
     private bool tileChoiceLocked = false;
 
-    [Header("Turret Selection (Otro)")]
+    [Header("Turret Selection (Other)")]
     [SerializeField] private GameObject turretPanelRoot;
     [SerializeField] private Button[] turretButtons;
     [SerializeField] private TMP_Text[] turretLabels;
@@ -28,34 +28,30 @@ public class ShiftingWorldUI : MonoBehaviour
     [SerializeField] private Canvas exitButtonsCanvas;
     private readonly List<Button> exitButtons = new();
 
-    [Header("Torretas (fuente)")]
+    [Header("Turrets (source)")]
     [SerializeField] private TurretDatabaseSO turretDatabase;
     [SerializeField] private List<TurretDataSO> turretPool = new();
 
     [Header("Placement")]
     [SerializeField] private Camera cam;
     [SerializeField] private LayerMask cellLayers = ~0;
-    [Tooltip("Si está activo, la UI coloca la torreta. Si está desactivado, delega en TurretPlacer externo.")]
+    [Tooltip("If enabled, the UI places the turret. Otherwise placement is delegated to an external TurretPlacer.")]
     [SerializeField] private bool placeWithUI = false;
 
-    [Header("Sistema de Dupes")]
+    [Header("Dupe System")]
     [SerializeField] private bool enableDupesSystem = true;
 
-    // Eventos hacia ShiftingWorldMechanic
     public event Action<World> OnTurretPlacedSuccessfully;
     public event Action<TurretDataSO, TurretLevelData> OnTurretLevelUp;
 
-    // Estado de colocación (independiente)
-    private bool tilePlacingMode = false;   // flujo de tiles (Normal)
-    private bool turretPlacingMode = false; // flujo de torretas (Otro) solo si placeWithUI = true
+    private bool tilePlacingMode = false;
+    private bool turretPlacingMode = false;
 
     private TileLayout selectedTileLayout;
     private TurretDataSO selectedTurret;
 
-    // Si delegás a un TurretPlacer externo:
     public event Action<TurretDataSO> OnTurretChosen;
 
-    // Callbacks de cierre independientes
     private Action onTileClosed;
     private Action onTurretClosed;
 
@@ -64,55 +60,49 @@ public class ShiftingWorldUI : MonoBehaviour
     private readonly List<TileLayout> currentTileOptions = new();
     private readonly List<TurretDataSO> currentTurretOptions = new();
 
-    [Header("Barras de progreso (Filled)")]
-    [SerializeField] private Image normalWorldFill;           // 0..1
-    [SerializeField] private Image otherWorldFill;            // 0..1
-    [SerializeField] private Image worldToggleCooldownFill;   // 0..1 (recarga)
+    [Header("Progress Bars (Filled)")]
+    [SerializeField] private Image normalWorldFill;
+    [SerializeField] private Image otherWorldFill;
+    [SerializeField] private Image worldToggleCooldownFill;
 
     [Header("Meter Shader Value (_MeterValue)")]
-    [Tooltip("Graphic con el material que usa el parámetro _MeterValue del shader.")]
+    [Tooltip("Graphic whose material uses the shader _MeterValue parameter.")]
     [SerializeField] private Graphic meterGraphic;
     [SerializeField, Range(0f, 1f)]
-    private float meterValue = 0f; // valor actual 0..1 que se manda al material
+    private float meterValue = 0f;
 
     private Material meterMaterial;
     private static readonly int MeterValuePropertyId = Shader.PropertyToID("_MeterValue");
 
-    [Header("Icono de Mundo")]
+    [Header("World Icon")]
     [SerializeField] private Image worldIcon;
     [SerializeField] private Sprite normalWorldSprite;
     [SerializeField] private Sprite otherWorldSprite;
     [SerializeField] private float pulseScale = 1.2f;
     [SerializeField] private float pulseSpeed = 2.5f;
 
-    [Header("Referencias")]
+    [Header("References")]
     [SerializeField] private RectTransform uiContainer;
 
     private Coroutine blinkRoutine;
     [SerializeField] private float blinkSpeed = 0.6f;
-    [SerializeField] private Color blinkColor = Color.white * 1.5f; // color brillante
+    [SerializeField] private Color blinkColor = Color.white * 1.5f;
 
     private ShiftingWorldMechanic.World currentWorld;
 
-
     private void OnValidate()
     {
-        // Auto-cablear cosas típicas si faltan
         if (!grid) grid = FindFirstObjectByType<GridGenerator>();
         if (!cam) cam = Camera.main;
 
-        // Inicializar material del meter en Editor y aplicar valor actual
         TryInitMeterMaterial();
         ApplyMeterValueToMaterial();
     }
 
-    // --- NUEVO: helper interno para el material del meter ---
     private void TryInitMeterMaterial()
     {
         if (meterGraphic == null) return;
 
-        // Graphic.material devuelve una instancia (no sharedMaterial),
-        // que es exactamente lo que hacía el Meter original.
         if (meterMaterial == null)
         {
             meterMaterial = meterGraphic.material;
@@ -129,11 +119,6 @@ public class ShiftingWorldUI : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Setea el valor del meter (0..1) y lo manda al material.
-    /// Usalo para que el shader tenga el mismo valor que la barra de UI.
-    /// </summary>
-    /// <param name="normalized">Valor entre 0 y 1.</param>
     private void SetMeterValue(float normalized)
     {
         meterValue = Mathf.Clamp01(normalized);
@@ -141,7 +126,6 @@ public class ShiftingWorldUI : MonoBehaviour
         ApplyMeterValueToMaterial();
     }
 
-    // --- NUEVO: helper para trackear cada botón ---
     private class ExitBtn
     {
         public string label;
@@ -149,21 +133,40 @@ public class ShiftingWorldUI : MonoBehaviour
         public RectTransform rect;
     }
 
-    // Lista con la info de cada botón
     private readonly List<ExitBtn> exitBtnInfo = new();
 
-    // Altura en MUNDO (se multiplica por cellSize)
     [SerializeField] private float buttonWorldYOffset = 2.0f;
 
-    // Altura extra en PANTALLA (pixeles) para Overlay/Camera
     [SerializeField] private float buttonScreenYOffset = 24f;
 
-    // Forzar pivot abajo (0.5, 0) para que el punto quede en la base
     [SerializeField] private bool buttonPivotBottom = true;
 
     void Awake()
     {
-        HideAll(); // arranca limpio
+        HideAll();
+    }
+
+    private void OnEnable()
+    {
+        EscapeRouter.Register(HandleEscape, EscapeRouter.PriorityPlacement);
+    }
+
+    private void OnDisable()
+    {
+        EscapeRouter.Unregister(HandleEscape);
+    }
+
+    private bool HandleEscape()
+    {
+        if (tilePlacingMode)
+        {
+            CancelTilePlacement();
+            return true;
+        }
+
+        if (!placeWithUI || !turretPlacingMode) return false;
+        CancelTurretPlacement();
+        return true;
     }
 
     private void Start()
@@ -174,16 +177,17 @@ public class ShiftingWorldUI : MonoBehaviour
             TurretDupeUI.Instance.ConnectToSystem((TurretDupeSystem)dupeSystem);
         }
 
-        // Asegurarnos de que el material del meter arranque con el valor correcto
         TryInitMeterMaterial();
         ApplyMeterValueToMaterial();
     }
 
     void Update()
     {
-        // Colocación de torreta por UI (opcional)
         if (placeWithUI && turretPlacingMode)
             HandleTurretPlacementMode();
+
+        if (tilePlacingMode && !GameTime.IsPaused && Input.GetMouseButtonDown(1))
+            CancelTilePlacement();
 
         if (tilePlacingMode && exitButtonsCanvas && (cam || Camera.main))
         {
@@ -220,6 +224,13 @@ public class ShiftingWorldUI : MonoBehaviour
 
         BuildNormalOptions();
 
+        if (!HasAnyTileOption())
+        {
+            Debug.LogWarning("[ShiftingWorldUI] No tile fits any open exit. The tile reward is skipped");
+            CloseTilePanelOnly();
+            return;
+        }
+
         if (tilePanelRoot) tilePanelRoot.SetActive(true);
 
         HideExitButtons();
@@ -248,10 +259,34 @@ public class ShiftingWorldUI : MonoBehaviour
             var layout = (i < candidates.Count) ? candidates[i] : null;
             currentTileOptions.Add(layout);
 
-            string label = layout ? layout.name : "N/D";
+            if (layout == null)
+            {
+                if (tileButtons != null && i < tileButtons.Length && tileButtons[i])
+                    tileButtons[i].gameObject.SetActive(false);
+                continue;
+            }
+
             int idx = i;
-            BindButton(tileButtons, tileLabels, i, label, () => OnChooseTile(idx));
+            BindButton(tileButtons, tileLabels, i, layout.name, () => OnChooseTile(idx));
         }
+    }
+
+    private bool HasAnyTileOption()
+    {
+        for (int i = 0; i < currentTileOptions.Count; i++)
+            if (currentTileOptions[i] != null) return true;
+        return false;
+    }
+
+    private void CancelTilePlacement()
+    {
+        Debug.Log("[ShiftingWorldUI] Tile placement cancelled");
+        tilePlacingMode = false;
+        selectedTileLayout = null;
+        tileChoiceLocked = false;
+        HideExitButtons();
+
+        if (tilePanelRoot) tilePanelRoot.SetActive(true);
     }
 
     private void OnChooseTile(int index)
@@ -261,7 +296,7 @@ public class ShiftingWorldUI : MonoBehaviour
         var chosen = (index >= 0 && index < currentTileOptions.Count) ? currentTileOptions[index] : null;
         if (!chosen)
         {
-            Debug.LogWarning("[ShiftingWorldUI] Opción de tile inválida. Panel sigue abierto.");
+            Debug.LogWarning("[ShiftingWorldUI] Invalid tile option. The panel stays open");
             return;
         }
 
@@ -274,7 +309,6 @@ public class ShiftingWorldUI : MonoBehaviour
     {
         tilePlacingMode = true;
 
-        // Ocultamos solo el panel de selección de tiles (NO tocamos el de torretas)
         if (tilePanelRoot) tilePanelRoot.SetActive(false);
         CreateExitButtons();
     }
@@ -284,7 +318,7 @@ public class ShiftingWorldUI : MonoBehaviour
         ClearExitButtons();
         exitBtnInfo.Clear();
 
-        var exits = grid.GetAvailableExits();
+        var exits = grid.GetAvailableExitsFor(selectedTileLayout);
         if (!exitButtonPrefab || !exitButtonsCanvas) return;
 
         Camera camToUse = cam ? cam : Camera.main;
@@ -298,7 +332,6 @@ public class ShiftingWorldUI : MonoBehaviour
             var txt = go.GetComponentInChildren<TMPro.TMP_Text>();
             if (txt) txt.text = label;
 
-            // Anclaje y pivot para que el punto quede en la base del botón
             if (buttonPivotBottom)
             {
                 rect.pivot = new Vector2(0.5f, 0f);
@@ -307,7 +340,6 @@ public class ShiftingWorldUI : MonoBehaviour
 
             exitBtnInfo.Add(new ExitBtn { label = label, worldPos = worldPos, rect = rect });
 
-            // Posición inicial (igual se re-calcula en Update)
             SetExitButtonPosition(
                 rect,
                 worldPos + Vector3.up * GetWorldYOffset(),
@@ -378,7 +410,7 @@ public class ShiftingWorldUI : MonoBehaviour
 
         if (ok)
         {
-            Debug.Log($"[ShiftingWorldUI] Tile {selectedTileLayout.name} colocado en exit {exitLabel}");
+            Debug.Log($"[ShiftingWorldUI] Tile {selectedTileLayout.name} placed on exit {exitLabel}");
 
             PlacementEvents.RaiseTileApplied(new PlacementEvents.TileAppliedInfo
             {
@@ -392,7 +424,7 @@ public class ShiftingWorldUI : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning($"[ShiftingWorldUI] No se pudo colocar el tile: {selectedTileLayout.name}. Probá otro exit.");
+            Debug.LogWarning($"[ShiftingWorldUI] Could not place tile {selectedTileLayout.name}. Try another exit");
         }
     }
 
@@ -435,7 +467,7 @@ public class ShiftingWorldUI : MonoBehaviour
 
         if (pool.Count == 0)
         {
-            Debug.LogWarning("[ShiftingWorldUI] No hay torretas en la DB o turretPool.");
+            Debug.LogWarning("[ShiftingWorldUI] No turrets in the database or turretPool");
             return;
         }
 
@@ -457,7 +489,7 @@ public class ShiftingWorldUI : MonoBehaviour
         var so = (index >= 0 && index < currentTurretOptions.Count) ? currentTurretOptions[index] : null;
         if (!so || !so.prefab)
         {
-            Debug.LogWarning("[ShiftingWorldUI] Opción de torreta inválida. Panel sigue abierto.");
+            Debug.LogWarning("[ShiftingWorldUI] Invalid turret option. The panel stays open");
             return;
         }
 
@@ -475,8 +507,8 @@ public class ShiftingWorldUI : MonoBehaviour
 
             StartCoroutine(DelayedTurretSelectFlow(selectedTurret));
 
-            Debug.Log($"[ShiftingWorldUI] Torreta seleccionada: {so.displayName}. " +
-                      $"Cerrará el panel de torretas al confirmar colocación (NotifyTurretPlaced).");
+            Debug.Log($"[ShiftingWorldUI] Turret selected: {so.displayName}. " +
+                      "The turret panel closes once placement is confirmed (NotifyTurretPlaced)");
         }
     }
 
@@ -489,7 +521,7 @@ public class ShiftingWorldUI : MonoBehaviour
         if (turretPanelRoot)
             turretPanelRoot.SetActive(false);
 
-        Debug.Log($"[ShiftingWorldUI] Elegiste torreta: {selectedTurret.displayName}. Seleccioná una celda.");
+        Debug.Log($"[ShiftingWorldUI] Turret selected: {selectedTurret.displayName}. Select a cell");
     }
 
     private void HandleTurretPlacementMode()
@@ -497,7 +529,7 @@ public class ShiftingWorldUI : MonoBehaviour
         if (EventSystem.current && EventSystem.current.IsPointerOverGameObject())
             return;
 
-        if (Input.GetKeyDown(KeyCode.Escape) || Input.GetMouseButtonDown(1))
+        if (Input.GetMouseButtonDown(1))
         {
             CancelTurretPlacement();
             return;
@@ -522,15 +554,15 @@ public class ShiftingWorldUI : MonoBehaviour
 
                 if (slot.TryPlace(selectedTurret.prefab, selectedTurret))
                 {
-                    Debug.Log("[ShiftingWorldUI] Torreta colocada.");
-                    OnTurretPlacedSuccessfully?.Invoke(World.Otro);
+                    Debug.Log("[ShiftingWorldUI] Turret placed");
+                    OnTurretPlacedSuccessfully?.Invoke(World.Other);
 
                     EndTurretPlacement();
-                    StartCoroutine(CloseTurretPanelDelayed()); // ← cerrar SOLO el panel/flujo de torretas
+                    StartCoroutine(CloseTurretPanelDelayed());
                 }
                 else
                 {
-                    Debug.Log("[ShiftingWorldUI] Celda ocupada. Probá otra.");
+                    Debug.Log("[ShiftingWorldUI] Cell is occupied. Try another one");
                 }
             }
         }
@@ -538,7 +570,6 @@ public class ShiftingWorldUI : MonoBehaviour
 
     private IEnumerator CloseTurretPanelDelayed(float delay = 1.5f)
     {
-        // Esperá para que el jugador vea el aumento de dupes
         yield return new WaitForSeconds(delay);
 
         CloseTurretPanelOnly();
@@ -552,7 +583,7 @@ public class ShiftingWorldUI : MonoBehaviour
 
     private void CancelTurretPlacement()
     {
-        Debug.Log("[ShiftingWorldUI] Colocación de torreta cancelada.");
+        Debug.Log("[ShiftingWorldUI] Turret placement cancelled");
         EndTurretPlacement();
         if (turretPanelRoot) turretPanelRoot.SetActive(true);
     }
@@ -567,7 +598,6 @@ public class ShiftingWorldUI : MonoBehaviour
 
         currentTurretOptions.Clear();
     }
-
 
     public void NotifyTurretPlaced(World world)
     {
@@ -660,8 +690,6 @@ public class ShiftingWorldUI : MonoBehaviour
             if (otherWorldFill.type != Image.Type.Filled) otherWorldFill.type = Image.Type.Filled;
             otherWorldFill.fillAmount = Mathf.Clamp01(other01);
         }
-
-
     }
 
     public void SetWorldToggleCooldown(float normalized)
@@ -680,7 +708,7 @@ public class ShiftingWorldUI : MonoBehaviour
 
         if (clamped >= 1f)
         {
-            if (blinkRoutine == null) 
+            if (blinkRoutine == null)
                 blinkRoutine = StartCoroutine(BlinkWorldIcon());
         }
         else
@@ -689,7 +717,7 @@ public class ShiftingWorldUI : MonoBehaviour
             {
                 StopCoroutine(blinkRoutine);
                 blinkRoutine = null;
-                ResetWorldIconColor(); 
+                ResetWorldIconColor();
             }
         }
     }
@@ -717,7 +745,6 @@ public class ShiftingWorldUI : MonoBehaviour
         {
             toggle = !toggle;
 
-            // cambiar entre el color original y el color brillante
             worldIcon.color = toggle ? blinkColor : GetCurrentWorldBaseColor();
 
             yield return new WaitForSeconds(blinkSpeed);
@@ -728,10 +755,8 @@ public class ShiftingWorldUI : MonoBehaviour
     {
         if (worldIcon == null) return;
 
-        // Guardamos el mundo actual
         currentWorld = world;
 
-        // Cambiar sprite y color base
         switch (world)
         {
             case ShiftingWorldMechanic.World.Normal:
@@ -739,20 +764,18 @@ public class ShiftingWorldUI : MonoBehaviour
                 worldIcon.color = Color.blue;
                 break;
 
-            case ShiftingWorldMechanic.World.Otro:
+            case ShiftingWorldMechanic.World.Other:
                 worldIcon.sprite = otherWorldSprite;
                 worldIcon.color = Color.red;
                 break;
         }
 
-        // Pulse animation
         if (uiContainer != null)
         {
             StopAllCoroutines();
             StartCoroutine(AnimatePulse(uiContainer));
         }
     }
-
 
     private IEnumerator AnimatePulse(RectTransform target)
     {

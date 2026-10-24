@@ -6,14 +6,14 @@ public sealed class WorldProgressMaterialFiller : MonoBehaviour
     [Header("References")]
     [SerializeField] private ShiftingWorldMechanic shiftingWorld;
 
-    [Tooltip("Material usado para el mundo Normal (tiene el float FillPercent).")]
+    [Tooltip("Material used for the Normal world (has the FillPercent float).")]
     [SerializeField] private Material normalWorldMaterial;
 
-    [Tooltip("Material usado para el mundo Otro (tiene el float FillPercent).")]
+    [Tooltip("Material used for the Other world (has the FillPercent float).")]
     [SerializeField] private Material otherWorldMaterial;
 
     [Header("Shader property")]
-    [Tooltip("Nombre del parámetro float en el shader que controla el fill (por defecto _FillPercent).")]
+    [Tooltip("Name of the shader float that controls the fill (default _FillPercent).")]
     [SerializeField] private string fillPercentProperty = "_FillPercent";
 
     private int _fillPercentId;
@@ -27,7 +27,7 @@ public sealed class WorldProgressMaterialFiller : MonoBehaviour
             shiftingWorld = FindFirstObjectByType<ShiftingWorldMechanic>();
             if (shiftingWorld == null)
             {
-                Debug.LogError("[WorldProgressMaterialFiller] No se encontró ShiftingWorldMechanic en la escena.");
+                Debug.LogError("[WorldProgressMaterialFiller] ShiftingWorldMechanic not found in the scene");
             }
         }
     }
@@ -36,11 +36,9 @@ public sealed class WorldProgressMaterialFiller : MonoBehaviour
     {
         if (shiftingWorld == null) return;
 
-        // Traemos los porcentajes 0..100 del mechanic y los normalizamos 0..1
         float normalFill = shiftingWorld.GetNormalInt() / 100f;
         float otherFill = shiftingWorld.GetOtherInt() / 100f;
 
-        // Actualizamos los materiales si existen
         if (normalWorldMaterial != null)
         {
             normalWorldMaterial.SetFloat(_fillPercentId, normalFill);

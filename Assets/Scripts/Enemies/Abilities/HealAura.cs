@@ -1,16 +1,16 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 public class Ability_HealAura : MonoBehaviour, IEnemyAbility
 {
     [Header("Aura")]
     [SerializeField, Min(0f)] private float radius = 5f;
-    [SerializeField, Range(0f, 1f)] private float healPercentOfMaxHP = 0.10f; // 0.10 = 10%
+    [SerializeField, Range(0f, 1f)] private float healPercentOfMaxHP = 0.10f;
     [SerializeField, Min(0.1f)] private float intervalSeconds = 5f;
     [SerializeField] private bool affectSelf = true;
     [SerializeField] private bool drawGizmos = true;
 
-    [Header("FX (opcional)")]
+    [Header("FX (optional)")]
     [SerializeField] private GameObject healPulseVfx;
     [SerializeField, Min(0f)] private float vfxLifetime = 1.5f;
 
@@ -18,7 +18,6 @@ public class Ability_HealAura : MonoBehaviour, IEnemyAbility
     private float _timer;
     private bool _active = true;
 
-    // buffer GC-friendly
     private readonly List<Enemy> _buffer = new();
 
     public void Initialize(AbilityContext ctx)
@@ -37,7 +36,6 @@ public class Ability_HealAura : MonoBehaviour, IEnemyAbility
         if (_timer < intervalSeconds) return;
         _timer = 0f;
 
-        // Obtener enemigos en rango
         EnemyTracker.GetEnemiesInRangeNonAlloc(_ctx.Transform.position, radius, _buffer);
 
         for (int i = 0; i < _buffer.Count; i++)
@@ -50,18 +48,11 @@ public class Ability_HealAura : MonoBehaviour, IEnemyAbility
             float healAmount = healPercentOfMaxHP * max;
             if (healAmount <= 0f) continue;
 
-            e.Health.Heal(healAmount); // usa tu Heal(float amount)
+            e.Health.Heal(healAmount);
 
-            // VFX opcional
             if (healPulseVfx != null)
             {
-                var vfx = Object.Instantiate(
-                    healPulseVfx,
-                    e.transform.position,
-                    Quaternion.identity,
-                    e.transform
-                );
-                Object.Destroy(vfx, vfxLifetime);
+                VfxPool.Spawn(healPulseVfx, e.transform.position, Quaternion.identity, vfxLifetime, e.transform);
             }
         }
     }

@@ -1,4 +1,4 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using System.Collections.Generic;
 
 public class ProjectilePool : MonoBehaviour
@@ -23,13 +23,11 @@ public class ProjectilePool : MonoBehaviour
         for (int i = 0; i < initialSize; i++)
         {
             GameObject projectile = Instantiate(projectilePrefab);
-            projectile.transform.SetParent(this.transform); // agrupado en Projectile Pool
+            projectile.transform.SetParent(this.transform);
             projectile.SetActive(false);
             projectilePool.Enqueue(projectile);
             totalInstantiated++;
         }
-
-        //Debug.Log($"Inicializado pool de proyectiles con {initialSize} proyectiles.");
     }
 
     public GameObject GetProjectile()
@@ -39,15 +37,13 @@ public class ProjectilePool : MonoBehaviour
             GameObject projectile = Instantiate(projectilePrefab);
             projectile.transform.SetParent(this.transform);
             projectile.SetActive(false);
-            projectilePool.Enqueue(projectile); // importante: agregar al pool
+            projectilePool.Enqueue(projectile);
             totalInstantiated++;
-
-            //Debug.Log($"Pool vacío. Instanciando nuevo proyectil. Total instanciados: {totalInstantiated}");
         }
 
         GameObject proj = projectilePool.Dequeue();
         proj.SetActive(true);
-        //Debug.Log($"Proyectil solicitado. Usados: {totalInstantiated - projectilePool.Count}, Sin usar: {projectilePool.Count}");
+
         return proj;
     }
 
@@ -56,12 +52,10 @@ public class ProjectilePool : MonoBehaviour
         projectile.SetActive(false);
         projectile.transform.SetParent(this.transform);
         projectilePool.Enqueue(projectile);
-        //Debug.Log($"Proyectil regresado al pool. Sin usar ahora: {projectilePool.Count}");
     }
 
     public void LogPoolStatus()
     {
         int used = totalInstantiated - projectilePool.Count;
-        //Debug.Log($"Estado Pool de Proyectiles: Total instanciados: {totalInstantiated}, Usados: {used}, Sin usar: {projectilePool.Count}");
     }
 }

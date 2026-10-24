@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using Unity.Cinemachine;
 
@@ -11,7 +11,6 @@ public class CinemachineBlendController : IBlendController
     {
         if (brain == null) yield break;
 
-        // Backup
         if (restoreAfter)
         {
             _originalDefaultBlend = GetBrainDefaultBlend(brain);
@@ -30,13 +29,11 @@ public class CinemachineBlendController : IBlendController
                 SetBrainDefaultBlend(brain, def);
         }
 
-        // Esperar a que inicie el blend (siguiente frame)
         yield return null;
-        // Esperar a que termine el blend
+
         while (IsBlending(brain))
             yield return null;
 
-        // Restaurar si corresponde
         if (restoreAfter)
         {
             if (_originalDefaultBlend != null) SetBrainDefaultBlend(brain, _originalDefaultBlend);
@@ -46,7 +43,6 @@ public class CinemachineBlendController : IBlendController
 
     public bool IsBlending(CinemachineBrain brain) => brain != null && brain.IsBlending;
 
-    // ===== Helpers de compatibilidad CM2/CM3 (reflection) =====
     private static object CreateBlendDefinition(string styleName, float time)
     {
         var cbdType = typeof(CinemachineBlendDefinition);

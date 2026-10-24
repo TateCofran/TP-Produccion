@@ -6,15 +6,14 @@ public sealed class TileLevelCapProviderSO : MonoBehaviour, ITileLevelCapProvide
     [SerializeField] private TileLevelCapConfig config;
 
     [Header("Refs")]
-    [SerializeField] private UpgradeSO tileLevelCapUpgradeSO; // arrastrá tu "Tile Level Cap" aquí
+    [SerializeField] private UpgradeSO tileLevelCapUpgradeSO;
 
     public int GetMaxTileLevel()
     {
         if (config == null || tileLevelCapUpgradeSO == null) return 5;
 
-        // Nivel del upgrade (0..3)
         int level = UpgradeSystemBootstrap.Service.GetCurrentLevel(tileLevelCapUpgradeSO);
-        // Mapear nivel → cap
+
         return config.GetCapForTier(Mathf.Clamp(level, 0, 3));
     }
 }

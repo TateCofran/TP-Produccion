@@ -1,5 +1,4 @@
-// TileDupeUI.cs
-using System.Collections.Generic;
+ï»¿using System.Collections.Generic;
 using UnityEngine;
 
 public class TileDupeUI : MonoBehaviour
@@ -43,7 +42,6 @@ public class TileDupeUI : MonoBehaviour
     {
         if (system == null) return;
 
-        // Evitar dobles suscripciones
         if (dupeSystem != null)
         {
             dupeSystem.OnDupeChanged -= HandleDupeChanged;
@@ -105,8 +103,6 @@ public class TileDupeUI : MonoBehaviour
 
     private string GetTileTypeName(TileDataSO tile)
     {
-        // Si querés otro display (por ejemplo un campo "displayName"),
-        // solo cambiás esto.
         return !string.IsNullOrEmpty(tile.id) ? tile.id : tile.name;
     }
 
@@ -115,7 +111,6 @@ public class TileDupeUI : MonoBehaviour
         if (tileData.TryGetValue(tileType, out var data))
             return data;
 
-        // Default visual
         return (1, 0, 1);
     }
 }

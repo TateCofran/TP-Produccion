@@ -42,6 +42,6 @@ public class TileLevelData
 
     public string GetStatusText()
     {
-        return $"Nvl {currentLevel} ({currentDupes}/{dupesRequiredForNextLevel})";
+        return $"Lv {currentLevel} ({currentDupes}/{dupesRequiredForNextLevel})";
     }
 }

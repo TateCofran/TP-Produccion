@@ -12,18 +12,17 @@ public class UIController : MonoBehaviour
     [SerializeField] private TextMeshProUGUI enemiesRemainingText;
 
     [Header("Next Wave UI")]
-    [Tooltip("Texto que muestra la cuenta regresiva hacia la próxima oleada.")]
+    [Tooltip("Text that shows the countdown to the next wave.")]
     [SerializeField] private TextMeshProUGUI nextWaveCountdownText;
 
-    [Tooltip("Botón para iniciar manualmente la próxima oleada.")]
+    [Tooltip("Button that starts the next wave manually.")]
     [SerializeField] private Button nextWaveButton;
 
-    [Tooltip("Contenedor opcional (panel) para mostrar/ocultar todo el bloque de 'Próxima Oleada'.")]
+    [Tooltip("Optional container that shows or hides the whole next wave block.")]
     [SerializeField] private GameObject nextWavePanel;
 
     private void Awake()
     {
-        // Singleton simple
         if (Instance != null && Instance != this)
         {
             Destroy(gameObject);
@@ -37,14 +36,12 @@ public class UIController : MonoBehaviour
             nextWaveButton.onClick.AddListener(OnNextWaveButtonClicked);
         }
 
-        // Estado inicial
         SetNextWaveCountdownVisible(false);
         SetNextWaveButtonVisible(true);
         SetNextWaveButtonInteractable(true);
     }
     private void Start()
     {
-        // Si en OnEnable no estaba listo, probá ahora.
         TrySubscribeWaveManager();
     }
 
@@ -86,34 +83,23 @@ public class UIController : MonoBehaviour
         wm.OnWaveNumberChanged -= HandleWaveNumberChanged;
     }
 
-    // =========================
-    //  Core / Wave / Enemies UI
-    // =========================
-
-    /// <summary>Actualiza el texto de vida del núcleo.</summary>
     public void UpdateCoreHealth(int currentHealth, int maxHealth)
     {
         if (coreHealthText != null)
             coreHealthText.text = $"Core HP: {currentHealth}/{maxHealth}";
     }
 
-    /// <summary>Actualiza el texto de oleada.</summary>
     public void UpdateWave(int currentWave, int _maxWaves)
     {
         if (waveText != null)
             waveText.text = $"Wave: {currentWave}";
     }
 
-    /// <summary>Actualiza el texto de enemigos restantes.</summary>
     public void UpdateEnemiesRemaining(int count)
     {
         if (enemiesRemainingText != null)
             enemiesRemainingText.text = $"Enemies Left: {count}";
     }
-
-    // =========================
-    //  Next Wave (contador + botón)
-    // =========================
 
     public void UpdateNextWaveCountdown(float seconds)
     {
@@ -133,16 +119,12 @@ public class UIController : MonoBehaviour
 
     public void SetNextWaveCountdownVisible(bool visible)
     {
-        // No apagues el panel si dentro está el botón
-        // Mostrá/ocultá sólo el texto del contador.
         if (nextWaveCountdownText != null)
             nextWaveCountdownText.gameObject.SetActive(visible);
 
-        // Si preferís seguir usando el panel como contenedor, dejalo siempre activo:
         if (nextWavePanel != null && !nextWavePanel.activeSelf)
             nextWavePanel.SetActive(true);
     }
-
 
     public void SetNextWaveButtonInteractable(bool interactable)
     {
@@ -155,7 +137,7 @@ public class UIController : MonoBehaviour
         if (nextWaveButton != null)
         {
             nextWaveButton.gameObject.SetActive(visible);
-        }      
+        }
     }
 
     private void OnNextWaveButtonClicked()
@@ -164,26 +146,20 @@ public class UIController : MonoBehaviour
         WaveManager.Instance.ForceStartNextWave();
     }
 
-    // =========================
-    //  Handlers de eventos
-    // =========================
-
     private void HandleWaveStarted(int waveNumber, int totalEnemies)
     {
-        // Actualizo texto de wave y escondo UI de próxima oleada
         UpdateWave(waveNumber, WaveManager.Instance != null ? WaveManager.Instance.MaxWaves : 0);
         SetNextWaveCountdownVisible(false);
-        SetNextWaveButtonInteractable(false); // mientras corre la oleada no se fuerza otra
+        SetNextWaveButtonInteractable(false);
         SetNextWaveButtonVisible(false);
         UpdateEnemiesRemaining(totalEnemies);
     }
 
     private void HandleWaveEnded()
     {
-        // Terminó la oleada: mostramos countdown y deshabilitamos botón hasta que esté "Ready!"
         SetNextWaveCountdownVisible(true);
         SetNextWaveButtonVisible(true);
-        SetNextWaveButtonInteractable(true);   // <— habilitado apenas termina la oleada
+        SetNextWaveButtonInteractable(true);
     }
 
     private void HandleEnemiesRemainingChanged(int enemiesLeft)
@@ -194,7 +170,6 @@ public class UIController : MonoBehaviour
     private void HandleCountdownTick(float secondsLeft)
     {
         UpdateNextWaveCountdown(secondsLeft);
-        // El botón se habilita cuando el manager dispara OnNextWaveReady
     }
 
     private void HandleNextWaveReady()

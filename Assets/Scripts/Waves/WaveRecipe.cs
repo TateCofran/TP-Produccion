@@ -4,9 +4,9 @@
 public class WaveStep
 {
     public EnemyType enemyType;
-    public int count;                 // Cuántos enemigos de este tipo
-    public float interval;            // Intervalo entre spawns de este tipo
-    public float waitAfterStep;       // Esperar después de este step
+    public int count;
+    public float interval;
+    public float waitAfterStep;
 }
 
 [System.Serializable]

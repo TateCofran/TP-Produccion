@@ -1,4 +1,4 @@
-public interface ITurretStats
+﻿public interface ITurretStats
 {
     float Damage { get; }
     float Range { get; }

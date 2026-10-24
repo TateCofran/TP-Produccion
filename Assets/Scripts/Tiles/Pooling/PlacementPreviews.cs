@@ -1,4 +1,4 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 
 public enum PreviewStatus
 {
@@ -9,10 +9,10 @@ public enum PreviewStatus
 
 public struct PlacementPreview
 {
-    public Vector3 origin;          // posición mundial donde se ubicaría el tile
-    public Vector2 sizeXZ;          // tamaño visual del tile (w x h)
-    public bool valid;              // true si no se superpone con otro tile
-    public PreviewStatus status;    // estado (válido, solapado, inválido)
-    public string note;             // texto descriptivo (ej: nombre, rotación)
-    public float cellSize;          // tamaño de celda usado (solo informativo)
+    public Vector3 origin;
+    public Vector2 sizeXZ;
+    public bool valid;
+    public PreviewStatus status;
+    public string note;
+    public float cellSize;
 }

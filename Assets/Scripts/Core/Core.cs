@@ -1,4 +1,4 @@
-using System.Collections;
+ï»¿using System.Collections;
 using Unity.Cinemachine;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -18,38 +18,48 @@ public class Core : MonoBehaviour
     [SerializeField] private CinemachineImpulseSource impulseSource;
 
     [Header("Post Process (Vignette)")]
-    [Tooltip("Volume que tiene el efecto de Vignette (Global Volume).")]
+    [Tooltip("Volume that contains the Vignette override (Global Volume).")]
     [SerializeField] private Volume damageVolume;
-    [Tooltip("Intensidad máxima del vignette al recibir daño.")]
+    [Tooltip("Maximum vignette intensity when taking damage.")]
     [SerializeField] private float hitVignetteIntensity = 0.45f;
-    [Tooltip("Velocidad a la que se desvanece el vignette.")]
+    [Tooltip("Speed at which the vignette fades out.")]
     [SerializeField] private float vignetteFadeSpeed = 4f;
 
     private Vignette vignette;
     private Coroutine vignetteCoroutine;
 
+    public static Core Active { get; private set; }
+
+    private void OnEnable()
+    {
+        Active = this;
+    }
+
+    private void OnDisable()
+    {
+        if (Active == this) Active = null;
+    }
+
     private void Start()
     {
         currentHealth = maxHealth;
-        UIController.Instance.UpdateCoreHealth(currentHealth, maxHealth);
+        UIController.Instance?.UpdateCoreHealth(currentHealth, maxHealth);
 
-        // Cachear el Vignette del Volume
         if (damageVolume != null && damageVolume.profile != null)
         {
             if (damageVolume.profile.TryGet(out vignette))
             {
-                // Aseguramos que arranque apagado y rojo
                 vignette.intensity.value = 0f;
                 vignette.color.value = Color.red;
             }
             else
             {
-                Debug.LogWarning("Core: el Volume asignado no tiene un Vignette override.");
+                Debug.LogWarning("[Core] The assigned Volume has no Vignette override");
             }
         }
         else
         {
-            Debug.LogWarning("Core: no hay Volume asignado para el efecto de daño.");
+            Debug.LogWarning("[Core] No Volume assigned for the damage effect");
         }
     }
 
@@ -57,7 +67,7 @@ public class Core : MonoBehaviour
     {
         infiniteHealth = enabled;
         currentHealth = maxHealth;
-        UIController.Instance.UpdateCoreHealth(currentHealth, maxHealth);
+        UIController.Instance?.UpdateCoreHealth(currentHealth, maxHealth);
     }
 
     public void TakeDamage(int amount)
@@ -72,7 +82,7 @@ public class Core : MonoBehaviour
             currentHealth = maxHealth;
         }
 
-        UIController.Instance.UpdateCoreHealth(currentHealth, maxHealth);
+        UIController.Instance?.UpdateCoreHealth(currentHealth, maxHealth);
 
         if (impulseSource != null)
         {

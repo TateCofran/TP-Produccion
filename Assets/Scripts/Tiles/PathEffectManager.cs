@@ -1,4 +1,4 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using System;
 
 [DisallowMultipleComponent]
@@ -9,27 +9,39 @@ public class PathEffectManager : MonoBehaviour
     [Header("Master")]
     public bool enableAll = true;
 
-    // ===== Daño fijo =====
-    [Header("Daño fijo (golpe)")]
+    [Header("Fixed Damage (hit)")]
     public bool enableDamage = true;
-    [Min(0)] public int damagePerHit = 1;   // escala global del daño por golpe
-    [Min(0.05f)] public float damageCooldown = 10f;  // cooldown global POR ENEMIGO para el daño
+    [Min(0)] public int damagePerHit = 1;
+    [Min(0.05f)] public float damageCooldown = 10f;
 
-    // ===== Slow =====
-    [Header("Slow (reducción de velocidad)")]
+    [Header("Slow (speed reduction)")]
     public bool enableSlow = true;
-    [Tooltip("Multiplica la fuerza de slow definida por el tile (0..1). 1 = igual al tile.")]
-    [Range(0, 1)] public float slowMultiplier = 1f;    // controla CUÁNTO se reduce la velocidad
-    [Range(0, 1)] public float slowMax = 0.95f;        // no más de 95% de reducción
-    [Tooltip("Intervalo opcional de refresco para slow (si 0 usa el interval del PathCellEffect).")]
-    [Min(0)] public float globalApplyIntervalOverride = 0f; // NO es cooldown; solo refresco de estado
+    [Tooltip("Multiplies the slow strength defined by the tile (0..1). 1 = same as the tile.")]
+    [Range(0, 1)] public float slowMultiplier = 1f;
+    [Range(0, 1)] public float slowMax = 0.95f;
+    [Tooltip("Optional slow refresh interval (0 uses the PathCellEffect interval).")]
+    [Min(0)] public float globalApplyIntervalOverride = 0f;
 
-    // ===== Stun =====
-    [Header("Stun (aturdimiento)")]
+    [Header("Stun")]
     public bool enableStun = true;
-    [Min(0)] public float stunMultiplier = 1f;        // escala global de duración de stun
-    [Min(0)] public float stunMax = 10f;              // tope de duración
-    [Min(0.05f)] public float stunCooldown = 0.5f;    // cooldown global POR ENEMIGO para re-aplicar stun
+    [Min(0)] public float stunMultiplier = 1f;
+    [Min(0)] public float stunMax = 10f;
+    [Min(0.05f)] public float stunCooldown = 0.5f;
+
+    [Header("Other World Flip")]
+    [Tooltip("In the Other World, slow tiles deal damage and stun tiles push enemies back.")]
+    public bool enableWorldFlip = true;
+    [Tooltip("Damage per tick for a slow tile with strength 1 (scaled by the tile slow value).")]
+    [Min(0)] public float otherWorldSlowDamage = 4f;
+    [Min(0.05f)] public float otherWorldSlowDamageInterval = 1f;
+    [Tooltip("Knockback distance per second of stun defined by the tile.")]
+    [Min(0)] public float knockbackPerStunSecond = 1.5f;
+    [Min(0)] public float maxKnockbackDistance = 3f;
+    [Tooltip("Seconds an enemy cannot be pushed again after a knockback.")]
+    [Min(0)] public float knockbackImmunity = 3f;
+    [Min(0)] public int maxKnockbacksPerEnemy = 3;
+
+    public bool IsWorldFlipped => enableAll && enableWorldFlip && WorldState.IsOther;
 
     public event Action OnValuesChanged;
 
@@ -43,10 +55,6 @@ public class PathEffectManager : MonoBehaviour
     private void OnValidate() { OnValuesChanged?.Invoke(); }
 #endif
 
-    /// <summary>
-    /// Aplica switches, multiplicadores y caps.
-    /// Devuelve además los cooldowns específicos de daño y stun.
-    /// </summary>
     public void GetEffective(
         int inDamagePerHit, float inSlow, float inStun,
         out int outDamagePerHit, out float outSlow, out float outStun,
@@ -62,32 +70,27 @@ public class PathEffectManager : MonoBehaviour
             return;
         }
 
-        // Daño fijo
         if (enableDamage)
             outDamagePerHit = inDamagePerHit;
         else
             outDamagePerHit = 0;
 
-        // Slow fijo
         if (enableSlow)
             outSlow = inSlow;
         else
             outSlow = 0;
 
-        // Stun fijo
         if (enableStun)
             outStun = inStun;
         else
             outStun = 0;
 
-        // Cooldowns fijos por efecto
         outDamageCd = Mathf.Max(0.05f, damageCooldown);
         outStunCd = Mathf.Max(0.05f, stunCooldown);
     }
 
     public float GetApplyIntervalOverride() => globalApplyIntervalOverride;
 
-    // Helpers para UI (opcionales)
     public void ToggleAll(bool on) { enableAll = on; OnValuesChanged?.Invoke(); }
     public void ToggleDamage(bool on) { enableDamage = on; OnValuesChanged?.Invoke(); }
     public void ToggleSlow(bool on) { enableSlow = on; OnValuesChanged?.Invoke(); }

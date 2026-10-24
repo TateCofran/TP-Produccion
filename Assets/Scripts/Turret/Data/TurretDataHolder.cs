@@ -3,7 +3,7 @@
 [RequireComponent(typeof(TurretStats))]
 public class TurretDataHolder : MonoBehaviour
 {
-    [Header("SO con los datos de la torreta")]
+    [Header("Turret Data SO")]
     public TurretDataSO turretDataSO;
 
     private TurretStats stats;
@@ -17,7 +17,7 @@ public class TurretDataHolder : MonoBehaviour
         if (turretDataSO != null)
             ApplyDataSO(turretDataSO);
         else
-            Debug.LogWarning($"[TurretDataHolder] No se asignó un TurretDataSO en {gameObject.name}");
+            Debug.LogWarning($"[TurretDataHolder] No TurretDataSO assigned on {gameObject.name}");
     }
 
     public void ApplyDataSO(TurretDataSO data)
@@ -25,7 +25,10 @@ public class TurretDataHolder : MonoBehaviour
         if (data == null) return;
 
         turretDataSO = data;
+        if (stats == null) stats = GetComponent<TurretStats>();
+        if (levelApplier == null) levelApplier = GetComponent<TurretLevelApplier>();
+
         stats.InitializeFromSO(data);
-        levelApplier.Initialize(data);
+        levelApplier?.Initialize(data);
     }
 }

@@ -1,4 +1,4 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using System.Collections.Generic;
 
 public class Node
@@ -7,8 +7,8 @@ public class Node
     public Vector2Int gridPosition;
     public int tileIndex;
     public List<Edge> edges;
-    public float gCost; // Costo desde el inicio
-    public float hCost; // Heurística hasta el final
+    public float gCost;
+    public float hCost;
     public Node parent;
     public bool isWalkable;
 

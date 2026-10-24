@@ -6,9 +6,9 @@ public static class TurretPermanentUpgrades
     private const string GLOBAL_RANGE_ID = "turret_global_range";
     private const string GLOBAL_FIRE_RATE_ID = "turret_global_fire_rate";
 
-    private const float DAMAGE_PER_LEVEL = 0.10f;   // +10% por nivel
-    private const float RANGE_PER_LEVEL = 0.05f;    // +5% por nivel
-    private const float FIRE_RATE_PER_LEVEL = 0.08f; // +8% por nivel
+    private const float DAMAGE_PER_LEVEL = 0.10f;
+    private const float RANGE_PER_LEVEL = 0.05f;
+    private const float FIRE_RATE_PER_LEVEL = 0.08f;
 
     public static float GetDamageMultiplier()
     {

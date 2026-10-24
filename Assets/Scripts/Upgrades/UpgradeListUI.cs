@@ -11,8 +11,8 @@ public class UpgradeListUI : MonoBehaviour
     [SerializeField] private UpgradeCategory category;
 
     [Header("UI")]
-    [SerializeField] private Transform contentParent;       // contenedor de ítems
-    [SerializeField] private Button itemButtonPrefab;       // botón con un TMP_Text hijo
+    [SerializeField] private Transform contentParent;
+    [SerializeField] private Button itemButtonPrefab;
 
     public event Action<UpgradeSO> OnItemSelected;
 
@@ -28,7 +28,7 @@ public class UpgradeListUI : MonoBehaviour
 
         foreach (var up in repository.GetByCategory(category))
         {
-            if (first == null) first = up;   // Guardamos el primero de la categoría
+            if (first == null) first = up;
 
             var btn = Instantiate(itemButtonPrefab, contentParent);
             var rect = btn.GetComponent<RectTransform>();
@@ -47,18 +47,14 @@ public class UpgradeListUI : MonoBehaviour
             btn.onClick.AddListener(() => OnItemSelected?.Invoke(up));
         }
 
-        // ---- NUEVO ----
-        // Si hay al menos una mejora en esta categoría, mostrarla por defecto
         if (first != null)
         {
             OnItemSelected?.Invoke(first);
         }
     }
 
-
     public void RefreshLevels()
     {
-        // Vuelve a construir los textos de nivel sin recrear la lista si preferís.
         Build();
     }
 

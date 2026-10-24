@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+ï»¿using System.Collections.Generic;
 using UnityEngine;
 
 public class Ability_SpawnMinionsPeriodic : MonoBehaviour, IEnemyAbility
@@ -7,14 +7,14 @@ public class Ability_SpawnMinionsPeriodic : MonoBehaviour, IEnemyAbility
     [SerializeField] private EnemyType spawnType = EnemyType.Minion;
     [SerializeField, Min(1)] private int countPerWave = 3;
     [SerializeField, Min(0.1f)] private float periodSeconds = 5f;
-    [SerializeField, Min(0f)] private float spreadRadius = 0.75f; // offset alrededor del jefe
-    [SerializeField] private bool spawnOnStart = false;           // si querés que spawnee instantáneo
+    [SerializeField, Min(0f)] private float spreadRadius = 0.75f;
+    [SerializeField] private bool spawnOnStart = false;
 
-    [Header("Límites (opcionales)")]
-    [SerializeField, Min(0)] private int maxWaves = 0;  // 0 = infinito
-    [SerializeField, Min(0)] private int maxActiveMinions = 0; // 0 = sin límite
+    [Header("Limits (optional)")]
+    [SerializeField, Min(0)] private int maxWaves = 0;
+    [SerializeField, Min(0)] private int maxActiveMinions = 0;
 
-    [Header("FX (opcional)")]
+    [Header("FX (optional)")]
     [SerializeField] private GameObject spawnVfxPrefab;
 
     private AbilityContext _ctx;
@@ -25,7 +25,7 @@ public class Ability_SpawnMinionsPeriodic : MonoBehaviour, IEnemyAbility
     public void Initialize(AbilityContext ctx)
     {
         _ctx = ctx;
-        _timer = spawnOnStart ? periodSeconds : 0f; // si querés que salga al toque, poné true y esto lo dispara en el primer Tick
+        _timer = spawnOnStart ? periodSeconds : 0f;
         _wavesDone = 0;
         _running = true;
     }
@@ -39,7 +39,6 @@ public class Ability_SpawnMinionsPeriodic : MonoBehaviour, IEnemyAbility
         if (_timer < periodSeconds) return;
         _timer = 0f;
 
-        // Respetar límite de activos (si se configuró)
         if (maxActiveMinions > 0)
         {
             int active = EnemyTracker.CountEnemiesOfType(spawnType);
@@ -50,10 +49,10 @@ public class Ability_SpawnMinionsPeriodic : MonoBehaviour, IEnemyAbility
         _wavesDone++;
     }
 
-    public void OnDamaged(float dmg, float currentHP, object source) { /* no-op */ }
-    public void OnDeath() => _running = false;          // detener spawns al morir el caster
-    public void OnArrivedToCore() => _running = false;  // y si llega al core
-    public void OnWaypoint(int index) { /* opcional: triggers por waypoint */ }
+    public void OnDamaged(float dmg, float currentHP, object source) {  }
+    public void OnDeath() => _running = false;
+    public void OnArrivedToCore() => _running = false;
+    public void OnWaypoint(int index) {  }
     public void ResetRuntime()
     {
         _timer = 0f;
@@ -69,7 +68,6 @@ public class Ability_SpawnMinionsPeriodic : MonoBehaviour, IEnemyAbility
         var baseRoute = _ctx.GetRoute != null ? _ctx.GetRoute() : null;
         int wp = _ctx.GetWaypointIndex != null ? _ctx.GetWaypointIndex() : 0;
 
-        // armamos una ruta que arranca en la POSICIÓN ACTUAL del jefe y luego continúa la suya
         List<Vector3> MakeChildRoute(Vector3 start)
         {
             var route = new List<Vector3>(8);
@@ -83,28 +81,26 @@ public class Ability_SpawnMinionsPeriodic : MonoBehaviour, IEnemyAbility
             return route;
         }
 
-        // distribuimos en círculo (o pseudo-aleatorio) alrededor del jefe
         float angleStep = Mathf.PI * 2f / Mathf.Max(1, countPerWave);
         for (int i = 0; i < countPerWave; i++)
         {
-            float a = angleStep * i + Random.Range(-0.25f, 0.25f); // pequeña variación
+            float a = angleStep * i + Random.Range(-0.25f, 0.25f);
             Vector3 offset = new Vector3(Mathf.Cos(a), 0f, Mathf.Sin(a)) * spreadRadius;
             Vector3 spawnPos = pos + offset;
 
             var go = EnemyPool.Instance.GetEnemy(spawnType);
             if (go == null) continue;
 
-            // importante: posicionar antes o incluir en la ruta como primer punto
             var enemy = go.GetComponent<Enemy>();
             if (enemy == null) { go.transform.position = spawnPos; continue; }
 
             var route = MakeChildRoute(spawnPos);
             enemy.Init(route);
+            WaveManager.Instance?.RegisterExtraEnemies(1);
 
             if (spawnVfxPrefab != null)
             {
-                var vfx = Instantiate(spawnVfxPrefab, spawnPos, Quaternion.identity);
-                Destroy(vfx, 2f);
+                VfxPool.Spawn(spawnVfxPrefab, spawnPos, Quaternion.identity, 2f);
             }
         }
     }

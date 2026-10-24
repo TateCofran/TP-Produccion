@@ -33,40 +33,35 @@ public class TileLayout : ScriptableObject
     [System.Serializable]
     public struct PathModifiers
     {
-        [Min(0)] public float dps;          // daño por segundo
-        [Range(0f, 1f)] public float slow;  // 0..1 (0.3 = 30% más lento)
-        [Min(0)] public float stun;         // segundos de stun
+        [Min(0)] public float dps;
+        [Range(0f, 1f)] public float slow;
+        [Min(0)] public float stun;
     }
 
     [Header("Path Modifiers (Defaults for the whole tile)")]
-    [Tooltip("Útil para tiles 'temáticas': Daño, Slow, Stun. Las básicas quedarán en 0.")]
+    [Tooltip("Used by themed tiles: Damage, Slow, Stun. Basic tiles stay at 0.")]
     public PathModifiers defaultPathMods;
 
     [System.Serializable]
     public struct PathModOverride
     {
-        public Vector2Int grid;   // celda del layout
-        public PathModifiers mods; // valores específicos para esa celda
+        public Vector2Int grid;
+        public PathModifiers mods;
     }
 
-    [Header("Path Modifiers (Overrides por celda)")]
+    [Header("Path Modifiers (per cell overrides)")]
     public List<PathModOverride> perCellOverrides = new List<PathModOverride>();
 
-    // =========================
-    // CACHÉS (runtime)
-    // =========================
-    // Mapa rápido de celdas -> tipo
     private Dictionary<Vector2Int, TileType> _tileMap;
-    // Conjunto de celdas Path
+
     private HashSet<Vector2Int> _pathCells;
-    // Overrides por celda
+
     private Dictionary<Vector2Int, PathModifiers> _modsByCell;
 
     private void OnEnable() => BuildCaches();
 #if UNITY_EDITOR
     private void OnValidate()
     {
-        // Sanitizar tamaños y posiciones para evitar errores sutiles
         gridWidth = Mathf.Max(1, gridWidth);
         gridHeight = Mathf.Max(1, gridHeight);
 
@@ -74,14 +69,13 @@ public class TileLayout : ScriptableObject
         for (int i = 0; i < exits.Count; i++) { var e = exits[i]; ClampInside(ref e); exits[i] = e; }
         if (coreCell.x >= 0 || coreCell.y >= 0) { ClampInside(ref coreCell); }
 
-        // Rebuild caches cuando se edita el asset
         BuildCaches();
     }
 #endif
 
     private void ClampInside(ref Vector2Int g)
     {
-        if (g.x < 0 || g.y < 0) return; // valor “no seteado”
+        if (g.x < 0 || g.y < 0) return;
         g.x = Mathf.Clamp(g.x, 0, gridWidth - 1);
         g.y = Mathf.Clamp(g.y, 0, gridHeight - 1);
     }
@@ -96,16 +90,14 @@ public class TileLayout : ScriptableObject
         _pathCells.Clear();
         _modsByCell.Clear();
 
-        // Construir mapa y set de paths en O(n)
         for (int i = 0; i < tiles.Count; i++)
         {
             var t = tiles[i];
-            if (!IsInside(t.grid)) continue; // ignorar fuera de rango
+            if (!IsInside(t.grid)) continue;
             _tileMap[t.grid] = t.type;
             if (t.type == TileType.Path) _pathCells.Add(t.grid);
         }
 
-        // Overrides por celda
         for (int i = 0; i < perCellOverrides.Count; i++)
         {
             var ov = perCellOverrides[i];
@@ -114,16 +106,12 @@ public class TileLayout : ScriptableObject
         }
     }
 
-    // =========================
-    // API
-    // =========================
     public Vector3 GridToWorld(Vector2Int g)
         => origin + new Vector3(g.x * cellSize, 0f, g.y * cellSize);
 
     public bool IsInside(Vector2Int g)
         => g.x >= 0 && g.x < gridWidth && g.y >= 0 && g.y < gridHeight;
 
-    // IMPORTANTE: ahora realmente busca por coordenada en el diccionario
     public bool TryGetTile(Vector2Int g, out TileEntry t)
     {
         if (_tileMap != null && _tileMap.TryGetValue(g, out var type))
@@ -138,7 +126,7 @@ public class TileLayout : ScriptableObject
     public bool IsPath(Vector2Int g)
     {
         if (!IsInside(g)) return false;
-        // O(1) si hay caché; fallback a TryGetTile si aún no se construyó
+
         if (_pathCells != null) return _pathCells.Contains(g);
         return TryGetTile(g, out var t) && t.type == TileType.Path;
     }
@@ -151,12 +139,8 @@ public class TileLayout : ScriptableObject
         Vector2Int.left
     };
 
-    /// <summary>
-    /// Obtiene la celda donde colocar el Core.
-    /// </summary>
     public Vector2Int GetCoreCell()
     {
-        // Si se especificó una celda específica y es válida, usarla
         if (coreCell.x >= 0 && coreCell.y >= 0 &&
             coreCell.x < gridWidth && coreCell.y < gridHeight &&
             IsPath(coreCell))
@@ -164,16 +148,13 @@ public class TileLayout : ScriptableObject
             return coreCell;
         }
 
-        // Si no, usar la entrada
         if (IsInside(entry) && IsPath(entry))
         {
             return entry;
         }
 
-        // Fallback: buscar cualquier celda path (scan O(n), rápido con _pathCells)
         if (_pathCells != null && _pathCells.Count > 0)
         {
-            // devolver la primera arbitraria
             foreach (var c in _pathCells) return c;
         }
         else
@@ -186,7 +167,7 @@ public class TileLayout : ScriptableObject
                 }
         }
 
-        return new Vector2Int(0, 0); // Último recurso
+        return new Vector2Int(0, 0);
     }
 
     public bool AutoDetectEndpoints(out Vector2Int autoEntry, out List<Vector2Int> autoExits)

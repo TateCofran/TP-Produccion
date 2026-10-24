@@ -20,3 +20,4 @@ MonoBehaviour:
   fireRate: 1
   projectileSpeed: 1
   prefab: {fileID: 7333658948748976991, guid: f4ec192a3a35b5f42a0059935148bbe8, type: 3}
+  affinity: 2

@@ -1,7 +1,7 @@
+﻿using System.Collections;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
-using System.Collections;
 
 public class EnemyPopupUI : MonoBehaviour
 {
@@ -10,61 +10,87 @@ public class EnemyPopupUI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI popupText;
     [SerializeField] private Button popupButton;
 
-    [SerializeField] private Image popupIcon;                    
-    [SerializeField] private EnemySpriteData[] enemySprites;     
+    [SerializeField] private Image popupIcon;
+    [SerializeField] private EnemySpriteData[] enemySprites;
 
-    [Header("Panel de info")]
+    [Header("Info Panel")]
     [SerializeField] private GameObject infoPanelObject;
     [SerializeField] private EnemyInfoPanel infoPanel;
 
-    private EnemyData currentData;
+    [SerializeField] private float popupDuration = 10f;
 
+    private EnemyData currentData;
+    private SpawnManager spawnManager;
+    private Coroutine hideRoutine;
+    private bool infoPanelOpen;
 
     private void Start()
     {
         popupObject.SetActive(false);
         infoPanelObject.SetActive(false);
 
-        SpawnManager sm = FindFirstObjectByType<SpawnManager>();
-        sm.OnFirstTimeEnemySpawned += HandleFirstSpawn;
+        spawnManager = FindFirstObjectByType<SpawnManager>();
+        if (spawnManager != null)
+            spawnManager.OnFirstTimeEnemySpawned += HandleFirstSpawn;
+        else
+            Debug.LogWarning("[EnemyPopupUI] SpawnManager not found in the scene");
 
         popupButton.onClick.AddListener(OpenInfoPanel);
+    }
+
+    private void OnDestroy()
+    {
+        if (spawnManager != null)
+            spawnManager.OnFirstTimeEnemySpawned -= HandleFirstSpawn;
+
+        EscapeRouter.Unregister(HandleEscape);
+        if (infoPanelOpen) GameTime.ReleasePause();
     }
 
     private void HandleFirstSpawn(EnemyData data)
     {
         currentData = data;
-
-        //popupText.text = $"New enemy type: {data.enemyName}";
         popupIcon.sprite = GetSprite(data.enemyName);
-
         popupObject.SetActive(true);
 
-
-        StartCoroutine(HidePopupAfter10Sec());
+        if (hideRoutine != null) StopCoroutine(hideRoutine);
+        hideRoutine = StartCoroutine(HidePopupAfterDelay());
     }
 
-    private IEnumerator HidePopupAfter10Sec()
+    private IEnumerator HidePopupAfterDelay()
     {
-        yield return new WaitForSeconds(10f);
+        yield return new WaitForSeconds(popupDuration);
         popupObject.SetActive(false);
-
+        hideRoutine = null;
     }
 
     private void OpenInfoPanel()
     {
         popupObject.SetActive(false);
-
-        Time.timeScale = 0f;
         infoPanelObject.SetActive(true);
-
         infoPanel.Display(currentData);
+
+        if (infoPanelOpen) return;
+        infoPanelOpen = true;
+        GameTime.RequestPause();
+        EscapeRouter.Register(HandleEscape, EscapeRouter.PriorityPopup);
     }
 
     public void CloseInfoPanel()
     {
         infoPanelObject.SetActive(false);
-        Time.timeScale = 1f;
+
+        if (!infoPanelOpen) return;
+        infoPanelOpen = false;
+        EscapeRouter.Unregister(HandleEscape);
+        GameTime.ReleasePause();
+    }
+
+    private bool HandleEscape()
+    {
+        if (!infoPanelOpen) return false;
+        CloseInfoPanel();
+        return true;
     }
 
     private Sprite GetSprite(string enemyName)
@@ -74,7 +100,7 @@ public class EnemyPopupUI : MonoBehaviour
             if (e.enemyName == enemyName)
                 return e.sprite;
         }
-        Debug.LogWarning($"No hay sprite definido para {enemyName}");
+        Debug.LogWarning($"[EnemyPopupUI] No sprite defined for {enemyName}");
         return null;
     }
 }

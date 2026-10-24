@@ -9,7 +9,6 @@ public class TurretShooter : MonoBehaviour
     private float fireCountdown;
     private Transform currentTarget;
 
-    // NUEVO: respetar el gate de colocación
     private bool _combatEnabled = true;
 
     void Awake()
@@ -19,14 +18,14 @@ public class TurretShooter : MonoBehaviour
 
         if (shootingBehavior == null)
         {
-            Debug.LogWarning($"[TurretShooter] No hay IShootingBehavior en {gameObject.name}. Este componente no disparará.");
+            Debug.LogWarning($"[TurretShooter] No IShootingBehavior on {gameObject.name}. This component will not shoot");
             enabled = false;
         }
     }
 
     void Update()
     {
-        if (!_combatEnabled) return;         // <- NUEVO: no disparar si no está colocado
+        if (!_combatEnabled) return;
         if (currentTarget == null) return;
 
         fireCountdown -= Time.deltaTime;
@@ -34,12 +33,13 @@ public class TurretShooter : MonoBehaviour
         if (fireCountdown <= 0f)
         {
             Shoot();
-            fireCountdown = 1f / stats.FireRate;
+            fireCountdown = 1f / Mathf.Max(0.01f, stats.FireRate);
         }
     }
 
     public void SetTarget(Transform target)
     {
+        if (target == currentTarget) return;
         if (target == null) { currentTarget = null; return; }
 
         var enemy = target.GetComponent<Enemy>();

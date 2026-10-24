@@ -1,3 +1,4 @@
+ï»¿using System.Collections;
 using UnityEngine;
 
 [RequireComponent(typeof(TurretStats))]
@@ -12,7 +13,7 @@ public class Turret : MonoBehaviour
     private IRangeDisplay rangeDisplay;
 
     [Header("Range Display")]
-    [SerializeField] private bool showRangeOnStart = false; // mejor oculto hasta seleccionar
+    [SerializeField] private bool showRangeOnStart = false;
 
     [Header("Placement Gate")]
     [SerializeField] private bool isPlaced = false;
@@ -23,12 +24,10 @@ public class Turret : MonoBehaviour
         if (!stats) stats = GetComponent<TurretStats>();
         dataHolder = GetComponent<TurretDataHolder>();
 
-        // Buscar visualizador también en hijos (incluye inactivos en editor)
         rangeDisplay = GetComponent<IRangeDisplay>();
         if (rangeDisplay == null)
             rangeDisplay = GetComponentInChildren<IRangeDisplay>(true);
 
-        // Behaviors de combate
         shooter = GetComponent<IShootingBehavior>();
         targeting = GetComponent<ITargetingBehavior>();
 
@@ -36,12 +35,11 @@ public class Turret : MonoBehaviour
         if (RequiresCombatBehaviors(type))
         {
             if (shooter == null)
-                Debug.LogWarning($"[Turret] {name} no tiene IShootingBehavior. No podrá disparar.");
+                Debug.LogWarning($"[Turret] {name} has no IShootingBehavior and cannot shoot");
             if (targeting == null)
-                Debug.LogWarning($"[Turret] {name} no tiene ITargetingBehavior. No podrá detectar enemigos.");
+                Debug.LogWarning($"[Turret] {name} has no ITargetingBehavior and cannot detect enemies");
         }
 
-        // Si todavía no está colocada, bloqueamos combate
         ToggleCombat(isPlaced);
     }
 
@@ -59,7 +57,6 @@ public class Turret : MonoBehaviour
 
     private void Start()
     {
-        // Asegurá que el visualizador tenga el radio actual antes de mostrar/ocultar
         RefreshRangeDisplay(silent: true);
 
         if (showRangeOnStart) ShowRange();
@@ -108,9 +105,6 @@ public class Turret : MonoBehaviour
         return type == "attack" || type == "aoe" || type == "slow";
     }
 
-    // ======== NUEVO: Gate de colocación ========
-
-    /// <summary>Llamar apenas la torreta se coloca sobre una celda válida.</summary>
     public void SetPlaced(bool placed)
     {
         if (isPlaced == placed) return;
@@ -118,14 +112,11 @@ public class Turret : MonoBehaviour
         ToggleCombat(isPlaced);
     }
 
-    /// <summary>Activa/desactiva componentes de combate/targeting y shooters auxiliares.</summary>
     private void ToggleCombat(bool enabledCombat)
     {
-        // Cualquier componente que implemente estas interfaces
         if (targeting is MonoBehaviour mbT) mbT.enabled = enabledCombat;
         if (shooter is MonoBehaviour mbS) mbS.enabled = enabledCombat;
 
-        // Gate para TurretShooter monobehaviour (si existe)
         var turretShooter = GetComponent<TurretShooter>();
         if (turretShooter) turretShooter.SetCombatEnabled(enabledCombat);
     }
@@ -135,4 +126,21 @@ public class Turret : MonoBehaviour
         ToggleCombat(value);
     }
 
+    private Coroutine _disableCo;
+    public bool IsTemporarilyDisabled => _disableCo != null;
+
+    public void DisableFor(float seconds)
+    {
+        if (!isActiveAndEnabled) return;
+        if (_disableCo != null) StopCoroutine(_disableCo);
+        _disableCo = StartCoroutine(DisableRoutine(seconds));
+    }
+
+    private IEnumerator DisableRoutine(float seconds)
+    {
+        ToggleCombat(false);
+        yield return new WaitForSeconds(seconds);
+        _disableCo = null;
+        ToggleCombat(isPlaced);
+    }
 }

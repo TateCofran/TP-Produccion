@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using TMPro;
 
 public class ScreenSettings : MonoBehaviour
@@ -14,44 +14,35 @@ public class ScreenSettings : MonoBehaviour
     private void Start()
     {
         PlayerPrefs.DeleteKey("displayMode");
-        // Cargar el modo actual del sistema en el dropdown
+
         displayModeDropdown.value = GetCurrentDisplayModeIndex();
-        displayModeDropdown.onValueChanged.AddListener(SetDisplayMode);     
+        displayModeDropdown.onValueChanged.AddListener(SetDisplayMode);
     }
 
     public void SetDisplayMode(int index)
     {
         switch (index)
         {
-            case 0: // Fullscreen
+            case 0:
                 Screen.fullScreenMode = FullScreenMode.ExclusiveFullScreen;
                 break;
 
-            case 1: // Borderless
+            case 1:
                 Screen.fullScreenMode = FullScreenMode.FullScreenWindow;
                 break;
 
-            case 2: // Windowed
+            case 2:
                 Screen.fullScreenMode = FullScreenMode.Windowed;
                 break;
         }
 
-        // Fuerza refresh incluso en pausa
-        //Screen.fullScreen = !Screen.fullScreen;
-        //Screen.fullScreen = !Screen.fullScreen;
-
         StartCoroutine(ForceDisplayRefresh());
-
-        //-- si se rompe el display mode en pausa quitar el  StartCoroutine(ForceDisplayRefresh()); y dejar esta linea de abajo de player prefs!!
-
-        //PlayerPrefs.SetInt("displayMode", index); 
     }
 
     private System.Collections.IEnumerator ForceDisplayRefresh()
     {
-        yield return null; // esperar 1 frame
+        yield return null;
         Screen.SetResolution(Screen.width, Screen.height, Screen.fullScreenMode);
-
     }
 
     private int GetCurrentDisplayModeIndex()
@@ -68,5 +59,3 @@ public class ScreenSettings : MonoBehaviour
         }
     }
 }
-
-

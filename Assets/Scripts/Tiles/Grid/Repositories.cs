@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -21,7 +21,7 @@ public sealed class ExitRepository : IExitRepository
     public void Clear() => _exits.Clear();
     public void Add(ExitRecord exit) => _exits.Add(exit);
 
-    public IEnumerable<int> IndicesDisponibles()
+    public IEnumerable<int> AvailableIndices()
     {
         for (int i = 0; i < _exits.Count; i++)
             if (!_exits[i].Used && !_exits[i].Closed) yield return i;
@@ -32,7 +32,7 @@ public sealed class ExitRepository : IExitRepository
         var e = _exits[globalIndex]; e.SetUsed(true); _exits[globalIndex] = e;
     }
 
-    public void MarkClosed(int globalIndex, string reason = "EXIT CERRADO")
+    public void MarkClosed(int globalIndex, string reason = "EXIT_CLOSED")
     {
         var e = _exits[globalIndex]; e.SetClosed(true); e.label = reason; _exits[globalIndex] = e;
     }
@@ -40,7 +40,7 @@ public sealed class ExitRepository : IExitRepository
     public int GlobalIndexFromAvailable(int availableIdx)
     {
         int count = 0;
-        foreach (var i in IndicesDisponibles())
+        foreach (var i in AvailableIndices())
         {
             if (count == availableIdx) return i;
             count++;
@@ -73,7 +73,7 @@ public sealed class ExitRepository : IExitRepository
         }
     }
 
-    private readonly IOrientationService _orientation; // dependencia inyectada
+    private readonly IOrientationService _orientation;
 
     public ExitRepository(IOrientationService orientation)
     {

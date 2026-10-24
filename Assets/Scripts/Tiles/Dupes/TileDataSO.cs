@@ -1,5 +1,4 @@
-﻿// Ejemplo de TileDataSO.cs (si no existe)
-using UnityEngine;
+﻿using UnityEngine;
 
 [CreateAssetMenu(menuName = "Tiles/TileData")]
 public class TileDataSO : ScriptableObject

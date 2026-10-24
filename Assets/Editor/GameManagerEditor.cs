@@ -1,4 +1,4 @@
-#if UNITY_EDITOR
+﻿#if UNITY_EDITOR
 using UnityEditor;
 using UnityEngine;
 
@@ -7,33 +7,30 @@ public class GameManagerEditor : Editor
 {
     public override void OnInspectorGUI()
     {
-        // Inspector original
         DrawDefaultInspector();
 
         GUILayout.Space(10);
-        EditorGUILayout.LabelField("Debug / Testeo", EditorStyles.boldLabel);
+        EditorGUILayout.LabelField("Debug", EditorStyles.boldLabel);
 
         var gm = (GameManager)target;
 
-        // Campo de oleada actual
-        int newWave = EditorGUILayout.IntField("Oleada a saltar", gm.DebugWaveToJump);
+        int newWave = EditorGUILayout.IntField("Wave to jump to", gm.DebugWaveToJump);
         if (newWave != gm.DebugWaveToJump)
         {
             gm.DebugWaveToJump = Mathf.Max(1, newWave);
             EditorUtility.SetDirty(gm);
         }
 
-        // ---- EXISTENTES ----
         GUILayout.BeginHorizontal();
-        if (GUILayout.Button("Saltar a Oleada"))
+        if (GUILayout.Button("Jump To Wave"))
         {
             gm.Debug_Editor_JumpToWave();
         }
-        if (GUILayout.Button("Forzar Victoria"))
+        if (GUILayout.Button("Force Win"))
         {
             gm.Debug_Editor_ForceWin();
         }
-        if (GUILayout.Button("Forzar Derrota"))
+        if (GUILayout.Button("Force Lose"))
         {
             gm.Debug_Editor_ForceLose();
         }
@@ -41,17 +38,14 @@ public class GameManagerEditor : Editor
 
         GUILayout.Space(12);
 
-        // ---- NUEVOS BOTONES ----
         EditorGUILayout.LabelField("Debug Cheats Extra", EditorStyles.boldLabel);
 
-        // Completar oleada (matar enemigos)
-        if (GUILayout.Button("Completar Oleada (Matar Enemigos)"))
+        if (GUILayout.Button("Complete Wave (Kill Enemies)"))
         {
             gm.Debug_Editor_CompleteCurrentWaveAndKillEnemies();
         }
 
-        // Toggle vida infinita Core
-        if (GUILayout.Button("Toggle Core Vida Infinita"))
+        if (GUILayout.Button("Toggle Core Infinite Health"))
         {
             gm.Debug_Editor_ToggleCoreInfiniteHealth();
         }

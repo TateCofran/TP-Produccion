@@ -5,14 +5,12 @@ public sealed class SpatialPartitioner : MonoBehaviour, ISpatialPartitioner
 {
     [SerializeField] private float spatialCellSize = 10f;
 
-    // celdas -> índices de tiles
     private readonly Dictionary<Vector2Int, List<int>> _spatialGrid = new();
-    // índice de tile -> AABB
+
     private readonly Dictionary<int, (Vector3 min, Vector3 max)> _aabbs = new();
 
     public void AddToSpatialGrid(PlacedTile tile, int index)
     {
-        // guardar AABB para consultas rápidas
         _aabbs[index] = (tile.aabbMin, tile.aabbMax);
 
         var minCell = WorldToSpatialCell(tile.aabbMin);
@@ -38,7 +36,6 @@ public sealed class SpatialPartitioner : MonoBehaviour, ISpatialPartitioner
         var minCell = WorldToSpatialCell(nMin);
         var maxCell = WorldToSpatialCell(nMax);
 
-        // evitar chequear el mismo índice varias veces
         var checkedSet = new HashSet<int>();
 
         for (int x = minCell.x; x <= maxCell.x; x++)
@@ -51,7 +48,7 @@ public sealed class SpatialPartitioner : MonoBehaviour, ISpatialPartitioner
                 for (int i = 0; i < indices.Count; i++)
                 {
                     int idx = indices[i];
-                    if (!checkedSet.Add(idx)) continue; // ya comprobado
+                    if (!checkedSet.Add(idx)) continue;
 
                     if (_aabbs.TryGetValue(idx, out var aabb))
                     {

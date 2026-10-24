@@ -6,7 +6,7 @@ public class DamageTextPopup : MonoBehaviour
 {
     [Header("Anim")]
     [SerializeField] private float lifetime = 1f;
-    [SerializeField] private float riseDistance = 30f; 
+    [SerializeField] private float riseDistance = 30f;
     [SerializeField] private AnimationCurve riseCurve = AnimationCurve.EaseInOut(0, 0, 1, 1);
     [SerializeField] private float fadeStart = 0.5f;
     [SerializeField] private AnimationCurve fadeCurve = AnimationCurve.Linear(0, 1, 1, 0);
@@ -16,7 +16,7 @@ public class DamageTextPopup : MonoBehaviour
     private Color _base;
     private Vector3 _start;
 
-    public void Play() { _t = 0f; } // trigger externo
+    public void Play() { _t = 0f; }
 
     private void Awake()
     {
@@ -28,7 +28,7 @@ public class DamageTextPopup : MonoBehaviour
     private void OnEnable()
     {
         _t = 0f;
-        _start = transform.localPosition; // posición relativa al padre (barra)
+        _start = transform.localPosition;
         if (_tmp != null) _tmp.color = _base;
     }
 
@@ -37,11 +37,9 @@ public class DamageTextPopup : MonoBehaviour
         _t += Time.deltaTime;
         float k = Mathf.Clamp01(_t / lifetime);
 
-        // Movimiento vertical relativo a la barra
         float yOff = riseCurve.Evaluate(k) * riseDistance;
         transform.localPosition = _start + new Vector3(0f, yOff, 0f);
 
-        // Fade
         if (_tmp != null)
         {
             float fadeT = (k <= fadeStart) ? 0f : Mathf.InverseLerp(fadeStart, 1f, k);
@@ -52,7 +50,7 @@ public class DamageTextPopup : MonoBehaviour
         if (_t >= lifetime)
         {
             gameObject.SetActive(false);
-            transform.localPosition = _start; // reinicia posición
+            transform.localPosition = _start;
         }
     }
 

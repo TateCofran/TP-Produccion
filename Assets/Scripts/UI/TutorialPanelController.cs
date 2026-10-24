@@ -8,11 +8,10 @@ public sealed class TutorialPanelController : MonoBehaviour
     [SerializeField] private GameObject panel;
     [SerializeField] private Button closeButton;
 
-    private bool _isOpen;
+    private bool isOpen;
 
     private void Reset()
     {
-        // Auto-guess en caso de agregar el script desde el inspector
         if (panel == null)
             panel = gameObject;
 
@@ -22,11 +21,10 @@ public sealed class TutorialPanelController : MonoBehaviour
 
     private void Awake()
     {
-        // Asegurarnos de que el panel arranca cerrado
         if (panel != null)
             panel.SetActive(false);
 
-        _isOpen = false;
+        isOpen = false;
 
         if (closeButton != null)
         {
@@ -35,37 +33,44 @@ public sealed class TutorialPanelController : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning("[TutorialPanelController] Falta asignar 'closeButton' en el inspector.");
+            Debug.LogWarning("[TutorialPanelController] 'closeButton' is not assigned in the inspector");
         }
+    }
+
+    private void OnDestroy()
+    {
+        EscapeRouter.Unregister(HandleEscape);
+        if (isOpen) GameTime.ReleasePause();
     }
 
     public void OpenTutorial()
     {
-        if (_isOpen) return;
-        _isOpen = true;
+        if (isOpen) return;
+        isOpen = true;
 
         if (panel != null)
             panel.SetActive(true);
 
-        // Pausar el juego SIN abrir el panel de pausa
-        if (GameManager.Instance != null)
-            GameManager.Instance.PauseOnly();
-        else
-            Time.timeScale = 0f; // fallback si no hay GameManager
+        GameTime.RequestPause();
+        EscapeRouter.Register(HandleEscape, EscapeRouter.PriorityPopup);
     }
 
     public void CloseTutorial()
     {
-        if (!_isOpen) return;
-        _isOpen = false;
+        if (!isOpen) return;
+        isOpen = false;
 
         if (panel != null)
             panel.SetActive(false);
 
-        // Reanudar el juego usando la lógica normal del GameManager
-        if (GameManager.Instance != null)
-            GameManager.Instance.ResumeGame();
-        else
-            Time.timeScale = 1f; // fallback
+        EscapeRouter.Unregister(HandleEscape);
+        GameTime.ReleasePause();
+    }
+
+    private bool HandleEscape()
+    {
+        if (!isOpen) return false;
+        CloseTutorial();
+        return true;
     }
 }

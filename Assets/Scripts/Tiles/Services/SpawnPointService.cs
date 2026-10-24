@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+ï»¿using System.Collections.Generic;
 using UnityEngine;
 
 public sealed class SpawnPointsService : ISpawnPointsService
@@ -54,7 +54,6 @@ public sealed class SpawnPointsService : ISpawnPointsService
             if (!IsDuplicate(w, list)) list.Add(w);
         }
 
-        // Fallback: usar exits del último tile
         if (list.Count == 0 && _chain.Count > 0)
         {
             var last = _chain.Get(_chain.Count - 1);

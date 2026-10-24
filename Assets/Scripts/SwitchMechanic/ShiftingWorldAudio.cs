@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using UnityEngine;
 
 public class ShiftingWorldAudio : MonoBehaviour
@@ -7,7 +7,7 @@ public class ShiftingWorldAudio : MonoBehaviour
     [SerializeField] private AudioClip normalWorldClip;
     [SerializeField] private AudioClip otherWorldClip;
     private AudioSource audioSource;
-   
+
     private void Start()
     {
         audioSource = GetComponent<AudioSource>();
@@ -20,7 +20,7 @@ public class ShiftingWorldAudio : MonoBehaviour
         AudioClip clipToPlay = isOtherWorld ? otherWorldClip : normalWorldClip;
         float volume = 1f;
 
-        StopAllCoroutines(); 
+        StopAllCoroutines();
         StartCoroutine(PlayWithFade(clipToPlay, volume));
     }
 
@@ -41,6 +41,6 @@ public class ShiftingWorldAudio : MonoBehaviour
         }
 
         audioSource.Stop();
-        audioSource.volume = targetVolume; //reiniciar volumen - que se fue bajando antes
+        audioSource.volume = targetVolume;
     }
 }

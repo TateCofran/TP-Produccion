@@ -4,7 +4,7 @@ using UnityEngine;
 [CreateAssetMenu(menuName = "TD/Turret Database (SO)", fileName = "TurretDatabaseSO")]
 public class TurretDatabaseSO : ScriptableObject
 {
-    [Header("Todas las torretas (SO)")]
+    [Header("All Turrets (SO)")]
     public List<TurretDataSO> allTurrets = new();
 
     private Dictionary<string, TurretDataSO> _byId;

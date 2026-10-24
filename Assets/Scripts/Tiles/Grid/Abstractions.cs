@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 public interface ITileGenerator
@@ -45,9 +45,9 @@ public interface IExitRepository
     ExitRecord Get(int index);
     int Count { get; }
     void Clear();
-    IEnumerable<int> IndicesDisponibles();
+    IEnumerable<int> AvailableIndices();
     void MarkUsed(int globalIndex);
-    void MarkClosed(int globalIndex, string reason = "EXIT CERRADO");
+    void MarkClosed(int globalIndex, string reason = "EXIT_CLOSED");
     int GlobalIndexFromAvailable(int availableIdx);
     int AvailableIndexByLabel(string label);
     void Relabel();
@@ -109,4 +109,6 @@ public interface IRunnerService
     void SpawnRunnersAtAllOpenExits();
 
     bool TryGetRouteExitToCore(Vector3 exitWorldPos, out List<Vector3> route);
+
+    bool TryGetRouteLength(Vector3 worldPos, out int cells);
 }

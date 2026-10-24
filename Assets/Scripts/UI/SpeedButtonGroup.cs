@@ -1,6 +1,6 @@
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using System.Collections.Generic;
 
 public class SpeedButtonGroup : MonoBehaviour
 {
@@ -16,7 +16,7 @@ public class SpeedButtonGroup : MonoBehaviour
 
     public List<SpeedButton> buttons;
 
-    void Start()
+    private void Start()
     {
         foreach (var btn in buttons)
         {
@@ -24,20 +24,32 @@ public class SpeedButtonGroup : MonoBehaviour
             btn.button.onClick.AddListener(() => OnSpeedButtonClicked(speed));
         }
 
-        // Inicializa en velocidad x1
         OnSpeedButtonClicked(1f);
     }
 
-    void OnSpeedButtonClicked(float selectedSpeed)
+    private void OnEnable()
     {
-        Time.timeScale = selectedSpeed;
+        GameTime.OnSpeedChanged += RefreshVisuals;
+    }
 
+    private void OnDisable()
+    {
+        GameTime.OnSpeedChanged -= RefreshVisuals;
+    }
+
+    private void OnSpeedButtonClicked(float selectedSpeed)
+    {
+        GameTime.SetSpeed(selectedSpeed);
+    }
+
+    private void RefreshVisuals(float currentSpeed)
+    {
         foreach (var btn in buttons)
         {
-            if (btn.speedValue == selectedSpeed)
-                btn.targetImage.sprite = btn.pressedSprite;
-            else
-                btn.targetImage.sprite = btn.normalSprite;
+            if (btn.targetImage == null) continue;
+            btn.targetImage.sprite = Mathf.Approximately(btn.speedValue, currentSpeed)
+                ? btn.pressedSprite
+                : btn.normalSprite;
         }
     }
 }

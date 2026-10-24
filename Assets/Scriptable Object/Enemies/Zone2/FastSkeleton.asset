@@ -19,3 +19,4 @@ MonoBehaviour:
   damageToCore: 1
   abilityDescription: When its health reaches 50%, it doubles its movement speed.
   type: 6
+  vulnerableIn: 2

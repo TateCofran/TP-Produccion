@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.Audio;
 using UnityEngine.SceneManagement;
 
@@ -16,11 +16,10 @@ public class SoundManager : MonoBehaviour
     public AudioClip gameMusic;
     private void Awake()
     {
-        
         if (instance == null)
         {
             instance = this;
-            DontDestroyOnLoad(gameObject); // NECESARIO para mantener los valores
+            DontDestroyOnLoad(gameObject);
         }
         else
         {
@@ -29,18 +28,6 @@ public class SoundManager : MonoBehaviour
             return;
         }
 
-        /* // ================================
-         //  RESET SOLO LA PRIMERA VEZ
-         // ================================
-         if (!PlayerPrefs.HasKey("audio_initialized"))
-         {
-             PlayerPrefs.SetFloat("MusicVolume", 1f);
-             PlayerPrefs.SetFloat("SFXVolume", 1f);
-             PlayerPrefs.SetInt("audio_initialized", 1);
-             PlayerPrefs.Save();
-         }
-
-         LoadVolumes();*/
         SceneManager.activeSceneChanged += OnSceneChanged;
         ApplyVolumes();
     }
@@ -77,7 +64,6 @@ public class SoundManager : MonoBehaviour
 
     private void ApplyVolumes()
     {
-        // Evita log10(0) usando -80 dB como silencio
         float musicVol = currentMusic > 0 ? Mathf.Log10(currentMusic) * 20f : -80f;
         float sfxVol = currentSFX > 0 ? Mathf.Log10(currentSFX) * 20f : -80f;
 
@@ -89,14 +75,12 @@ public class SoundManager : MonoBehaviour
     {
         currentMusic = value;
         ApplyVolumes();
-        //SaveVolumes();
     }
 
     public void SetSFX(float value)
     {
         currentSFX = value;
         ApplyVolumes();
-       // SaveVolumes();
     }
 
     public float GetMusic() => currentMusic;

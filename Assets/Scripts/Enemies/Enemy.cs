@@ -1,9 +1,9 @@
-using System.Collections.Generic;
+ï»¿using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
 [DisallowMultipleComponent]
-public class Enemy : MonoBehaviour, IEnemyDeathHandler
+public class Enemy : MonoBehaviour, IEnemyDeathHandler, IWorldAware
 {
     [SerializeField] private EnemyData data;
     public EnemyData Data => data;
@@ -11,7 +11,18 @@ public class Enemy : MonoBehaviour, IEnemyDeathHandler
 
     private bool hasHitCore = false;
 
+    public bool ReachedCore => hasHitCore;
+
+    private static int _nextSpawnId;
+    public int SpawnId { get; private set; }
+    public bool IsSameSpawn(int spawnId) => isActiveAndEnabled && !_removedFromWave && SpawnId == spawnId;
+
     public static event System.Action<Enemy> OnAnyEnemyKilled;
+
+    public bool IsTargetable() => data == null || WorldState.Matches(data.vulnerableIn);
+
+    private float _knockbackImmuneUntil;
+    private int _knockbackCount;
 
     [Header("Settings")]
     [SerializeField] private float waypointTolerance = 0.03f;
@@ -27,7 +38,6 @@ public class Enemy : MonoBehaviour, IEnemyDeathHandler
     private EnemyEffects _effects;
     private List<IEnemyAbility> _abilities;
 
-    // Evita notificar muerte más de una vez (pooling / Destroy / llegada al core)
     private bool _removedFromWave;
 
     private void Awake()
@@ -37,7 +47,7 @@ public class Enemy : MonoBehaviour, IEnemyDeathHandler
         _effects = GetComponent<EnemyEffects>();
 
         if (data == null)
-            Debug.LogError($"[Enemy] {name} no tiene asignado EnemyData");
+            Debug.LogError($"[Enemy] {name} has no EnemyData assigned");
 
         _abilities = GetComponents<IEnemyAbility>().ToList();
     }
@@ -49,8 +59,12 @@ public class Enemy : MonoBehaviour, IEnemyDeathHandler
         _idx = 0;
         if (_route.Count > 0) transform.position = _route[0];
 
+        SpawnId = ++_nextSpawnId;
+
         _removedFromWave = false;
         hasHitCore = false;
+        _knockbackImmuneUntil = 0f;
+        _knockbackCount = 0;
 
         if (Health != null && data != null)
             Health.Initialize(data.maxHealth, data.defense);
@@ -108,19 +122,50 @@ public class Enemy : MonoBehaviour, IEnemyDeathHandler
         {
             var forward = new Vector3(dir.x, 0f, dir.z);
 
-            // Rotación base hacia la dirección de movimiento
             var look = Quaternion.LookRotation(forward, Vector3.up);
 
-            // Aplico offset extra para este prefab (0, 180, 0 si mira para atrás)
             var finalRotation = look * Quaternion.Euler(facingOffsetEuler);
 
             transform.rotation = Quaternion.Slerp(transform.rotation, finalRotation, 0.25f);
         }
 
-
         float dt = Time.deltaTime;
         for (int i = 0; i < _abilities.Count; i++)
             _abilities[i].Tick(dt);
+    }
+
+    public bool TryKnockBack(float distance, float immunitySeconds, int maxPerLife)
+    {
+        if (distance <= 0f || _removedFromWave || hasHitCore) return false;
+        if (_route.Count == 0 || _idx <= 0 || _idx > _route.Count) return false;
+        if (Time.time < _knockbackImmuneUntil || _knockbackCount >= maxPerLife) return false;
+
+        Vector3 pos = transform.position;
+        float remaining = distance;
+        int idx = Mathf.Min(_idx, _route.Count - 1);
+
+        while (remaining > 0f && idx > 0)
+        {
+            Vector3 prev = _route[idx - 1];
+            float segment = Vector3.Distance(pos, prev);
+            if (segment >= remaining)
+            {
+                pos = Vector3.MoveTowards(pos, prev, remaining);
+                remaining = 0f;
+            }
+            else
+            {
+                pos = prev;
+                remaining -= segment;
+                idx--;
+            }
+        }
+
+        transform.position = pos;
+        _idx = idx;
+        _knockbackImmuneUntil = Time.time + immunitySeconds;
+        _knockbackCount++;
+        return true;
     }
 
     private void OnTriggerEnter(Collider other)
@@ -128,12 +173,7 @@ public class Enemy : MonoBehaviour, IEnemyDeathHandler
         if (hasHitCore) return;
 
         if (other.TryGetComponent<Core>(out var core))
-        {
-            hasHitCore = true;
-            core.TakeDamage(data.damageToCore);
-            // Al impactar el núcleo, este enemigo cuenta como eliminado de la oleada
-            NotifyDeath();
-        }
+            HitCore(core);
     }
 
     private void OnEnable()
@@ -141,16 +181,16 @@ public class Enemy : MonoBehaviour, IEnemyDeathHandler
         EnemyTracker.RegisterEnemy(this);
         _removedFromWave = false;
         hasHitCore = false;
-        SuscribeHealthEvents();
+        SubscribeHealthEvents();
     }
 
     private void OnDisable()
     {
         EnemyTracker.UnregisterEnemy(this);
-        UnsuscribeHealthEvents();
+        UnsubscribeHealthEvents();
     }
 
-    private void SuscribeHealthEvents()
+    private void SubscribeHealthEvents()
     {
         if (Health == null) Health = GetComponent<EnemyHealth>();
         if (Health == null) return;
@@ -158,7 +198,7 @@ public class Enemy : MonoBehaviour, IEnemyDeathHandler
         Health.OnDamaged += HandleOnDamagedCompat;
     }
 
-    private void UnsuscribeHealthEvents()
+    private void UnsubscribeHealthEvents()
     {
         if (Health == null) return;
         Health.OnDamaged -= HandleOnDamagedCompat;
@@ -173,12 +213,20 @@ public class Enemy : MonoBehaviour, IEnemyDeathHandler
     private void OnArrived()
     {
         if (_removedFromWave) return;
+        HitCore(Core.Active);
+    }
+
+    private void HitCore(Core core)
+    {
+        if (hasHitCore || _removedFromWave) return;
         hasHitCore = true;
 
         foreach (var ab in _abilities)
             ab.OnArrivedToCore();
 
-        // Llegó al núcleo: también cuenta como enemigo eliminado
+        if (core != null && data != null)
+            core.TakeDamage(data.damageToCore);
+
         NotifyDeath();
     }
 

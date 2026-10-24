@@ -5,7 +5,6 @@ using System.Collections.Generic;
 [DisallowMultipleComponent]
 public sealed class TurretRangeVisualizer : MonoBehaviour, IRangeDisplay
 {
-    // ===== Registro global de instancias/visibles =====
     private static readonly HashSet<TurretRangeVisualizer> s_instances = new();
     private static readonly HashSet<TurretRangeVisualizer> s_visible = new();
     private static bool s_bulkHideInProgress = false;
@@ -13,20 +12,19 @@ public sealed class TurretRangeVisualizer : MonoBehaviour, IRangeDisplay
     [Header("Refs")]
     [SerializeField] private LineRenderer lineRenderer;
 
-    [Header("Calidad del círculo")]
-    [Tooltip("Longitud aproximada de cada cuerda. Radios grandes ⇒ más segmentos automáticamente.")]
+    [Header("Circle Quality")]
+    [Tooltip("Approximate length of each chord. Larger radii use more segments automatically.")]
     [SerializeField] private float targetChordLength = 0.15f;
     [SerializeField] private int minSegments = 24;
     [SerializeField] private int maxSegments = 256;
 
-    [Header("Altura del círculo")]
+    [Header("Circle Height")]
     [SerializeField] private float yOffset = 0.02f;
 
-    [Header("Opciones")]
-    [Tooltip("Si está activo, redibuja aunque el radio no cambie (útil al reactivar).")]
+    [Header("Options")]
+    [Tooltip("If enabled, redraws even when the radius did not change (useful when re-enabled).")]
     [SerializeField] private bool alwaysRedrawOnShow = true;
 
-    // Estado (runtime)
     private float _currentRadius = -1f;
     private int _currentSegments = -1;
     private bool _visible;
@@ -34,12 +32,10 @@ public sealed class TurretRangeVisualizer : MonoBehaviour, IRangeDisplay
     private bool _playedOnce;
     private Coroutine _animRoutine;
 
-    // Cache
     private Transform _tr;
     private Vector3 _lastCenter;
 
-    // Ajustes de animación
-    [Header("Animación de aparición")]
+    [Header("Show Animation")]
     [SerializeField] private float showDuration = 0.25f;
     [SerializeField] private float widthMultiplierTarget = 0.045f;
 
@@ -61,8 +57,18 @@ public sealed class TurretRangeVisualizer : MonoBehaviour, IRangeDisplay
         _animating = false;
     }
 
+    private bool _initialized;
+
     private void Awake()
     {
+        EnsureInitialized();
+    }
+
+    private void EnsureInitialized()
+    {
+        if (_initialized) return;
+        _initialized = true;
+
         _tr = transform;
 
         if (!lineRenderer)
@@ -75,7 +81,6 @@ public sealed class TurretRangeVisualizer : MonoBehaviour, IRangeDisplay
             lineRenderer.enabled = false;
             lineRenderer.widthMultiplier = 0f;
 
-            // Bordes suaves
             lineRenderer.numCornerVertices = 2;
             lineRenderer.numCapVertices = 2;
         }
@@ -85,7 +90,6 @@ public sealed class TurretRangeVisualizer : MonoBehaviour, IRangeDisplay
 
     private void LateUpdate()
     {
-        // No se redibuja por movimiento; solo se traslada la geometría existente.
         if (!_visible || !lineRenderer) return;
 
         Vector3 center = Center();
@@ -96,16 +100,16 @@ public sealed class TurretRangeVisualizer : MonoBehaviour, IRangeDisplay
             for (int i = 0; i < count; i++)
             {
                 Vector3 pos = lineRenderer.GetPosition(i);
-                // Trasladar manteniendo la forma
+
                 lineRenderer.SetPosition(i, new Vector3(pos.x + delta.x, center.y, pos.z + delta.z));
             }
             _lastCenter = center;
         }
     }
 
-    // ========== IRangeDisplay ==========
     public void Show(float radius)
     {
+        EnsureInitialized();
         if (!lineRenderer) return;
 
         _visible = true;
@@ -124,15 +128,11 @@ public sealed class TurretRangeVisualizer : MonoBehaviour, IRangeDisplay
 
     public void Hide()
     {
-        // Oculta este y, además, cualquier otro activo
         HideInternal(alsoHideOthers: true);
     }
 
     public bool IsVisible() => _visible;
 
-    /// <summary>
-    /// Llamar justo después de colocar/reciclar la torreta para que la animación se reproduzca nuevamente.
-    /// </summary>
     public void ResetAnimationForPlacement()
     {
         _playedOnce = false;
@@ -147,11 +147,9 @@ public sealed class TurretRangeVisualizer : MonoBehaviour, IRangeDisplay
         if (lineRenderer) lineRenderer.widthMultiplier = 0f;
     }
 
-    /// <summary>
-    /// Actualiza el radio y redibuja el círculo si hace falta.
-    /// </summary>
     public void SetRadius(float radius, bool forceRedraw = false)
     {
+        EnsureInitialized();
         if (!lineRenderer) return;
 
         radius = Mathf.Max(0.0001f, radius);
@@ -166,13 +164,13 @@ public sealed class TurretRangeVisualizer : MonoBehaviour, IRangeDisplay
             _currentSegments = desiredSegments;
 
             RebuildCircle(_currentRadius, _currentSegments);
-            _lastCenter = Center(); // resetea el centro de referencia tras redibujar
+            _lastCenter = Center();
         }
     }
 
-    // ========== Internos ==========
     private void HideInternal(bool alsoHideOthers)
     {
+        EnsureInitialized();
         if (!lineRenderer) return;
 
         _visible = false;
@@ -181,17 +179,14 @@ public sealed class TurretRangeVisualizer : MonoBehaviour, IRangeDisplay
 
         if (!alsoHideOthers) return;
 
-        // Evitar recursión si otros también llaman Hide()
         if (s_bulkHideInProgress) return;
 
         s_bulkHideInProgress = true;
         try
         {
-            // Crear snapshot porque vamos a modificar s_visible dentro del loop
             var others = ListPool<TurretRangeVisualizer>.Get();
             foreach (var tv in s_visible) others.Add(tv);
 
-            // Ocultar a todos los que sigan visibles
             for (int i = 0; i < others.Count; i++)
             {
                 var other = others[i];
@@ -209,6 +204,7 @@ public sealed class TurretRangeVisualizer : MonoBehaviour, IRangeDisplay
 
     private Vector3 Center()
     {
+        if (_tr == null) _tr = transform;
         var p = _tr.position;
         p.y += yOffset;
         return p;
@@ -262,7 +258,6 @@ public sealed class TurretRangeVisualizer : MonoBehaviour, IRangeDisplay
         _animRoutine = null;
     }
 
-    // ===== Utilidad mínima de pool de listas para evitar GC =====
     private static class ListPool<T>
     {
         private static readonly Stack<List<T>> _pool = new();

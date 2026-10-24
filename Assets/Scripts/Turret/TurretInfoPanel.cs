@@ -12,7 +12,7 @@ public class TurretInfoPanel : MonoBehaviour
     [Header("Texts")]
     [SerializeField] private TMP_Text nameText;
     [SerializeField] private TMP_Text damageText;
-    //[SerializeField] private TMP_Text dpsText;
+
     [SerializeField] private TMP_Text rangeText;
     [SerializeField] private TMP_Text levelText;
     [SerializeField] private TMP_Text targetModeText;
@@ -21,16 +21,15 @@ public class TurretInfoPanel : MonoBehaviour
     [SerializeField] private Button cycleTargetModeButton;
     [SerializeField] private Button removeButton;
 
-    [Header("Refs opcionales")]
-    [Tooltip("Si lo dejás vacío, lo busca en la escena.")]
+    [Header("Optional Refs")]
+    [Tooltip("If empty, it is searched in the scene.")]
     [SerializeField] private TurretDupeSystem dupeSystem;
 
     private Turret _current;
-    private TurretStats _stats;               // Ajustar a tu clase concreta si difiere
-    private TurretDataHolder _holder;         // Para obtener el TurretDataSO
-    private TurretTargeting _targeting;       // Tu targeting actual
+    private TurretStats _stats;
+    private TurretDataHolder _holder;
+    private TurretTargeting _targeting;
 
-    // cache para detectar si el evento de level up corresponde a la torreta mostrada
     private TurretDataSO _currentSO;
 
     void Awake()
@@ -63,7 +62,6 @@ public class TurretInfoPanel : MonoBehaviour
         if (panelRoot) panelRoot.SetActive(true);
         RefreshAll();
 
-        // Botón: cambiar modo de target (usa tu NextMode)
         if (cycleTargetModeButton)
         {
             cycleTargetModeButton.onClick.RemoveAllListeners();
@@ -78,7 +76,6 @@ public class TurretInfoPanel : MonoBehaviour
             cycleTargetModeButton.interactable = (_targeting != null);
         }
 
-        // Botón: eliminar torreta (libera la celda si existe)
         if (removeButton)
         {
             removeButton.onClick.RemoveAllListeners();
@@ -117,7 +114,6 @@ public class TurretInfoPanel : MonoBehaviour
     {
         if (!_current) { Hide(); return; }
 
-        // Nombre (usa displayName de SO si existe)
         string display = (_holder && _holder.turretDataSO && !string.IsNullOrEmpty(_holder.turretDataSO.displayName))
             ? _holder.turretDataSO.displayName
             : _current.name.Replace("(Clone)", "").Trim();
@@ -125,7 +121,7 @@ public class TurretInfoPanel : MonoBehaviour
 
         RefreshNumbers();
         RefreshTargetMode();
-        RefreshLevel(); // nivel desde TurretDupeSystem
+        RefreshLevel();
     }
 
     private void RefreshNumbers()
@@ -137,16 +133,16 @@ public class TurretInfoPanel : MonoBehaviour
         float dps = dmg * rate;
         float rng = _stats.Range;
 
-        if (damageText) damageText.text = $"Daño: {dmg:0}";
-        //if (dpsText) dpsText.text = $"DPS: {dps:0.##}";
-        if (rangeText) rangeText.text = $"Rango: {rng:0.##}";
+        if (damageText) damageText.text = $"Damage: {dmg:0}";
+
+        if (rangeText) rangeText.text = $"Range: {rng:0.##}";
     }
 
     private void PutNumbersNA()
     {
-        if (damageText) damageText.text = "Daño: N/A";
-        //if (dpsText) dpsText.text = "DPS: N/A";
-        if (rangeText) rangeText.text = "Rango: N/A";
+        if (damageText) damageText.text = "Damage: N/A";
+
+        if (rangeText) rangeText.text = "Range: N/A";
     }
 
     private void RefreshTargetMode()
@@ -159,17 +155,15 @@ public class TurretInfoPanel : MonoBehaviour
     {
         int lvl = 1;
 
-        // Prioridad: si tenés dupeSystem y SO válido, usamos el nivel real
         if (dupeSystem != null && _currentSO != null)
         {
             var ld = dupeSystem.GetTurretLevelData(_currentSO);
             if (ld != null && ld.currentLevel > 0) lvl = ld.currentLevel;
         }
 
-        if (levelText) levelText.text = $"Nivel: {lvl}";
+        if (levelText) levelText.text = $"Level: {lvl}";
     }
 
-    // Cuando sube el nivel de alguna torreta, refrescamos si coincide con la mostrada
     private void HandleLevelUpEvent(TurretDataSO so, TurretLevelData data)
     {
         if (!_currentSO || so != _currentSO) return;

@@ -1,5 +1,4 @@
-// TurretType.cs
-public enum TurretType
+﻿public enum TurretType
 {
     Tesla,
     Basic,

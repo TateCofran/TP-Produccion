@@ -1,4 +1,4 @@
-using System.Collections;
+ï»¿using System.Collections;
 using UnityEngine;
 
 [DisallowMultipleComponent]
@@ -8,11 +8,11 @@ public class CameraController : MonoBehaviour
     public float moveSpeed = 10f;
 
     [Header("Zoom")]
-    [Tooltip("Velocidad de cambio de FOV.")]
+    [Tooltip("FOV change speed.")]
     public float zoomSpeed = 5f;
-    [Tooltip("FOV mínimo (más cerca).")]
+    [Tooltip("Minimum FOV (closest).")]
     public float minZoom = 5f;
-    [Tooltip("FOV máximo (más lejos).")]
+    [Tooltip("Maximum FOV (farthest).")]
     public float maxZoom = 40f;
 
     private Camera cam;
@@ -22,7 +22,7 @@ public class CameraController : MonoBehaviour
         cam = Camera.main;
         if (cam == null)
         {
-            Debug.LogWarning("[CameraController] No se encontró Camera.main. Asigná la cámara principal.");
+            Debug.LogWarning("[CameraController] Camera.main not found. Assign the main camera");
         }
     }
 

@@ -30,7 +30,7 @@ public class TileLayoutEditor : Editor
     {
         EditorGUI.BeginChangeCheck();
 
-        EditorGUILayout.LabelField("Configuración de Grid", EditorStyles.boldLabel);
+        EditorGUILayout.LabelField("Grid Settings", EditorStyles.boldLabel);
         layout.gridWidth = Mathf.Max(1, EditorGUILayout.IntField("Grid Width", layout.gridWidth));
         layout.gridHeight = Mathf.Max(1, EditorGUILayout.IntField("Grid Height", layout.gridHeight));
         layout.cellSize = Mathf.Max(0.1f, EditorGUILayout.FloatField("Cell Size", layout.cellSize));
@@ -40,7 +40,7 @@ public class TileLayoutEditor : Editor
         EnsureTilesSize();
 
         EditorGUILayout.LabelField("Tiles (click para Entry / Exit)", EditorStyles.boldLabel);
-        EditorGUILayout.HelpBox("Elegí Grass/Path. Botón Entry (único). Botón Exit (toggle, puede haber varios).", MessageType.Info);
+        EditorGUILayout.HelpBox("Pick Grass/Path. Entry button (single). Exit button (toggle, multiple allowed).", MessageType.Info);
 
         for (int y = layout.gridHeight - 1; y >= 0; y--)
         {
@@ -61,7 +61,7 @@ public class TileLayoutEditor : Editor
                     layout.entry = new Vector2Int(x, y);
 
                 bool isExit = layout.exits.Contains(new Vector2Int(x, y));
-                string exitLabel = isExit ? "Exit ✓" : "Exit";
+                string exitLabel = isExit ? "Exit (on)" : "Exit";
                 if (GUILayout.Button(exitLabel, GUILayout.Width(50)))
                 {
                     var p = new Vector2Int(x, y);
@@ -70,12 +70,11 @@ public class TileLayoutEditor : Editor
                 }
                 EditorGUILayout.EndHorizontal();
 
-                // Indicadores
                 if (layout.entry == new Vector2Int(x, y))
-                    EditorGUILayout.LabelField("● ENTRY", EditorStyles.boldLabel);
+                    EditorGUILayout.LabelField("ENTRY", EditorStyles.boldLabel);
 
                 if (layout.exits.Contains(new Vector2Int(x, y)))
-                    EditorGUILayout.LabelField("● EXIT", EditorStyles.boldLabel);
+                    EditorGUILayout.LabelField("EXIT", EditorStyles.boldLabel);
 
                 layout.tiles[idx] = entry;
                 EditorGUILayout.EndVertical();
@@ -87,7 +86,6 @@ public class TileLayoutEditor : Editor
         EditorGUILayout.LabelField("Endpoints", EditorStyles.boldLabel);
         layout.entry = Vector2IntField("Entry", layout.entry);
 
-        // Mostrar exits actuales
         EditorGUILayout.LabelField($"Exits ({layout.exits.Count})");
         for (int i = 0; i < layout.exits.Count; i++)
         {
@@ -101,7 +99,7 @@ public class TileLayoutEditor : Editor
             EditorGUILayout.EndHorizontal();
         }
 
-        if (GUILayout.Button("Autodetectar Entry y Exits (según vecinos Path)"))
+        if (GUILayout.Button("Auto-detect Entry and Exits (from Path neighbors)"))
         {
             if (layout.AutoDetectEndpoints(out var autoE, out var autoXs))
             {
@@ -111,7 +109,7 @@ public class TileLayoutEditor : Editor
             }
             else
             {
-                Debug.LogWarning("[TileLayoutEditor] No se pudieron autodetectar endpoints.");
+                Debug.LogWarning("[TileLayoutEditor] Could not auto-detect endpoints");
             }
         }
 

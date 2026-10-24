@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+ï»¿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Audio;
 using UnityEngine.UI;
@@ -8,31 +8,12 @@ public class UIAudioManager : MonoBehaviour
 {
     public static UIAudioManager instance;
 
-    [Header("Sonido de click")]
+    [Header("Click Sound")]
     [SerializeField] private AudioClip clickSound;
-
-
 
     private AudioSource audioSource;
 
-    //para registrar botones solo una vez, sin repetidos
     private readonly HashSet<Button> registeredButtons = new();
-
-    /*private void Awake()
-    {
-        if (instance == null)
-        {
-            instance = this;
-            DontDestroyOnLoad(gameObject);
-
-            ApplyVolumes();
-        }
-        else
-        {
-            Destroy(gameObject);
-        }
-    }*/
-
 
     private void Start()
     {
@@ -46,24 +27,19 @@ public class UIAudioManager : MonoBehaviour
 
     private void RegisterActiveButtons()
     {
-        //botones activos
         Button[] buttons = FindObjectsByType<Button>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
 
         foreach (Button btn in buttons)
         {
-            //si no está registrado, o si estaba desactivado antes
             if (!registeredButtons.Contains(btn))
             {
                 btn.onClick.AddListener(PlayClickSound);
                 registeredButtons.Add(btn);
-                //Debug.Log("Registrado botón: " + btn.name);
             }
             else
             {
-                //si estaba en el HashSet pero estaba inactivo antes, ver si está activo ahora
-                //para que los botones que se activan y reactivan vuelvan a sonar
                 btn.onClick.RemoveListener(PlayClickSound);
-                btn.onClick.AddListener(PlayClickSound);  
+                btn.onClick.AddListener(PlayClickSound);
             }
         }
     }
@@ -73,6 +49,4 @@ public class UIAudioManager : MonoBehaviour
         if (clickSound && audioSource)
             audioSource.PlayOneShot(clickSound);
     }
-
 }
-

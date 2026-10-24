@@ -1,4 +1,4 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 
 public static class EssenceBank
 {
@@ -8,9 +8,6 @@ public static class EssenceBank
     public static int TotalBlue => PlayerPrefs.GetInt(BlueKey, 0);
     public static int TotalRed => PlayerPrefs.GetInt(RedKey, 0);
 
-    /// <summary>
-    /// Suma al banco persistente. Ignora valores negativos.
-    /// </summary>
     public static void Add(int blue, int red)
     {
         if (blue > 0) PlayerPrefs.SetInt(BlueKey, TotalBlue + blue);
@@ -18,9 +15,6 @@ public static class EssenceBank
         PlayerPrefs.Save();
     }
 
-    /// <summary>
-    /// Intenta gastar del banco. Devuelve true si pudo.
-    /// </summary>
     public static bool TrySpend(int blue, int red)
     {
         if (blue < 0 || red < 0) return false;
@@ -32,7 +26,6 @@ public static class EssenceBank
         return true;
     }
 
-    /// <summary>Set directo (por si querés sincronizar con otro sistema).</summary>
     public static void Set(int blue, int red)
     {
         PlayerPrefs.SetInt(BlueKey, Mathf.Max(0, blue));
@@ -40,7 +33,6 @@ public static class EssenceBank
         PlayerPrefs.Save();
     }
 
-    /// <summary>Borra las claves del banco.</summary>
     public static void Clear()
     {
         PlayerPrefs.DeleteKey(BlueKey);

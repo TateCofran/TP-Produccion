@@ -1,23 +1,27 @@
-using UnityEngine;
-
+﻿using UnityEngine;
 
 [CreateAssetMenu(menuName = "TD/Turret Data", fileName = "TurretDataSO_")]
 public class TurretDataSO : ScriptableObject
 {
-    [Header("Identidad")]
-    public string id; // opcional
+    [Header("Identity")]
+    public string id;
 
-    [Header("Rol / Tipo")]            
-    public string type;               // "attack", "aoe", "slow", etc.
+    [Header("Role / Type")]
+    public string type;
 
     [Header("Stats")]
-    public string displayName; //aca se guarda el tipo de torreta
-    //public Sprite icon;
+    public string displayName;
 
     public float damage;
     public float range;
     public float fireRate;
     public float projectileSpeed;
+
+    [Header("World Affinity")]
+    [Tooltip("World where this turret is stronger. Neutral turrets are not affected.")]
+    public WorldAffinity affinity = WorldAffinity.Neutral;
+    [Range(0f, 1f)] public float affinityBonus = 0.3f;
+    [Range(0f, 1f)] public float offWorldPenalty = 0.2f;
 
     [Header("Prefab")]
     public GameObject prefab;

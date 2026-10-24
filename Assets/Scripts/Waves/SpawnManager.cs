@@ -3,33 +3,29 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-/// <summary>
-/// Spawnea enemigos en base a las recetas de WaveManager,
-/// utilizando la lógica de spawns y rutas del GridGenerator:
-/// - Toma spawns con GetNextSpawnRoundRobin()
-/// - Pide ruta Exit->Core con TryGetRouteExitToCore()
-/// - Instancia desde EnemyPool y hace Enemy.Init(route)
-/// También notifica muertes a WaveManager.
-/// </summary>
 [DisallowMultipleComponent]
 public class SpawnManager : MonoBehaviour
 {
     [Header("Refs")]
-    [SerializeField] private WaveManager waveManager;   // arrastrá tu WaveManager
-    [SerializeField] private GridGenerator grid;        // arrastrá tu GridGenerator (el de tu código)
-    [SerializeField] private EnemyPool enemyPool;       // arrastrá tu EnemyPool
+    [SerializeField] private WaveManager waveManager;
+    [SerializeField] private GridGenerator grid;
+    [SerializeField] private EnemyPool enemyPool;
 
     [Header("Spawn")]
-    [Tooltip("Altura extra al spawnear (si el Grid no provee su propio offset).")]
+    [Tooltip("Extra height when spawning (if the grid does not provide its own offset).")]
     [SerializeField] private float defaultSpawnYOffset = 0.05f;
 
-    [Tooltip("Si falla construir la ruta con el Grid, usar línea recta Exit→Core.")]
+    [Tooltip("If the grid route cannot be built, use a straight line from the exit to the core.")]
     [SerializeField] private bool fallbackLineToCore = true;
 
-    [Tooltip("Hacer un yield (frame) entre steps para evitar micro-freezes.")]
+    [Tooltip("Enemy types that always spawn from the point with the longest route to the core.")]
+    [SerializeField] private List<EnemyType> farthestSpawnTypes = new List<EnemyType> { EnemyType.Boss, EnemyType.Boss2, EnemyType.Boss3 };
+
+    [Tooltip("Yield one frame between steps to avoid micro freezes.")]
     [SerializeField] private bool yieldBetweenSteps = true;
 
     private Coroutine runningWaveCo;
+    private bool spawningForWave;
 
     private HashSet<EnemyType> shownTypes = new HashSet<EnemyType>();
     [SerializeField] private List<EnemyData> enemyDatabase;
@@ -71,7 +67,7 @@ public class SpawnManager : MonoBehaviour
 
     private void HandleAnyEnemyKilled(Enemy e)
     {
-        if (waveManager) waveManager.NotifyEnemyKilled();
+        if (waveManager) waveManager.NotifyEnemyRemoved(!e.ReachedCore);
     }
 
     private void HandleWaveStarted(int waveNumber, int totalEnemies)
@@ -79,14 +75,14 @@ public class SpawnManager : MonoBehaviour
         var list = waveManager ? waveManager.RecipeList : null;
         if (!list || list.waveRecipes == null || list.waveRecipes.Count == 0)
         {
-            Debug.LogWarning("[SpawnManager] WaveRecipeList no asignado o vacío en WaveManager.");
+            Debug.LogWarning("[SpawnManager] WaveRecipeList is not assigned or empty on WaveManager");
             return;
         }
 
         var recipe = list.waveRecipes.FirstOrDefault(r => r.waveNumber == waveNumber);
         if (recipe == null)
         {
-            Debug.LogWarning($"[SpawnManager] No hay receta para la oleada {waveNumber}.");
+            Debug.LogWarning($"[SpawnManager] No recipe for wave {waveNumber}");
             return;
         }
 
@@ -109,12 +105,12 @@ public class SpawnManager : MonoBehaviour
     {
         if (!enemyPool)
         {
-            Debug.LogError("[SpawnManager] Falta EnemyPool.");
+            Debug.LogError("[SpawnManager] EnemyPool is missing");
             yield break;
         }
         if (!grid)
         {
-            Debug.LogError("[SpawnManager] Falta GridGenerator.");
+            Debug.LogError("[SpawnManager] GridGenerator is missing");
             yield break;
         }
 
@@ -126,7 +122,9 @@ public class SpawnManager : MonoBehaviour
 
             for (int i = 0; i < toSpawn; i++)
             {
+                spawningForWave = true;
                 SpawnOne(step.enemyType);
+                spawningForWave = false;
                 if (interval > 0f) yield return new WaitForSeconds(interval);
                 else yield return null;
             }
@@ -140,7 +138,6 @@ public class SpawnManager : MonoBehaviour
 
     private void SpawnOne(EnemyType type)
     {
-
         EnemyData data = GetDataFromType(type);
 
         if (data != null && !shownTypes.Contains(type))
@@ -149,27 +146,28 @@ public class SpawnManager : MonoBehaviour
             OnFirstTimeEnemySpawned?.Invoke(data);
         }
 
-        // 1) Elegimos EXIT desde el Grid (round-robin natural de tu sistema)
-        Vector3 exit = grid.GetNextSpawnRoundRobin();
+        bool useFarthest = farthestSpawnTypes != null && farthestSpawnTypes.Contains(type);
+        Vector3 exit = useFarthest ? grid.GetFarthestSpawnPoint() : grid.GetNextSpawnRoundRobin();
         if (exit == Vector3.zero)
         {
             var all = grid.GetSpawnPoints();
             if (all.Count == 0)
             {
-                Debug.LogWarning("[SpawnManager] Grid no tiene spawn points disponibles.");
+                Debug.LogWarning("[SpawnManager] The grid has no spawn points available");
+                CancelPendingEnemy();
                 return;
             }
             exit = all[0];
         }
 
-        // 2) Pedimos ruta Exit→Core al Grid (tu BFS). Si falla, fallback opcional.
         List<Vector3> route;
         bool hasRoute = grid.TryGetRouteExitToCore(exit, out route);
         if (!hasRoute || route == null || route.Count == 0)
         {
             if (!fallbackLineToCore)
             {
-                Debug.LogWarning("[SpawnManager] No se pudo construir ruta Exit→Core y fallback desactivado.");
+                Debug.LogWarning("[SpawnManager] Could not build a route from the exit to the core and the fallback is disabled");
+                CancelPendingEnemy();
                 return;
             }
 
@@ -180,25 +178,31 @@ public class SpawnManager : MonoBehaviour
             route.Add(new Vector3(corePos.x, y, corePos.z));
         }
 
-        // 3) Instanciamos desde el pool y llamamos Init(route)
         GameObject go = enemyPool.GetEnemy(type);
         if (!go)
         {
-            Debug.LogWarning($"[SpawnManager] EnemyPool devolvió null para {type}.");
+            Debug.LogWarning($"[SpawnManager] EnemyPool returned null for {type}");
+            CancelPendingEnemy();
             return;
         }
 
-        // Colocamos en el primer punto de la ruta
         go.transform.position = route[0];
 
         var enemy = go.GetComponent<Enemy>();
         if (!enemy)
         {
-            Debug.LogWarning("[SpawnManager] El prefab del pool no tiene componente Enemy.");
+            Debug.LogWarning("[SpawnManager] The pooled prefab has no Enemy component");
+            enemyPool.ReturnEnemy(go);
+            CancelPendingEnemy();
             return;
         }
 
-        enemy.Init(route); // Usa exactamente tu firma: Enemy.Init(List<Vector3>)
+        enemy.Init(route);
+    }
+
+    private void CancelPendingEnemy()
+    {
+        if (spawningForWave && waveManager) waveManager.NotifyEnemyRemoved(false);
     }
 
     private float TryGetGridYOffsetOrDefault()
@@ -213,7 +217,6 @@ public class SpawnManager : MonoBehaviour
         }
     }
 
-    // -------- utilidades para test rápido --------
     [ContextMenu("Test: Spawn 3 Minions")]
     private void TestSpawn3Minions()
     {

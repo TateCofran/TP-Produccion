@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using UnityEngine;
 
 [DisallowMultipleComponent]
@@ -27,7 +27,7 @@ public class WaveLightingController : MonoBehaviour
     {
         if (mainLight == null)
         {
-            mainLight = RenderSettings.sun; // toma la luz direccional del scene settings
+            mainLight = RenderSettings.sun;
         }
     }
 

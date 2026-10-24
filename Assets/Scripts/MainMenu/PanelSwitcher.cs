@@ -6,7 +6,7 @@ public class PanelSwitcher : MonoBehaviour
 {
     public static PanelSwitcher Instance { get; private set; }
 
-    [Header("Paneles registrados (arrastrá acá tus paneles)")]
+    [Header("Registered Panels")]
     [SerializeField] private List<GameObject> panels = new();
 
     private void Awake()

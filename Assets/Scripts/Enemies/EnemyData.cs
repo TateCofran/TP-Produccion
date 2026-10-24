@@ -9,6 +9,10 @@ public class EnemyData : ScriptableObject
     public float moveSpeed;
     public int damageToCore;
     public string abilityDescription;
-    // Si querés más control:
-    public EnemyType type; // Enum opcional si querés diferenciar visualmente
+
+    public EnemyType type;
+
+    [Header("World Phase")]
+    [Tooltip("World where this enemy can be targeted and damaged. Neutral means both worlds.")]
+    public WorldAffinity vulnerableIn = WorldAffinity.Neutral;
 }

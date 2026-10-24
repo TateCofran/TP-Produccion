@@ -1,5 +1,4 @@
-﻿// Ejemplo de TileStats.cs (si no existe)
-using UnityEngine;
+﻿using UnityEngine;
 
 public class TileStats : MonoBehaviour
 {

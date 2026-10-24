@@ -112,88 +112,85 @@ public class TutorialManager : MonoBehaviour
             running = false;
             panelRoot.SetActive(false);
 
-            // desbloquear todo
             AllowPlaceTiles = true;
             AllowPlaceTurrets = true;
             AllowStartWave = true;
             AllowWorldSwitch = true;
         }
 
-        // Resetear flag para no repetir
         TutorialProgress.ForceTutorialThisRun = false;
     }
-
 
     private TutorialStep[] BuildSteps()
     {
         return new TutorialStep[]
         {
             new TutorialStep(
-                "Bienvenido",
-                "Te enseñaré cómo defender el núcleo.",
+                "Welcome",
+                "I will teach you how to defend the core.",
                 TutorialEventType.Manual,
                 allowTiles:false, allowTurrets:false, allowWave:false, allowWorld:false
             ),
             new TutorialStep(
-                "Control de Cámara",
-                "Usá WASD (o las flechas) para mover la cámara.\n" +
-                "Usá la RUEDA DEL MOUSE para hacer zoom in/out.\n\n" +
-                "Probá moverte y hacer zoom, y cuando estés cómodo pulsá 'Continuar'.",
+                "Camera Controls",
+                "Use WASD (or the arrow keys) to move the camera.\n" +
+                "Use the MOUSE WHEEL to zoom in and out.\n\n" +
+                "Try moving and zooming, and press 'Continue' when you are ready.",
                 TutorialEventType.Manual,
                 allowTiles:false, allowTurrets:false, allowWave:false, allowWorld:false
             ),
             new TutorialStep(
-                "Colocá tu primer Tile",
-                "Elegí un Tile y colocá un Camino.",
+                "Place Your First Tile",
+                "Choose a tile and place a path.",
                 TutorialEventType.TilePlaced,
                 allowTiles:true, allowTurrets:false, allowWave:false, allowWorld:false
             ),
 
             new TutorialStep(
-                "Colocá una Torreta",
-                "Seleccioná una torreta y colócala en una celda libre.",
+                "Place A Turret",
+                "Select a turret and place it on a free cell.",
                 TutorialEventType.TurretPlaced,
                 allowTiles:false, allowTurrets:true, allowWave:false, allowWorld:false
             ),
 
             new TutorialStep(
-                "Iniciá la Oleada",
-                "Al colocar una torreta, la oleada comienza automáticamente.",
+                "Start The Wave",
+                "Placing a turret starts the wave automatically.",
                 TutorialEventType.WaveStarted,
                 allowTiles:false, allowTurrets:false, allowWave:true, allowWorld:false
             ),
 
             new TutorialStep(
-                "Defendé el Núcleo",
-                "Si el Núcleo llega a 0, perdés. ¡Defendelo!",
+                "Defend The Core",
+                "If the core reaches 0 you lose. Defend it!",
                 TutorialEventType.Manual,
                 allowTiles:true, allowTurrets:true, allowWave:true, allowWorld:true
             ),
 
             new TutorialStep(
-                "Cambio de Mundo",
-                "Podés cambiar entre el Mundo Normal y el Otro Mundo con la tecla J.\n",
+                "World Switch",
+                "You can switch between the Normal World and the Other World with the J key.\n",
                 TutorialEventType.Manual,
                 allowTiles:true, allowTurrets:true, allowWave:true, allowWorld:false
             ),
 
             new TutorialStep(
-                "Probá cambiar de mundo",
-                "Presioná J para cambiar de mundo ahora.",
+                "Try Switching Worlds",
+                "Press J to switch worlds now.",
                 TutorialEventType.WorldSwitched,
                 allowTiles:true, allowTurrets:true, allowWave:true, allowWorld:true
             ),
 
             new TutorialStep(
-                "Esencias por Cambio de Mundo",
-                "Cada vez que cambiás de mundo ganás esencias.\n" +
-                "Las esencias se usan para mejoras permanentes en el Laboratorio y el Taller.\n",
+                "Essences Per World Switch",
+                "Every time you switch worlds you earn essences.\n" +
+                "Essences are spent on permanent upgrades in the Lab and the Workshop.\n",
                 TutorialEventType.Manual,
                 allowTiles:true, allowTurrets:true, allowWave:true, allowWorld:true
             ),
             new TutorialStep(
-                "Sobreviví una oleada",
-                "Defendé tu núcleo hasta que termine la oleada en curso.",
+                "Survive A Wave",
+                "Defend your core until the current wave ends.",
                 TutorialEventType.WaveCompleted,
                 allowTiles:true, allowTurrets:true, allowWave:true, allowWorld:true
             ),
@@ -218,7 +215,6 @@ public class TutorialManager : MonoBehaviour
         AllowWorldSwitch = true;
 
         TutorialProgress.MarkCompleted();
-
     }
 
     public void NextStep()
@@ -269,7 +265,6 @@ public class TutorialManager : MonoBehaviour
         OnStepChanged?.Invoke(currentStep, s);
         if (s.eventType == TutorialEventType.TilePlaced)
         {
-            // Mostrar el panel de tiles inmediatamente
             var swUI = FindFirstObjectByType<ShiftingWorldUI>();
             if (swUI != null)
                 swUI.ForceOpenTilePanel();
@@ -283,7 +278,6 @@ public class TutorialManager : MonoBehaviour
     {
         yield return new WaitForSecondsRealtime(3f);
 
-        // Ocultamos el panel del tutorial mientras la oleada sigue
         HidePanel();
     }
 
@@ -351,23 +345,23 @@ public class TutorialManager : MonoBehaviour
         if (isFirstTime)
         {
             if (titleText != null)
-                titleText.text = "¡Tutorial completado!";
+                titleText.text = "Tutorial completed!";
             if (descText != null)
                 descText.text =
-                    "Sobreviviste a la oleada.\n\n" +
-                    "Ganaste <b>10 esencias del Mundo Normal</b>.\n" +
-                    "Volviendo al menú...";
+                    "You survived the wave.\n\n" +
+                    "You earned <b>10 Normal World essences</b>.\n" +
+                    "Returning to the menu...";
 
             EssenceBank.Add(10, 0);
         }
         else
         {
             if (titleText != null)
-                titleText.text = "Tutorial completado";
+                titleText.text = "Tutorial completed";
             if (descText != null)
                 descText.text =
-                    "¡Bien hecho!\n" +
-                    "Volviendo al menú...";
+                    "Well done!\n" +
+                    "Returning to the menu...";
         }
 
         if (continueButton != null) continueButton.gameObject.SetActive(false);
@@ -377,7 +371,6 @@ public class TutorialManager : MonoBehaviour
     }
     public void ForceStartTutorial()
     {
-        // Reset interno y forzar inicio aunque ya esté completado
         running = true;
         currentStep = -1;
 

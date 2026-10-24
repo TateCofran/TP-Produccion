@@ -1,4 +1,4 @@
-public interface IDamageDealer
+﻿public interface IDamageDealer
 {
     int GetDamage();
     void OnSuccessfulHit();

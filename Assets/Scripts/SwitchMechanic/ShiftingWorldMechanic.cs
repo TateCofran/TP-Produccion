@@ -2,28 +2,28 @@
 
 public class ShiftingWorldMechanic : MonoBehaviour
 {
-    public enum World { Normal, Otro }
+    public enum World { Normal, Other }
 
     [Header("Refs")]
     [SerializeField] private GridGenerator grid;
-    [SerializeField] private ShiftingWorldUI ui;  
+    [SerializeField] private ShiftingWorldUI ui;
     [SerializeField] private ShiftingWorldAudio shiftingWorldAudio;
     [SerializeField] private FogWorldMaterialSwitcher fogWorld;
 
-    [Header("Estado")]
+    [Header("State")]
     [SerializeField] private World currentWorld = World.Normal;
 
-    [Header("Progreso (0..100)")]
+    [Header("Progress (0..100)")]
     [SerializeField, Range(0f, 100f)] private float normalProgress = 0f;
     [SerializeField, Range(0f, 100f)] private float otherProgress = 0f;
 
-    [Header("Ajustes de velocidad")]
+    [Header("Speed Settings")]
     [SerializeField] private float speedPerSecond = 20f;
     [SerializeField, Range(0f, 1f)] private float passiveMultiplier = 0.25f;
 
-    [Header("Cambio de mundo")]
+    [Header("World Switch")]
     [SerializeField] private KeyCode toggleKey = KeyCode.J;
-    [SerializeField, Tooltip("Segundos de cooldown para volver a cambiar de mundo")]
+    [SerializeField, Tooltip("Cooldown in seconds before the world can be switched again")]
     private float toggleCooldownSeconds = 5f;
     private float toggleCooldownLeft = 0f;
 
@@ -47,9 +47,11 @@ public class ShiftingWorldMechanic : MonoBehaviour
 
     private void Start()
     {
+        WorldState.Initialize(currentWorld);
+
         if (fogWorld != null)
         {
-            bool startInOther = (currentWorld == World.Otro);
+            bool startInOther = (currentWorld == World.Other);
             isOtherWorld = startInOther;
             fogWorld.SetWorld(startInOther);
         }
@@ -57,7 +59,6 @@ public class ShiftingWorldMechanic : MonoBehaviour
 
     private void Update()
     {
-
         if (toggleCooldownLeft > 0f)
         {
             toggleCooldownLeft = Mathf.Max(0f, toggleCooldownLeft - Time.deltaTime);
@@ -67,16 +68,17 @@ public class ShiftingWorldMechanic : MonoBehaviour
         {
             float cooldownNormalized = (toggleCooldownSeconds <= 0f)
                 ? 1f
-                : 1f - (toggleCooldownLeft / toggleCooldownSeconds); // 1 = listo
+                : 1f - (toggleCooldownLeft / toggleCooldownSeconds);
             ui.SetWorldToggleCooldown(cooldownNormalized);
         }
-        if (Input.GetKeyDown(toggleKey) && toggleCooldownLeft <= 0f)
+        if (!GameTime.IsPaused && Input.GetKeyDown(toggleKey) && toggleCooldownLeft <= 0f)
         {
             if (TutorialManager.Instance != null && !TutorialManager.Instance.AllowWorldSwitch)
                 return;
 
-            currentWorld = (currentWorld == World.Normal) ? World.Otro : World.Normal;
-            isOtherWorld = (currentWorld == World.Otro);
+            currentWorld = (currentWorld == World.Normal) ? World.Other : World.Normal;
+            isOtherWorld = (currentWorld == World.Other);
+            WorldState.Set(currentWorld);
 
             if (shiftingWorldAudio != null)
                 shiftingWorldAudio.PlayWorldSound(isOtherWorld);
@@ -89,7 +91,7 @@ public class ShiftingWorldMechanic : MonoBehaviour
 
             toggleCooldownLeft = Mathf.Max(0.01f, toggleCooldownSeconds);
 
-            Debug.Log($"[ShiftingWorldMechanic] Cambié de mundo → {currentWorld}");
+            Debug.Log($"[ShiftingWorldMechanic] Switched world to {currentWorld}");
 
             TutorialEventHub.RaiseWorldSwitched();
         }
@@ -100,7 +102,6 @@ public class ShiftingWorldMechanic : MonoBehaviour
 
         float extraEnergyPerSecond = WorldEnergyRegistry.GetTotalChargePerSecond();
         float extraDelta = extraEnergyPerSecond * dt;
-
 
         if (currentWorld == World.Normal)
         {
@@ -137,7 +138,7 @@ public class ShiftingWorldMechanic : MonoBehaviour
                 {
                     normalPanelOpen = false;
                     normalWaitingChoice = false;
-                    normalProgress = 0f; // reset tras elegir/colocar tile
+                    normalProgress = 0f;
                 });
             }
         }
@@ -156,7 +157,7 @@ public class ShiftingWorldMechanic : MonoBehaviour
                 {
                     otherPanelOpen = false;
                     otherWaitingChoice = false;
-                    otherProgress = 0f; // reset tras colocar torreta
+                    otherProgress = 0f;
                 });
             }
         }
@@ -174,10 +175,10 @@ public class ShiftingWorldMechanic : MonoBehaviour
 
     private void HandleTurretLevelUp(TurretDataSO turret, TurretLevelData levelData)
     {
-        Debug.Log($"[ShiftingWorldMechanic] {turret.displayName} subió al nivel {levelData.currentLevel}!");
+        Debug.Log($"[ShiftingWorldMechanic] {turret.displayName} reached level {levelData.currentLevel}");
     }
 
-    private void HandleTurretChosen(TurretDataSO so) { /* noop visual/log si querés */ }
+    private void HandleTurretChosen(TurretDataSO so) {  }
 
     private void HandleTurretPlacedSuccessfully(World world)
     {
@@ -195,11 +196,10 @@ public class ShiftingWorldMechanic : MonoBehaviour
         }
     }
 
-    // ==== Helpers para la UI (si querés exponer ints también) ====
     public int GetNormalInt() => Mathf.Min(100, Mathf.FloorToInt(normalProgress));
     public int GetOtherInt() => Mathf.Min(100, Mathf.FloorToInt(otherProgress));
     public ShiftingWorldMechanic.World GetCurrentWorld()
     {
-        return currentWorld; // asumiendo que tu campo se llama 'currentWorld'
+        return currentWorld;
     }
 }

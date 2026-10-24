@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class TurretTargeting : MonoBehaviour, ITargetingBehavior
 {
@@ -8,35 +7,18 @@ public class TurretTargeting : MonoBehaviour, ITargetingBehavior
 
     private ITurretStats stats;
     private TurretShooter shooter;
-    private FireTurret fireTurret;
 
     void Awake()
     {
         stats = GetComponent<ITurretStats>();
         shooter = GetComponent<TurretShooter>();
-        fireTurret = GetComponent<FireTurret>();
     }
 
     void Update()
     {
-        float currentRange = stats.Range;
+        if (stats == null || shooter == null) return;
 
-        //para elegir nuevo enemigo dentro del rango
-        Transform targetInRange = GetTarget(transform.position, currentRange);
-        //if (targetInRange != null) Debug.Log("targetInRange " + targetInRange);
-
-        if (targetInRange != null)
-        {
-            if (fireTurret != null)
-            {
-                //fireTurret.MarkTarget(targetInRange);
-                shooter?.SetTarget(targetInRange);
-            }
-            else
-            {
-                shooter?.SetTarget(targetInRange);
-            }
-        }
+        shooter.SetTarget(GetTarget(transform.position, stats.Range));
     }
 
     public void NextMode()
@@ -46,32 +28,35 @@ public class TurretTargeting : MonoBehaviour, ITargetingBehavior
 
     public Transform GetTarget(Vector3 turretPosition, float range)
     {
-        var enemiesInRange = EnemyTracker.Enemies
-            .Where(enemy => enemy != null &&
-                            enemy.gameObject.activeInHierarchy &&
-                            enemy.Health != null &&
-                            !enemy.Health.IsDead() &&
-                            Vector3.Distance(turretPosition, enemy.transform.position) <= range)
-            .ToList();
+        float r2 = range * range;
+        Enemy best = null;
+        float bestScore = 0f;
 
-        if (enemiesInRange.Count == 0)
-            return null;
-
-        return mode switch
+        var list = EnemyTracker.Enemies;
+        for (int i = 0; i < list.Count; i++)
         {
-            TargetingMode.Closest => enemiesInRange
-                .OrderBy(x => Vector3.Distance(turretPosition, x.transform.position)).First().transform,
+            var e = list[i];
+            if (e == null || e.Health == null || e.Health.IsDead() || !e.IsTargetable()) continue;
 
-            TargetingMode.Farthest => enemiesInRange
-                .OrderByDescending(x => Vector3.Distance(turretPosition, x.transform.position)).First().transform,
+            float d2 = (e.transform.position - turretPosition).sqrMagnitude;
+            if (d2 > r2) continue;
 
-            TargetingMode.HighestHealth => enemiesInRange
-                .OrderByDescending(x => x.Health.GetCurrentHealth()).First().transform,
+            float score = mode switch
+            {
+                TargetingMode.Closest => -d2,
+                TargetingMode.Farthest => d2,
+                TargetingMode.HighestHealth => e.Health.GetCurrentHealth(),
+                TargetingMode.LowestHealth => -e.Health.GetCurrentHealth(),
+                _ => 0f
+            };
 
-            TargetingMode.LowestHealth => enemiesInRange
-                .OrderBy(x => x.Health.GetCurrentHealth()).First().transform,
+            if (best == null || score > bestScore)
+            {
+                best = e;
+                bestScore = score;
+            }
+        }
 
-            _ => null
-        };
+        return best != null ? best.transform : null;
     }
 }

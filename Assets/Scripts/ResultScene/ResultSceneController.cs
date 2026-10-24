@@ -51,11 +51,11 @@ public class ResultSceneController : MonoBehaviour
 
         if (gm == null)
         {
-            Debug.LogWarning("[ResultSceneController] GameManager no encontrado.");
+            Debug.LogWarning("[ResultSceneController] GameManager not found");
             return;
         }
 
-        if (titleText) titleText.text = gm.PlayerHasWon ? "¡Won!" : "Lose...";
+        if (titleText) titleText.text = gm.PlayerHasWon ? "Won!" : "Lose...";
 
         if (winImage) winImage.SetActive(gm.PlayerHasWon);
         if (loseImage) loseImage.SetActive(!gm.PlayerHasWon);

@@ -7,17 +7,17 @@ using UnityEditor;
 [ExecuteAlways]
 public class TileLayoutGizmos : MonoBehaviour
 {
-    [Header("Fuente de estado")]
+    [Header("State Source")]
     public GridGenerator gridGenerator;
 
-    [Header("Mostrar")]
+    [Header("Show")]
     public bool drawLastTileAABB = true;
     public bool drawUnusedExits = true;
     public bool drawPlacementPreviews = true;
     public bool drawExitArrow = true;
     public bool showPreviewLabelsOnlyForValid = true;
 
-    [Header("Colores")]
+    [Header("Colors")]
     public Color aabbWire = new Color(1f, 1f, 1f, 0.35f);
     public Color exitColor = Color.yellow;
     public Color okFill = new Color(0f, 1f, 0f, 0.18f);
@@ -25,7 +25,7 @@ public class TileLayoutGizmos : MonoBehaviour
     public Color edgeFill = new Color(1f, 0.6f, 0f, 0.22f);
     public Color previewWire = new Color(0f, 0f, 0f, 0.38f);
 
-    [Header("Tamaños")]
+    [Header("Sizes")]
     public float yLift = 0.02f;
     public float sphereRadius = 0.2f;
     public float labelHeight = 0.3f;
@@ -44,7 +44,6 @@ public class TileLayoutGizmos : MonoBehaviour
         EnsureStyles();
 #endif
 
-        // AABB del último tile
         if (drawLastTileAABB && gridGenerator.CurrentLayout != null)
         {
             var L = gridGenerator.CurrentLayout;
@@ -60,17 +59,16 @@ public class TileLayoutGizmos : MonoBehaviour
         }
 
 #if UNITY_EDITOR
-        // flecha del exit seleccionado
+
         if (drawExitArrow && gridGenerator.TryGetSelectedExitWorld(out var exitPos, out var dir))
         {
             Handles.color = Color.white;
             Vector3 dir3 = new Vector3(dir.x, 0f, dir.y);
             Handles.ArrowHandleCap(0, exitPos + Vector3.up * (yLift + 0.03f), Quaternion.LookRotation(dir3, Vector3.up), arrowSize, EventType.Repaint);
-            DrawLabel(exitPos + Vector3.up * (yLift + labelHeight), "EXIT sel.");
+            DrawLabel(exitPos + Vector3.up * (yLift + labelHeight), "EXIT sel");
         }
 #endif
 
-        // exits no usados
         if (drawUnusedExits)
         {
             var exits = gridGenerator.GetAvailableExits();
@@ -85,7 +83,6 @@ public class TileLayoutGizmos : MonoBehaviour
             }
         }
 
-        // previews
         if (drawPlacementPreviews)
         {
             var previews = gridGenerator.GetPlacementPreviews();
@@ -94,7 +91,6 @@ public class TileLayoutGizmos : MonoBehaviour
                 Vector3 center = pv.origin + new Vector3(pv.sizeXZ.x * 0.5f - pv.cellSize * 0.5f, yLift, pv.sizeXZ.y * 0.5f - pv.cellSize * 0.5f);
                 Vector3 size = new Vector3(pv.sizeXZ.x, 0.01f, pv.sizeXZ.y);
 
-                // usar el enum global PreviewStatus
                 switch (pv.status)
                 {
                     case PreviewStatus.Valid: Gizmos.color = okFill; break;
@@ -110,7 +106,7 @@ public class TileLayoutGizmos : MonoBehaviour
                 if (!showPreviewLabelsOnlyForValid || pv.valid)
                 {
                     string tag = pv.status == PreviewStatus.Valid ? "OK" :
-                                 pv.status == PreviewStatus.Overlap ? "SOLAPA" : "BORDE";
+                                 pv.status == PreviewStatus.Overlap ? "OVERLAP" : "EDGE";
                     DrawLabel(center + Vector3.up * (labelHeight * 0.6f), $"{tag}\n{pv.note}");
                 }
 #endif

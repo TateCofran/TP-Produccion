@@ -5,21 +5,21 @@ public class EnemyPool : MonoBehaviour
 {
     public static EnemyPool Instance;
 
-    [Header("Prefabs por tipo")]
+    [Header("Prefabs By Type")]
     [SerializeField] private GameObject minionEnemyPrefab;
     [SerializeField] private GameObject sprintEnemyPrefab;
     [SerializeField] private GameObject bigEnemyPrefab;
     [SerializeField] private GameObject miniBossPrefab;
     [SerializeField] private GameObject bossPrefab;
 
-    [Header("Prefabs por tipo")]
+    [Header("Prefabs By Type")]
     [SerializeField] private GameObject minionEnemyPrefab2;
     [SerializeField] private GameObject sprintEnemyPrefab2;
     [SerializeField] private GameObject bigEnemyPrefab2;
     [SerializeField] private GameObject miniBossPrefab2;
     [SerializeField] private GameObject bossPrefab2;
 
-    [Header("Prefabs por tipo")]
+    [Header("Prefabs By Type")]
     [SerializeField] private GameObject minionEnemyPrefab3;
     [SerializeField] private GameObject sprintEnemyPrefab3;
     [SerializeField] private GameObject bigEnemyPrefab3;
@@ -69,7 +69,7 @@ public class EnemyPool : MonoBehaviour
             pools[type] = new Queue<GameObject>();
             totalInstantiated[type] = 0;
 
-            if (!prefab) continue; // puede que no uses todos los tipos
+            if (!prefab) continue;
             Prewarm(type, initialSizePerType);
         }
     }
@@ -79,7 +79,7 @@ public class EnemyPool : MonoBehaviour
         for (int i = 0; i < count; i++)
         {
             var go = CreateNew(type);
-            ReturnEnemy(go); // lo deja inactivo en el pool
+            ReturnEnemy(go);
         }
     }
 
@@ -87,7 +87,7 @@ public class EnemyPool : MonoBehaviour
     {
         if (!prefabMap.TryGetValue(type, out var prefab) || !prefab)
         {
-            Debug.LogError($"[EnemyPool] No hay prefab asignado para {type}");
+            Debug.LogError($"[EnemyPool] No prefab assigned for {type}");
             return null;
         }
 
@@ -95,7 +95,6 @@ public class EnemyPool : MonoBehaviour
         go.name = $"{type}_{totalInstantiated[type]}";
         totalInstantiated[type]++;
 
-        // Asegurar componentes mínimos
         if (!go.TryGetComponent<Enemy>(out _)) go.AddComponent<Enemy>();
         if (!go.TryGetComponent<EnemyHealth>(out _)) go.AddComponent<EnemyHealth>();
         if (!go.TryGetComponent<EnemyHealthBar>(out _)) go.AddComponent<EnemyHealthBar>();
@@ -106,14 +105,9 @@ public class EnemyPool : MonoBehaviour
 
     private static bool IsDestroyed(GameObject go)
     {
-        // En Unity, un objeto destruido compara == null aunque no sea null CLR
         return go == null;
     }
 
-    /// <summary>
-    /// Saca un enemigo del pool. Si el slot está destruido, lo reemplaza.
-    /// Devuelve un GameObject activo y listo para configurar con Enemy.Init(route)
-    /// </summary>
     public GameObject GetEnemy(EnemyType type)
     {
         if (!pools.TryGetValue(type, out var q))
@@ -125,29 +119,24 @@ public class EnemyPool : MonoBehaviour
 
         GameObject go = null;
 
-        // Consumir hasta encontrar uno válido
         while (q.Count > 0 && (go == null))
         {
             var candidate = q.Dequeue();
             if (IsDestroyed(candidate))
             {
-                // slot inválido; seguimos
                 continue;
             }
             go = candidate;
         }
 
-        // Si no había, crear nuevo
         if (go == null)
         {
             go = CreateNew(type);
             if (go == null) return null;
         }
 
-        // Activar y resetear estado
         if (IsDestroyed(go))
         {
-            // si justo se destruyó entre chequeo y uso, creamos otro
             go = CreateNew(type);
             if (go == null) return null;
         }
@@ -155,15 +144,14 @@ public class EnemyPool : MonoBehaviour
         go.transform.SetParent(null, true);
         if (!go.activeSelf) go.SetActive(true);
 
-        // Reset lógico seguro
         var enemy = go.GetComponent<Enemy>();
         if (enemy != null)
         {
             try { enemy.ResetEnemy(); }
             catch (System.Exception ex)
             {
-                Debug.LogWarning($"[EnemyPool] ResetEnemy lanzó excepción: {ex.Message}");
-                // Recuperación mínima, alineada a tu API actual
+                Debug.LogWarning($"[EnemyPool] ResetEnemy threw an exception: {ex.Message}");
+
                 var hb = go.GetComponent<EnemyHealthBar>();
                 var h = go.GetComponent<EnemyHealth>();
                 if (hb && h)
@@ -174,23 +162,20 @@ public class EnemyPool : MonoBehaviour
                     hb.UpdateHealthBar(cur, max);
                 }
             }
-
         }
 
         return go;
     }
 
-    /// <summary> Devuelve el enemigo al pool (NO destruir). </summary>
     public void ReturnEnemy(GameObject go)
     {
         if (IsDestroyed(go)) return;
 
-        // Volver a estado inactivo y colgarlo bajo el pool
         go.SetActive(false);
         go.transform.SetParent(poolRoot, false);
 
         var enemy = go.GetComponent<Enemy>();
-        var type = enemy ? enemy.Type : EnemyType.Minion; // fallback
+        var type = enemy ? enemy.Type : EnemyType.Minion;
 
         if (!pools.ContainsKey(type))
         {
@@ -207,7 +192,6 @@ public class EnemyPool : MonoBehaviour
             int instantiated = totalInstantiated[type];
             int unused = pools[type].Count;
             int used = instantiated - unused;
-            // Debug.Log($"[EnemyPool] {type} → Inst: {instantiated} | Usados: {used} | En pool: {unused}");
         }
     }
 }

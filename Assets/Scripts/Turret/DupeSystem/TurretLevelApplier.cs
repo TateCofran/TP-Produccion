@@ -1,5 +1,4 @@
-﻿// TurretLevelApplier.cs
-using UnityEngine;
+﻿using UnityEngine;
 
 [RequireComponent(typeof(TurretStats))]
 public class TurretLevelApplier : MonoBehaviour
@@ -9,15 +8,49 @@ public class TurretLevelApplier : MonoBehaviour
 
     private TurretStats turretStats;
     private ITurretDupeSystem dupeSystem;
+    private bool subscribed;
 
     private void Awake()
     {
-        turretStats = GetComponent<TurretStats>();
-        dupeSystem = FindFirstObjectByType<TurretDupeSystem>();
+        ResolveDependencies();
+    }
+
+    private void OnEnable()
+    {
+        ResolveDependencies();
+        Subscribe();
+    }
+
+    private void OnDisable()
+    {
+        Unsubscribe();
+    }
+
+    private void ResolveDependencies()
+    {
+        if (turretStats == null) turretStats = GetComponent<TurretStats>();
+        if (dupeSystem == null) dupeSystem = FindFirstObjectByType<TurretDupeSystem>();
+    }
+
+    private void Subscribe()
+    {
+        if (subscribed || dupeSystem == null) return;
+        dupeSystem.OnTurretLevelUp += HandleTurretLevelUp;
+        subscribed = true;
+    }
+
+    private void Unsubscribe()
+    {
+        if (!subscribed || dupeSystem == null) return;
+        dupeSystem.OnTurretLevelUp -= HandleTurretLevelUp;
+        subscribed = false;
     }
 
     public void Initialize(TurretDataSO data)
     {
+        ResolveDependencies();
+        if (isActiveAndEnabled) Subscribe();
+
         turretData = data;
 
         if (dupeSystem != null)
@@ -27,29 +60,26 @@ public class TurretLevelApplier : MonoBehaviour
         }
     }
 
+    private void HandleTurretLevelUp(TurretDataSO so, TurretLevelData data)
+    {
+        if (so == null || so != turretData) return;
+        levelData = data;
+        ApplyLevelBonuses();
+    }
+
     private void ApplyLevelBonuses()
     {
         if (turretStats == null || levelData == null) return;
 
-        // Guardar los valores base del SO
-        float baseDamage = turretData.damage;
-        float baseRange = turretData.range;
-        float baseFireRate = turretData.fireRate;
-
-        // Aplicar multiplicadores de nivel
-        float finalDamage = baseDamage * levelData.damageMultiplier;
-        float finalRange = baseRange * levelData.rangeMultiplier;
-        float finalFireRate = baseFireRate * levelData.fireRateMultiplier;
-
-        // Aplicar al TurretStats
-        turretStats.ApplyLevelModifiers(finalDamage, finalRange, finalFireRate);
-
-        Debug.Log($"Torreta nivel {levelData.currentLevel} aplicada: " +
-                 $"Daño: {finalDamage}, Rango: {finalRange}, Velocidad: {finalFireRate}");
+        turretStats.SetLevel(
+            levelData.currentLevel,
+            levelData.damageMultiplier,
+            levelData.rangeMultiplier,
+            levelData.fireRateMultiplier);
     }
 
     public string GetLevelStatus()
     {
-        return levelData?.GetStatusText() ?? "Nvl 1";
+        return levelData?.GetStatusText() ?? "Lv 1";
     }
 }

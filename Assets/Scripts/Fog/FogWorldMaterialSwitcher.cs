@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 [DisallowMultipleComponent]
 [RequireComponent(typeof(Renderer))]
@@ -25,10 +25,6 @@ public sealed class FogWorldMaterialSwitcher : MonoBehaviour
         ApplyCurrentMaterial();
     }
 
-    /// <summary>
-    /// isOtherWorld = true  -> usa otherWorldMaterial.
-    /// isOtherWorld = false -> usa normalWorldMaterial.
-    /// </summary>
     public void SetWorld(bool isOtherWorld)
     {
         _isInOtherWorld = isOtherWorld;

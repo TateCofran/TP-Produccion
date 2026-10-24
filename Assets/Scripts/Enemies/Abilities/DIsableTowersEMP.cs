@@ -1,6 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+ï»¿using UnityEngine;
 
 public class Ability_DisableTowersEMP : MonoBehaviour, IEnemyAbility
 {
@@ -18,14 +16,10 @@ public class Ability_DisableTowersEMP : MonoBehaviour, IEnemyAbility
     private AbilityContext _ctx;
     private float _timer;
 
-    // Para no afectar dos veces la misma torre
-    private readonly HashSet<Turret> _affected = new HashSet<Turret>();
-
     public void Initialize(AbilityContext ctx)
     {
         _ctx = ctx;
         _timer = empInterval;
-        _affected.Clear();
     }
 
     public void Tick(float dt)
@@ -47,50 +41,18 @@ public class Ability_DisableTowersEMP : MonoBehaviour, IEnemyAbility
 
         Collider[] hits = Physics.OverlapSphere(center, radius, towerLayers);
 
-        Debug.Log("[EMP] Cast desde " + _ctx.Transform.name + " colliders: " + hits.Length);
-
         for (int i = 0; i < hits.Length; i++)
         {
             Turret turret = hits[i].GetComponentInParent<Turret>();
             if (turret == null)
                 continue;
 
-            // Para debug
-            Debug.Log("[EMP] Torre detectada: " + turret.name);
-
-            if (_affected.Contains(turret))
-                continue;
-
-            _affected.Add(turret);
-            DisableTower(turret);
+            turret.DisableFor(disableDuration);
         }
 
         if (empVfxPrefab != null)
         {
-            var vfx = Object.Instantiate(empVfxPrefab, center, Quaternion.identity);
-            Object.Destroy(vfx, 3f);
-        }
-    }
-
-    private void DisableTower(Turret turret)
-    {
-        if (turret == null) return;
-
-        // Desactiva comportamientos de combate
-        turret.SetCombatEnabled(false);
-
-        // Reactivar después de X segundos
-        _ctx.Enemy.StartCoroutine(ReenableAfter(turret));
-    }
-
-    private IEnumerator ReenableAfter(Turret turret)
-    {
-        yield return new WaitForSeconds(disableDuration);
-
-        if (turret != null)
-        {
-            turret.SetCombatEnabled(true);
-            _affected.Remove(turret);
+            VfxPool.Spawn(empVfxPrefab, center, Quaternion.identity, 3f);
         }
     }
 
@@ -100,7 +62,6 @@ public class Ability_DisableTowersEMP : MonoBehaviour, IEnemyAbility
     public void OnWaypoint(int index) { }
     public void ResetRuntime()
     {
-        _affected.Clear();
         _timer = empInterval;
     }
 

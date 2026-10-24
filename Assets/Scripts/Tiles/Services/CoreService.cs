@@ -1,4 +1,4 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 
 public sealed class CoreService : ICoreService
 {
@@ -22,14 +22,13 @@ public sealed class CoreService : ICoreService
 
         if (_corePrefab == null)
         {
-            Debug.LogWarning("[CoreService] corePrefab no asignado.");
+            Debug.LogWarning("[CoreService] corePrefab is not assigned");
             return;
         }
 
         _coreInstance = Object.Instantiate(_corePrefab, pos, Quaternion.identity, _root);
         _coreInstance.name = "Core";
 
-        // Asegurar setup básico
         if (_coreInstance.GetComponent<Core>() == null)
             _coreInstance.AddComponent<Core>();
 

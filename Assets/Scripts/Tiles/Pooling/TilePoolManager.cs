@@ -1,10 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-/// <summary>
-/// Manager de pooling para tiles (Grass, Path, etc.).
-/// Cumple con la interfaz ITilePoolManager utilizada por el LayoutInstantiator.
-/// </summary>
 [DisallowMultipleComponent]
 public sealed class TilePoolManager : MonoBehaviour, ITilePoolManager
 {
@@ -17,14 +13,8 @@ public sealed class TilePoolManager : MonoBehaviour, ITilePoolManager
     public void InitializePools()
     {
         if (!useObjectPooling) return;
-
-        // Ya no dependemos directamente de GridGenerator (principio DIP)
-        // => Prefabs se pueden registrar manualmente o a través de un inicializador externo.
     }
 
-    /// <summary>
-    /// Inicializa un pool manualmente (puede llamarse desde GridGenerator o desde otro bootstrap).
-    /// </summary>
     public void InitializePool(GameObject prefab, int size)
     {
         if (prefab == null || _objectPools.ContainsKey(prefab)) return;

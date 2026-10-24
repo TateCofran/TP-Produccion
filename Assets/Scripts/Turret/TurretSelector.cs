@@ -4,26 +4,44 @@ using UnityEngine.EventSystems;
 public class TurretSelector : MonoBehaviour
 {
     [Header("Raycast")]
-    [SerializeField] private Camera cam;                 // cámara a usar (si no se asigna usa Camera.main)
-    [SerializeField] private LayerMask turretLayer = ~0; // capa de torretas (opcional)
+    [SerializeField] private Camera cam;
+    [SerializeField] private LayerMask turretLayer = ~0;
     [SerializeField] private float maxDistance = 1000f;
 
     private Turret selectedTurret;
 
     private Camera Cam => cam ? cam : Camera.main;
 
+    private void OnEnable()
+    {
+        EscapeRouter.Register(HandleEscape, EscapeRouter.PrioritySelection);
+    }
+
+    private void OnDisable()
+    {
+        EscapeRouter.Unregister(HandleEscape);
+    }
+
     private void Update()
     {
+        if (GameTime.IsPaused) return;
+
         if (Input.GetMouseButtonDown(0))
             HandleSelection();
 
-        if (Input.GetKeyDown(KeyCode.Escape) || Input.GetMouseButtonDown(1))
+        if (Input.GetMouseButtonDown(1))
             DeselectTurret();
+    }
+
+    private bool HandleEscape()
+    {
+        if (selectedTurret == null) return false;
+        DeselectTurret();
+        return true;
     }
 
     private void HandleSelection()
     {
-        // Evitar clicks a través de UI
         if (EventSystem.current && EventSystem.current.IsPointerOverGameObject())
             return;
 
@@ -42,7 +60,6 @@ public class TurretSelector : MonoBehaviour
             }
         }
 
-        // click vacío = deseleccionar actual
         DeselectTurret();
     }
 
@@ -50,15 +67,12 @@ public class TurretSelector : MonoBehaviour
     {
         if (selectedTurret == turret)
         {
-            // ya está seleccionada → refrescar panel igual
             TurretInfoPanel.Instance?.Show(turret);
             return;
         }
 
         if (selectedTurret != null)
-        {
-            selectedTurret.HideRange(); // esto además apaga todos los demás gracias al visualizador
-        }
+            selectedTurret.HideRange();
 
         selectedTurret = turret;
         selectedTurret.ShowRange();

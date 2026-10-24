@@ -12,8 +12,8 @@ public class UpgradeDetailUI : MonoBehaviour
     [SerializeField] private Button buyButton;
 
     [Header("Cross UI")]
-    [SerializeField] private UpgradeListUI listUI;                 // para refrescar niveles a la izquierda
-    [SerializeField] private EssenceDisplayUI essenceDisplayUI;    // para refrescar totales mostrados
+    [SerializeField] private UpgradeListUI listUI;
+    [SerializeField] private EssenceDisplayUI essenceDisplayUI;
 
     private UpgradeSO _current;
 
@@ -62,18 +62,14 @@ public class UpgradeDetailUI : MonoBehaviour
 
         if (UpgradeSystemBootstrap.Service.TryPurchase(_current))
         {
-            // Refrescar panel derecho
             Show(_current);
 
-            // Refrescar panel izquierdo (niveles)
             if (listUI != null) listUI.RefreshLevels();
 
-            // Refrescar contador de esencias del panel
             if (essenceDisplayUI != null) essenceDisplayUI.UpdateEssenceDisplay();
         }
         else
         {
-            // Podés mostrar feedback de error aquí
         }
     }
 }

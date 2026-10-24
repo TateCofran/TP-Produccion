@@ -7,12 +7,10 @@ public class TurretManager : MonoBehaviour
 {
     [Header("UI")]
     public GameObject turretUIPrefab;
-    //public Transform turretsPanel;
 
     private List<Turret> activeTurrets = new List<Turret>();
     public static TurretManager Instance { get; private set; }
 
-    // Probabilidad global de fallo (0 = nunca falla, 1 = siempre falla)
     private float globalTurretMissChance = 0f;
 
     private void Awake()
@@ -48,5 +46,4 @@ public class TurretManager : MonoBehaviour
     {
         return globalTurretMissChance;
     }
-
 }

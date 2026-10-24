@@ -13,6 +13,14 @@ public class TurretStats : MonoBehaviour, ITurretStats
     private float baseRange;
     private float baseFireRate;
 
+    private float levelDamageMult = 1f;
+    private float levelRangeMult = 1f;
+    private float levelFireRateMult = 1f;
+
+    private WorldAffinity affinity = WorldAffinity.Neutral;
+    private float affinityBonus;
+    private float offWorldPenalty;
+
     [Header("Actual Stats")]
     [SerializeField] private float currentDamage;
     [SerializeField] private float currentRange;
@@ -28,15 +36,24 @@ public class TurretStats : MonoBehaviour, ITurretStats
     public float FireRate => currentFireRate;
     public int UpgradeLevel => upgradeLevel;
     public int MaxUpgradeLevel => maxUpgradeLevel;
+    public WorldAffinity Affinity => affinity;
+    public bool IsInAffinityWorld => affinity != WorldAffinity.Neutral && WorldState.Matches(affinity);
+    public float AffinityMultiplier
+    {
+        get
+        {
+            if (affinity == WorldAffinity.Neutral) return 1f;
+            return WorldState.Matches(affinity) ? 1f + affinityBonus : 1f - offWorldPenalty;
+        }
+    }
 
-    private IRangeDisplay rangeDisplay;        // puede vivir en este GO o en un hijo
+    private IRangeDisplay rangeDisplay;
     private TurretDataHolder dataHolder;
 
     public event System.Action OnStatsChanged;
 
     private void Awake()
     {
-        // Buscar en este GO y también en hijos (incluso inactivos en el editor)
         rangeDisplay = GetComponent<IRangeDisplay>();
         if (rangeDisplay == null)
             rangeDisplay = GetComponentInChildren<IRangeDisplay>(true);
@@ -44,36 +61,50 @@ public class TurretStats : MonoBehaviour, ITurretStats
         dataHolder = GetComponent<TurretDataHolder>();
     }
 
-    // === Inicialización con SO ===
+    private void OnEnable()
+    {
+        WorldState.OnWorldChanged += HandleWorldChanged;
+    }
+
+    private void OnDisable()
+    {
+        WorldState.OnWorldChanged -= HandleWorldChanged;
+    }
+
+    private void HandleWorldChanged(ShiftingWorldMechanic.World world)
+    {
+        if (affinity != WorldAffinity.Neutral)
+            RecalculateStats();
+    }
+
     public void InitializeFromSO(TurretDataSO so)
     {
         if (so == null) return;
 
-        float mod = (Application.isPlaying && GameModifiersManager.Instance)
-            ? GameModifiersManager.Instance.turretDamageMultiplier
-            : 1f;
+        baseDamage = so.damage;
+        baseRange = so.range;
+        baseFireRate = so.fireRate;
 
-        baseDamage = Mathf.Round(so.damage * mod * 10f) / 10f;
-        baseRange = Mathf.Round(so.range * 10f) / 10f;
-        baseFireRate = Mathf.Round(so.fireRate * 10f) / 10f;
+        affinity = so.affinity;
+        affinityBonus = so.affinityBonus;
+        offWorldPenalty = so.offWorldPenalty;
 
-        // === APLICAR UPGRADES PERMANENTES ===
         TurretPermanentUpgrades.ApplyPermanentUpgrades(
             ref baseDamage,
             ref baseRange,
             ref baseFireRate
         );
-        // ===================================
 
         RecalculateStats();
         UpdateRangeVisualizer();
     }
 
-    public void ApplyLevelModifiers(float damage, float range, float fireRate)
+    public void SetLevel(int level, float damageMult, float rangeMult, float fireRateMult)
     {
-        baseDamage = damage;
-        baseRange = range;
-        baseFireRate = fireRate;
+        upgradeLevel = Mathf.Clamp(level, 1, maxUpgradeLevel);
+        levelDamageMult = damageMult;
+        levelRangeMult = rangeMult;
+        levelFireRateMult = fireRateMult;
 
         RecalculateStats();
         UpdateRangeVisualizer();
@@ -92,18 +123,15 @@ public class TurretStats : MonoBehaviour, ITurretStats
             damageMod *= GameModifiersManager.Instance.turretDamageMultiplier;
         }
 
-        currentDamage = Mathf.Round(baseDamage * damageMod * 10f) / 10f;
-        currentRange = Mathf.Round(baseRange * rangeMod * 10f) / 10f;
-        currentFireRate = Mathf.Round(baseFireRate * fireRateMod * 10f) / 10f;
+        currentDamage = Round1(baseDamage * levelDamageMult * damageMod * AffinityMultiplier);
+        currentRange = Round1(baseRange * levelRangeMult * rangeMod);
+        currentFireRate = Round1(baseFireRate * levelFireRateMult * fireRateMod);
 
         OnStatsChanged?.Invoke();
     }
 
-    /// <summary>
-    /// Actualiza el visualizador acorde al rango actual.
-    /// Si está visible: Show(currentRange).
-    /// Si está oculto y es TurretRangeVisualizer: SetRadius(currentRange, false) para refrescarlo sin mostrar.
-    /// </summary>
+    private static float Round1(float v) => Mathf.Round(v * 10f) / 10f;
+
     private void UpdateRangeVisualizer()
     {
         if (rangeDisplay == null) return;
@@ -114,16 +142,13 @@ public class TurretStats : MonoBehaviour, ITurretStats
         }
         else
         {
-            // Si usás el TurretRangeVisualizer que te pasé, esto refresca "en frío"
             if (rangeDisplay is TurretRangeVisualizer concrete)
             {
                 concrete.SetRadius(currentRange, forceRedraw: false);
             }
-            // Si NO es ese tipo, lo dejamos así: se actualizará la próxima vez que se haga Show().
         }
     }
 
-    // Helpers para tu lógica de selección/deselección
     public void ShowRange()
     {
         if (rangeDisplay == null) return;

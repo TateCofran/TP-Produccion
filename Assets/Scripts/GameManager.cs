@@ -1,5 +1,5 @@
-using System.Collections;
-using System.Reflection;
+ï»¿using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -7,20 +7,20 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager Instance;
 
-    [Header("UI Pausa")]
+    [Header("Pause UI")]
     [SerializeField] private GameObject pausePanel;
-    [Tooltip("Intentará encontrar el panel por este Tag si 'pausePanel' está vacío al cargar la escena.")]
+    [Tooltip("Tag used to find the pause panel when 'pausePanel' is empty after a scene load.")]
     [SerializeField] private string pausePanelTag = "PausePanel";
-    [Tooltip("Si no hay Tag, probará por nombre exacto en la jerarquía.")]
+    [Tooltip("Exact object name used as a fallback when the tag is not found.")]
     [SerializeField] private string pausePanelName = "PausePanel";
 
     private bool isPaused = false;
 
-    [Header("Victoria")]
+    [Header("Victory")]
     [SerializeField] private string resultScene = "ResultScene";
     [SerializeField] private int wavesToWin = 10;
 
-    [Header("Escenas comunes")]
+    [Header("Scenes")]
     [SerializeField] private string mainMenuScene = "Menu";
     [SerializeField] private string gameplayScene = "GameScene";
 
@@ -31,10 +31,14 @@ public class GameManager : MonoBehaviour
     public int totalBlueEssences { get; private set; }
     public int totalRedEssences { get; private set; }
 
-    private bool subscribedToWave = false;
+    public bool IsPauseMenuOpen => isPaused;
 
-    [Header("Debug / Testeo")]
-    [Tooltip("Oleada a la que saltará el botón de testeo.")]
+    private bool subscribedToWave = false;
+    private bool runEnded = false;
+    private Coroutine subscribeRoutine;
+
+    [Header("Debug")]
+    [Tooltip("Wave the debug button jumps to.")]
     [Min(1), SerializeField] private int debugWaveToJump = 1;
     public int DebugWaveToJump
     {
@@ -42,11 +46,8 @@ public class GameManager : MonoBehaviour
         set => debugWaveToJump = Mathf.Max(1, value);
     }
 
-    [Tooltip("Tag que se usa para encontrar enemigos al completar la oleada por debug.")]
-    [SerializeField] private string enemyTag = "Enemy";
-
     [Header("Debug Core")]
-    [Tooltip("Estado actual del cheat de vida infinita del Core (solo lectura visual).")]
+    [Tooltip("Current state of the core infinite health cheat (read only).")]
     [SerializeField] private bool coreInfiniteHealth = false;
 
     private Core cachedCore;
@@ -76,6 +77,8 @@ public class GameManager : MonoBehaviour
             WaveManager.Instance.OnWaveEnded -= NotifyWaveCompleted;
     }
 
+    private bool IsGameplayScene => SceneManager.GetActiveScene().name == gameplayScene;
+
     private void HandleSceneLoaded(Scene scene, LoadSceneMode mode)
     {
         TryBindPausePanel();
@@ -84,7 +87,14 @@ public class GameManager : MonoBehaviour
 
         cachedCore = null;
 
-        StartCoroutine(SubscribeWhenReady());
+        if (subscribeRoutine != null)
+        {
+            StopCoroutine(subscribeRoutine);
+            subscribeRoutine = null;
+        }
+
+        if (scene.name == gameplayScene)
+            subscribeRoutine = StartCoroutine(SubscribeWhenReady());
     }
 
     private IEnumerator SubscribeWhenReady()
@@ -97,21 +107,33 @@ public class GameManager : MonoBehaviour
             WaveManager.Instance.OnWaveEnded -= NotifyWaveCompleted;
             WaveManager.Instance.OnWaveEnded += NotifyWaveCompleted;
             subscribedToWave = true;
-            Debug.Log("[GameManager] Suscrito correctamente a WaveManager.OnWaveEnded.");
         }
+
+        subscribeRoutine = null;
     }
 
     private void Update()
     {
-        if (!isPaused)
-            timePlayed += Time.deltaTime;
+        if (!GameTime.IsPaused)
+            timePlayed += Time.unscaledDeltaTime;
+
+        if (!IsGameplayScene) return;
 
         if (Input.GetKeyDown(KeyCode.Escape))
-        {
+            HandleEscape();
+    }
 
-            if (isPaused) ResumeGame();
-            else PauseGame();
+    private void HandleEscape()
+    {
+        if (isPaused)
+        {
+            ResumeGame();
+            return;
         }
+
+        if (EscapeRouter.TryConsume()) return;
+
+        PauseGame();
     }
 
     #region Pause Panel Binding
@@ -120,19 +142,13 @@ public class GameManager : MonoBehaviour
     {
         pausePanel = panel;
         if (pausePanel != null)
-        {
-            // Aseguramos estado acorde al flag actual
             pausePanel.SetActive(isPaused);
-            Debug.Log("[GameManager] PausePanel registrado por Binder: " + pausePanel.name);
-        }
     }
-
 
     private void TryBindPausePanel()
     {
         if (pausePanel != null) return;
 
-        // 1) Intento por Tag
         if (!string.IsNullOrEmpty(pausePanelTag))
         {
             var byTag = GameObject.FindGameObjectWithTag(pausePanelTag);
@@ -140,32 +156,30 @@ public class GameManager : MonoBehaviour
             {
                 pausePanel = byTag;
                 pausePanel.SetActive(isPaused);
-                Debug.Log("[GameManager] PausePanel enlazado por Tag: " + pausePanelTag);
                 return;
             }
         }
-
 
         if (!string.IsNullOrEmpty(pausePanelName))
         {
             var allRoots = SceneManager.GetActiveScene().GetRootGameObjects();
             foreach (var root in allRoots)
             {
-                var t = root.transform;
-                var found = FindDeepChildByName(t, pausePanelName);
+                var found = FindDeepChildByName(root.transform, pausePanelName);
                 if (found != null)
                 {
                     pausePanel = found.gameObject;
                     pausePanel.SetActive(isPaused);
-                    Debug.Log("[GameManager] PausePanel enlazado por Nombre: " + pausePanelName);
                     return;
                 }
             }
         }
 
-        Debug.LogWarning("[GameManager] No se pudo enlazar el Pause Panel. " +
-                         "Asignalo por Inspector, poné un Tag '" + pausePanelTag +
-                         "' o asegurá que exista un objeto llamado '" + pausePanelName + "'.");
+        if (IsGameplayScene)
+        {
+            Debug.LogWarning("[GameManager] Could not bind the pause panel. Assign it in the inspector, tag it '" +
+                             pausePanelTag + "' or make sure an object named '" + pausePanelName + "' exists.");
+        }
     }
 
     private Transform FindDeepChildByName(Transform parent, string childName)
@@ -178,39 +192,33 @@ public class GameManager : MonoBehaviour
         }
         return null;
     }
+
     #endregion
 
-    #region Pausa
-    public void PauseOnly()
-    {
-        if (isPaused) return;       // si ya está pausado, no hacer nada
-        isPaused = true;
-        Time.timeScale = 0f;
-        AudioListener.pause = true;
-    }
+    #region Pause
 
     public void PauseGame()
     {
         if (isPaused) return;
         isPaused = true;
-        Time.timeScale = 0f;
+        GameTime.RequestPause();
         if (pausePanel == null) TryBindPausePanel();
         if (pausePanel != null) pausePanel.SetActive(true);
-        AudioListener.pause = true;
     }
 
     public void ResumeGame()
     {
         if (!isPaused) return;
         isPaused = false;
-        Time.timeScale = 1f;
+        GameTime.ReleasePause();
         if (pausePanel == null) TryBindPausePanel();
         if (pausePanel != null) pausePanel.SetActive(false);
-        AudioListener.pause = false;
     }
+
     #endregion
 
-    #region Flujo de partida
+    #region Run Flow
+
     public void NotifyWaveCompleted()
     {
         wavesCompleted++;
@@ -232,6 +240,9 @@ public class GameManager : MonoBehaviour
 
     private void EndRun()
     {
+        if (runEnded) return;
+        runEnded = true;
+
         if (WaveManager.Instance != null)
             totalEnemiesKilled = WaveManager.Instance.GetTotalEnemiesKilled();
 
@@ -240,17 +251,24 @@ public class GameManager : MonoBehaviour
         {
             totalBlueEssences = essences.TotalBlue;
             totalRedEssences = essences.TotalRed;
-
             EssenceBank.Add(totalBlueEssences, totalRedEssences);
-
-            Time.timeScale = 1f;
-            AudioListener.pause = false;
-            SceneManager.LoadScene(resultScene);
         }
+        else
+        {
+            totalBlueEssences = 0;
+            totalRedEssences = 0;
+            Debug.LogWarning("[GameManager] WorldSwitchPoints not found. The run ends without essences.");
+        }
+
+        isPaused = false;
+        GameTime.ResetAll();
+        SceneManager.LoadScene(resultScene);
     }
+
     #endregion
 
-    #region Botones ResultScene
+    #region Result Scene Buttons
+
     public void OnMainMenuButton()
     {
         ResetRunState(false);
@@ -265,12 +283,13 @@ public class GameManager : MonoBehaviour
         var essences = FindFirstObjectByType<WorldSwitchPoints>();
         if (essences != null)
         {
-            essences.AddBlueEssence(-essences.TotalBlue); 
-            essences.AddRedEssence(-essences.TotalRed);   
+            essences.AddBlueEssence(-essences.TotalBlue);
+            essences.AddRedEssence(-essences.TotalRed);
         }
 
         SceneManager.LoadScene(gameplayScene);
     }
+
     #endregion
 
     private void ResetRunState(bool keepTime)
@@ -278,13 +297,13 @@ public class GameManager : MonoBehaviour
         wavesCompleted = 0;
         if (!keepTime) timePlayed = 0f;
         isPaused = false;
-        Time.timeScale = 1f;
-        AudioListener.pause = false;
+        GameTime.ResetAll();
         subscribedToWave = false;
-
+        runEnded = false;
     }
 
-    // ====== DEBUG BUTTONS EXISTENTES ======
+    #region Debug
+
     public void Debug_Editor_JumpToWave() => TryJumpToWave(debugWaveToJump);
     public void Debug_Editor_ForceWin() => WinGame();
     public void Debug_Editor_ForceLose() => GameOver();
@@ -294,45 +313,12 @@ public class GameManager : MonoBehaviour
         var wm = WaveManager.Instance;
         if (wm == null)
         {
-            Debug.LogWarning("[GameManager] WaveManager.Instance no está disponible. ¿Estás en la escena de juego?");
+            Debug.LogWarning("[GameManager] WaveManager.Instance is not available. Are you in the gameplay scene");
             return;
         }
 
-        var t = wm.GetType();
-
-        // Intentar métodos comunes con firma (int)
-        string[] candidateMethods =
-        {
-            "JumpToWave","SetCurrentWave","SetWave","StartWaveNumber","StartWave","GoToWave"
-        };
-
-        foreach (var name in candidateMethods)
-        {
-            MethodInfo m = t.GetMethod(name, BindingFlags.Public | BindingFlags.Instance, null, new[] { typeof(int) }, null);
-            if (m != null)
-            {
-                m.Invoke(wm, new object[] { waveNumber });
-                Debug.Log($"[GameManager] Salto a la oleada {waveNumber} usando {name}.");
-                return;
-            }
-        }
-
-        // Intentar propiedad pública
-        string[] candidateProps = { "CurrentWave", "WaveIndex" };
-        foreach (var pName in candidateProps)
-        {
-            PropertyInfo p = t.GetProperty(pName, BindingFlags.Public | BindingFlags.Instance);
-            if (p != null && p.CanWrite)
-            {
-                p.SetValue(wm, waveNumber);
-                Debug.Log($"[GameManager] Seteada propiedad {pName} = {waveNumber}. " +
-                          "Si tu sistema requiere iniciar/actualizar, llamalo manualmente.");
-                return;
-            }
-        }
-
-        Debug.LogWarning("[GameManager] No encontré una API pública en WaveManager para cambiar de oleada. " +
-                         "Agregá en WaveManager: public void JumpToWave(int wave).");
+        wm.JumpToWave(waveNumber);
+        Debug.Log($"[GameManager] Jumped to wave {waveNumber}");
     }
 
     public void Debug_Editor_CompleteCurrentWaveAndKillEnemies()
@@ -340,38 +326,30 @@ public class GameManager : MonoBehaviour
         var wm = WaveManager.Instance;
         if (wm == null)
         {
-            Debug.LogWarning("[GameManager] No se puede completar la oleada: WaveManager.Instance es null.");
+            Debug.LogWarning("[GameManager] Cannot complete the wave: WaveManager.Instance is null");
             return;
         }
 
-        int enemiesAliveBefore = wm.GetEnemiesAlive();
-        if (enemiesAliveBefore <= 0)
+        if (wm.GetEnemiesAlive() <= 0)
         {
-            Debug.Log("[GameManager] Debug_CompleteWave: no hay enemigos vivos en esta oleada.");
+            Debug.Log("[GameManager] Debug_CompleteWave: there are no enemies alive in this wave");
             return;
         }
 
-        int destroyed = 0;
-
-        if (!string.IsNullOrEmpty(enemyTag))
+        var enemies = new List<Enemy>(EnemyTracker.Enemies);
+        int killed = 0;
+        foreach (var e in enemies)
         {
-            var enemies = GameObject.FindGameObjectsWithTag(enemyTag);
-            foreach (var e in enemies)
-            {
-                if (e == null) continue;
-                Destroy(e);
-                destroyed++;
-            }
+            if (e == null) continue;
+            e.NotifyDeath();
+            killed++;
         }
 
-        // Forzamos a WaveManager a considerar que todos los enemigos murieron
-        for (int i = 0; i < enemiesAliveBefore; i++)
-        {
-            wm.NotifyEnemyKilled();
-        }
+        int remaining = wm.GetEnemiesAlive();
+        for (int i = 0; i < remaining; i++)
+            wm.NotifyEnemyRemoved(false);
 
-        Debug.Log($"[GameManager] Debug_CompleteWave: destruidos {destroyed} enemigos (tag '{enemyTag}') " +
-                  $"y notificados {enemiesAliveBefore} kills a WaveManager.");
+        Debug.Log($"[GameManager] Debug_CompleteWave: {killed} enemies returned to the pool, {remaining} pending enemies discounted");
     }
 
     private Core GetCoreInstance()
@@ -380,7 +358,7 @@ public class GameManager : MonoBehaviour
         {
             cachedCore = FindFirstObjectByType<Core>();
             if (cachedCore == null)
-                Debug.LogWarning("[GameManager] No se encontró un Core en la escena actual.");
+                Debug.LogWarning("[GameManager] No Core found in the current scene");
         }
         return cachedCore;
     }
@@ -390,14 +368,14 @@ public class GameManager : MonoBehaviour
         var core = GetCoreInstance();
         if (core == null)
         {
-            Debug.LogWarning("[GameManager] No se puede alternar vida infinita: Core no encontrado.");
+            Debug.LogWarning("[GameManager] Cannot toggle infinite health: Core not found");
             return;
         }
 
         coreInfiniteHealth = !coreInfiniteHealth;
         core.SetInfiniteHealth(coreInfiniteHealth);
 
-        Debug.Log($"[GameManager] Core vida infinita: {(coreInfiniteHealth ? "ACTIVADA" : "DESACTIVADA")}.");
+        Debug.Log($"[GameManager] Core infinite health: {(coreInfiniteHealth ? "ON" : "OFF")}");
     }
 
     public void Debug_Editor_SetCoreInfiniteHealth(bool enabled)
@@ -405,13 +383,15 @@ public class GameManager : MonoBehaviour
         var core = GetCoreInstance();
         if (core == null)
         {
-            Debug.LogWarning("[GameManager] No se puede setear vida infinita: Core no encontrado.");
+            Debug.LogWarning("[GameManager] Cannot set infinite health: Core not found");
             return;
         }
 
         coreInfiniteHealth = enabled;
         core.SetInfiniteHealth(coreInfiniteHealth);
 
-        Debug.Log($"[GameManager] Core vida infinita seteada a: {coreInfiniteHealth}.");
+        Debug.Log($"[GameManager] Core infinite health set to {coreInfiniteHealth}");
     }
+
+    #endregion
 }

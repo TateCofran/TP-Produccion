@@ -7,26 +7,21 @@ public class EnemyHealth : MonoBehaviour, IDamageable
     [SerializeField] private float defense;
     [SerializeField] private float currentHealth;
 
-    // Para que la Shield Aura de HP solo afecte una vez por enemigo
     [SerializeField] private bool shieldAuraApplied = false;
 
-    // Para habilidades tipo escudo indestructible (invulnerable total)
     [SerializeField] private bool invulnerable = false;
 
     private bool isDead = false;
 
-    // Refs
     private Enemy enemyReference;
     private IHealthDisplay healthBarDisplay;
     private IEnemyDeathHandler deathHandler;
 
-    // Opcional: para popups de daño si los usas
     private EnemyHealthBar healthBarConcrete;
 
-    public event System.Action<float, float> OnDamaged; // (current, max)
+    public event System.Action<float, float> OnDamaged;
     public event System.Action OnDied;
 
-    // Devuelve true = alguna habilidad cancelo la muerte (segunda vida, etc.)
     public event System.Func<bool> OnPreDeath;
 
     public void SetInvulnerable(bool value) => invulnerable = value;
@@ -73,7 +68,6 @@ public class EnemyHealth : MonoBehaviour, IDamageable
         currentHealth = this.maxHealth;
         isDead = false;
 
-        // Reset flags para pooling
         shieldAuraApplied = false;
         invulnerable = false;
 
@@ -112,7 +106,6 @@ public class EnemyHealth : MonoBehaviour, IDamageable
         isDead = false;
         currentHealth = Mathf.Max(1f, maxHealth);
 
-        // Si queres que al revivir puedan ser buffeados de nuevo por Shield Aura:
         shieldAuraApplied = false;
 
         healthBarDisplay?.UpdateHealthBar(currentHealth, maxHealth);
@@ -122,12 +115,13 @@ public class EnemyHealth : MonoBehaviour, IDamageable
     {
         if (isDead) return;
 
-        // Invulnerabilidad total (para habilidades tipo escudo indestructible)
         if (invulnerable)
         {
             OnDamaged?.Invoke(currentHealth, maxHealth);
             return;
         }
+
+        if (enemyReference != null && !enemyReference.IsTargetable()) return;
 
         float modAmount = amount;
         if (GameModifiersManager.Instance != null)
@@ -141,16 +135,12 @@ public class EnemyHealth : MonoBehaviour, IDamageable
 
         healthBarDisplay?.UpdateHealthBar(currentHealth, maxHealth);
 
-        // Popup de daño si lo usas
-        // healthBarConcrete?.ShowDamageText(realDamage, transform);
-
         OnDamaged?.Invoke(currentHealth, maxHealth);
 
         if (currentHealth <= 0f)
             Die();
     }
 
-    // "Escudo trucho": subir max HP y rellenar la diferencia UNA sola vez por enemigo
     public bool TryApplyShieldAuraBoost(float multiplier)
     {
         if (shieldAuraApplied) return false;
@@ -191,7 +181,6 @@ public class EnemyHealth : MonoBehaviour, IDamageable
 
     public void Die()
     {
-        // Hook para segunda vida / berserk
         if (OnPreDeath != null)
         {
             foreach (System.Func<bool> handler in OnPreDeath.GetInvocationList())
@@ -199,7 +188,7 @@ public class EnemyHealth : MonoBehaviour, IDamageable
                 try
                 {
                     if (handler())
-                        return; // alguna habilidad cancelo la muerte
+                        return;
                 }
                 catch (System.Exception ex)
                 {

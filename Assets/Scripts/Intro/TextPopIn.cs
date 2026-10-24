@@ -1,9 +1,11 @@
-using UnityEngine;
+﻿using UnityEngine;
+using UnityEngine.Serialization;
 using TMPro;
 
 public class TextPopIn : MonoBehaviour
 {
-    public TextMeshProUGUI texto;
+    [FormerlySerializedAs("texto")]
+    public TextMeshProUGUI text;
     public float duration = 0.75f; 
     
 
@@ -11,7 +13,7 @@ public class TextPopIn : MonoBehaviour
 
     void Awake()
     {
-        originalScale = texto.transform.localScale;
+        originalScale = text.transform.localScale;
     }
 
     public void PlayPopIn()
@@ -22,9 +24,9 @@ public class TextPopIn : MonoBehaviour
 
     private System.Collections.IEnumerator PopInRoutine()
     {
-        texto.ForceMeshUpdate();
-        texto.alpha = 0f;
-        texto.transform.localScale = originalScale * 0.85f;
+        text.ForceMeshUpdate();
+        text.alpha = 0f;
+        text.transform.localScale = originalScale * 0.85f;
 
         float t = 0f;
 
@@ -32,15 +34,15 @@ public class TextPopIn : MonoBehaviour
         {
             t += Time.deltaTime / duration;
 
-            texto.alpha = Mathf.Lerp(0f, 1f, t);
+            text.alpha = Mathf.Lerp(0f, 1f, t);
 
             float s = Mathf.SmoothStep(0.85f, 1f, t);
-            texto.transform.localScale = originalScale * s;
+            text.transform.localScale = originalScale * s;
 
             yield return null;
         }
 
-        texto.alpha = 1f;
-        texto.transform.localScale = originalScale;
+        text.alpha = 1f;
+        text.transform.localScale = originalScale;
     }
 }

@@ -1,4 +1,4 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using TMPro;
 using System.Collections.Generic;
 
@@ -12,10 +12,8 @@ public class ResolutionsSettings : MonoBehaviour
         Resolution[] allRes = Screen.resolutions;
         filteredResolutions = new List<Resolution>();
 
-        // --- LIMPIA OPCIONES DEL DROPDOWN ---
         resolutionDropdown.ClearOptions();
 
-        // --- FILTRA DUPLICADOS POR WIDTH + HEIGHT ---
         HashSet<string> seen = new HashSet<string>();
 
         foreach (var res in allRes)
@@ -29,7 +27,6 @@ public class ResolutionsSettings : MonoBehaviour
             }
         }
 
-        // --- CREA LAS OPCIONES ---
         List<string> options = new List<string>();
         foreach (var res in filteredResolutions)
         {
@@ -38,7 +35,6 @@ public class ResolutionsSettings : MonoBehaviour
 
         resolutionDropdown.AddOptions(options);
 
-        // Selecciona automáticamente la resolución actual
         int currentIndex = filteredResolutions.FindIndex(r =>
             r.width == Screen.width && r.height == Screen.height);
 

@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
@@ -22,7 +22,6 @@ public sealed class IntroSequenceController : MonoBehaviour
     [Tooltip("If true, the sequence starts automatically on Start().")]
     [SerializeField] private bool autoStart = true;
 
-    // Optional: if true, the intro will only be shown once.
     [SerializeField] private bool showOnlyOnce = false;
     [SerializeField] private string playerPrefsKey = "HasSeenIntro";
 
@@ -65,19 +64,16 @@ public sealed class IntroSequenceController : MonoBehaviour
     {
         slideTexts.Clear();
 
-        // Slide 0
         slideTexts.Add(
             "The world was shattered. Two realities now overlap, " +
             "fighting for the same space."
         );
 
-        // Slide 1
         slideTexts.Add(
             "From the cracks between worlds, corrupted creatures emerged, " +
             "spreading chaos and destruction."
         );
 
-        // Slide 2
         slideTexts.Add(
             "You are the last line of defense."
 
@@ -94,20 +90,17 @@ public sealed class IntroSequenceController : MonoBehaviour
 
         currentIndex = Mathf.Clamp(index, 0, MaxIndex);
 
-        // Image
         if (slideImage != null && slideImages.Length > currentIndex)
         {
             slideImage.sprite = slideImages[currentIndex];
         }
 
-        // Text
         if (slideText != null && slideTexts.Count > currentIndex)
         {
             slideText.text = slideTexts[currentIndex];
             textPopIn.PlayPopIn();
         }
 
-        // Button label (Next / Start)
         if (nextButton != null)
         {
             var label = nextButton.GetComponentInChildren<TextMeshProUGUI>();

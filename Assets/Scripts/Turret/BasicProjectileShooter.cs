@@ -4,23 +4,21 @@
 public class BasicProjectileShooter : MonoBehaviour, IShootingBehavior
 {
     [SerializeField] private Transform firePoint;
-    private TurretStats stats;
-    private void Awake()
-    {
-        stats = GetComponent<TurretStats>();
-        if (stats == null)
-            Debug.LogError("[BasicProjectileShooter] No se encontró TurretStats en la torreta.");
-    }
+
     public void Shoot(Transform firePoint, Transform target, ITurretStats stats)
     {
-        if (target == null || firePoint == null) return;
+        if (target == null || firePoint == null || stats == null) return;
+
+        if (ProjectilePool.Instance == null)
+        {
+            Debug.LogWarning("[BasicProjectileShooter] ProjectilePool not found in the scene");
+            return;
+        }
 
         var projectile = ProjectilePool.Instance.GetProjectile();
-        projectile.transform.position = firePoint.position;
-        projectile.transform.rotation = firePoint.rotation;
+        projectile.transform.SetPositionAndRotation(firePoint.position, firePoint.rotation);
 
-        var p = projectile.GetComponent<Projectile>();
-        p.Initialize(target, stats.Damage); // Usamos el daño real en runtime
+        if (projectile.TryGetComponent<Projectile>(out var p))
+            p.Initialize(target, stats.Damage);
     }
-
 }

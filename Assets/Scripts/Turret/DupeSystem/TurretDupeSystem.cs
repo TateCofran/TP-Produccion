@@ -1,5 +1,4 @@
-﻿// TurretDupeSystem.cs
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 public class TurretDupeSystem : MonoBehaviour, ITurretDupeSystem

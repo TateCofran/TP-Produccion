@@ -11,7 +11,6 @@ public class TurretInfoUI : MonoBehaviour
     public TMP_Text damageText;
     public TMP_Text rangeText;
     public TMP_Text fireRateText;
-    //public TMP_Text specialInfoText;
 
     public Button sellButton;
     public TMP_Text sellButtonText;
@@ -37,7 +36,6 @@ public class TurretInfoUI : MonoBehaviour
 
         sellButton.onClick.AddListener(SellTurret);
         changeTargetModeButton.onClick.AddListener(ChangeTargetingMode);
-
     }
 
     public void Initialize(Turret turret)
@@ -50,7 +48,7 @@ public class TurretInfoUI : MonoBehaviour
 
         if (dataHolder == null || stats == null)
         {
-            Debug.LogError("Faltan componentes requeridos en la torreta.");
+            Debug.LogError("[TurretInfoUI] Required turret components are missing");
             return;
         }
 
@@ -62,7 +60,7 @@ public class TurretInfoUI : MonoBehaviour
             targeting = turret.GetComponent<TurretTargeting>();
             if (targeting == null)
             {
-                Debug.LogError("Falta TurretTargeting en torreta no-support.");
+                Debug.LogError("[TurretInfoUI] TurretTargeting is missing on a non-support turret");
                 return;
             }
         }
@@ -71,7 +69,6 @@ public class TurretInfoUI : MonoBehaviour
         if (!isSupport)
             UpdateTargetModeText(targeting.mode);
     }
-
 
     public void UpdateInfo()
     {
@@ -92,17 +89,14 @@ public class TurretInfoUI : MonoBehaviour
             fireRateText.text = $"{stats.FireRate}";
             rangeText.text = $"{stats.Range}";
 
-            //specialInfoText.gameObject.SetActive(false);
             changeTargetModeButton.gameObject.SetActive(true);
         }
-
 
         sellButtonText.text = $"Sell";
     }
 
     private void SellTurret()
     {
-
     }
 
     public void UpdateTargetModeText(TurretTargeting.TargetingMode mode)
@@ -122,7 +116,7 @@ public class TurretInfoUI : MonoBehaviour
 
     void ChangeTargetingMode()
     {
-        targeting.NextMode(); // Asegurate de tener este método en TurretTargeting
+        targeting.NextMode();
         UpdateTargetModeText(targeting.mode);
     }
 }

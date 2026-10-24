@@ -1,11 +1,11 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 public class Ability_ShieldAuraHpBoost : MonoBehaviour, IEnemyAbility
 {
     [Header("Shield Aura")]
     [SerializeField, Min(0f)] private float radius = 6f;
-    [SerializeField, Range(1f, 3f)] private float hpMultiplier = 1.5f; // 1.5 = +50% HP
+    [SerializeField, Range(1f, 3f)] private float hpMultiplier = 1.5f;
     [SerializeField, Min(0.1f)] private float checkInterval = 1.0f;
     [SerializeField] private bool affectSelf = true;
 
@@ -16,7 +16,6 @@ public class Ability_ShieldAuraHpBoost : MonoBehaviour, IEnemyAbility
     private AbilityContext _ctx;
     private float _timer;
 
-    // buffer local para evitar allocations
     private readonly List<Enemy> _buffer = new List<Enemy>(64);
 
     public void Initialize(AbilityContext ctx)
@@ -53,7 +52,6 @@ public class Ability_ShieldAuraHpBoost : MonoBehaviour, IEnemyAbility
 
         _buffer.Clear();
 
-        // Usamos EnemyTracker.Enemies directamente
         var all = EnemyTracker.Enemies;
         Vector3 center = _ctx.Transform.position;
         float r2 = radius * radius;
@@ -79,13 +77,7 @@ public class Ability_ShieldAuraHpBoost : MonoBehaviour, IEnemyAbility
             bool applied = enemy.Health.TryApplyShieldAuraBoost(hpMultiplier);
             if (applied && shieldVfxPrefab != null)
             {
-                var vfx = Object.Instantiate(
-                    shieldVfxPrefab,
-                    enemy.transform.position,
-                    Quaternion.identity,
-                    enemy.transform
-                );
-                Object.Destroy(vfx, vfxLifetime);
+                VfxPool.Spawn(shieldVfxPrefab, enemy.transform.position, Quaternion.identity, vfxLifetime, enemy.transform);
             }
         }
     }

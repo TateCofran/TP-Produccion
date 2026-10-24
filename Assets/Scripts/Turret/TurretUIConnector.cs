@@ -13,7 +13,7 @@ public class TurretUIConnector : MonoBehaviour
 
         dataHolder = GetComponent<TurretDataHolder>();
         if (dataHolder == null)
-            Debug.LogError("Falta el componente TurretDataHolder en " + gameObject.name);
+            Debug.LogError("[TurretUIConnector] TurretDataHolder component is missing on " + gameObject.name);
     }
 
     public void ShowUI()

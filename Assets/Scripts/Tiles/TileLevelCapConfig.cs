@@ -4,7 +4,7 @@
 public class TileLevelCapConfig : ScriptableObject
 {
     [SerializeField] private string tileCapUpgradeId = "tile_level_cap";
-    [Tooltip("Cap por tier (index = nivel del upgrade). Index 0 se usa si no compraste el upgrade.")]
+    [Tooltip("Cap per tier (index = upgrade level). Index 0 is used when the upgrade was not purchased.")]
     [SerializeField] private int[] capByTier = new[] { 5, 10, 15 };
 
     public string UpgradeId => tileCapUpgradeId;

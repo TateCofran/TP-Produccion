@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+ï»¿using System.Collections.Generic;
 using UnityEngine;
 
 public class TurretDupeUI : MonoBehaviour
@@ -27,7 +27,6 @@ public class TurretDupeUI : MonoBehaviour
     {
         if (system == null) return;
 
-        // Evita duplicar subscripciones
         if (dupeSystem != null)
         {
             dupeSystem.OnDupeChanged -= HandleDupeChanged;
@@ -39,7 +38,7 @@ public class TurretDupeUI : MonoBehaviour
         dupeSystem.OnDupeChanged += HandleDupeChanged;
         dupeSystem.OnTurretLevelUp += HandleTurretLevelUp;
 
-        Debug.Log("[TurretDupeUI] Conectado a TurretDupeSystem.");
+        Debug.Log("[TurretDupeUI] Connected to TurretDupeSystem");
     }
 
     private void InitializeData()
@@ -62,9 +61,8 @@ public class TurretDupeUI : MonoBehaviour
             data.dupesRequiredForNextLevel
         );
 
-        Debug.Log($"[UI] Dupes actualizados para {typeName}: {data.currentDupes}/{data.dupesRequiredForNextLevel}");
+        Debug.Log($"[TurretDupeUI] Dupes updated for {typeName}: {data.currentDupes}/{data.dupesRequiredForNextLevel}");
 
-        // Buscar todas las barras de duplicados activas en la escena
         var bars = FindObjectsByType<DupeBarUI>(FindObjectsSortMode.None);
         Debug.Log("bars: " + bars);
         foreach (var bar in bars)
@@ -72,7 +70,7 @@ public class TurretDupeUI : MonoBehaviour
             Debug.Log("bar: ----" + bar.GetTurretTypeName());
             if (bar != null && bar.GetTurretTypeName() == typeName)
             {
-                Debug.Log("Sincronizando barras");
+                Debug.Log("[TurretDupeUI] Syncing bars");
                 bar.UpdateDupeBar();
             }
         }
@@ -87,19 +85,17 @@ public class TurretDupeUI : MonoBehaviour
             levelData.dupesRequiredForNextLevel
         );
 
-        Debug.Log($"[UI] {typeName} subió al nivel {levelData.currentLevel}!");
+        Debug.Log($"[TurretDupeUI] {typeName} reached level {levelData.currentLevel}");
 
-
-        // Buscar todas las barras de duplicados activas en la escena
         var bars = FindObjectsByType<DupeBarUI>(FindObjectsSortMode.None);
         Debug.Log("bars: " + bars);
 
         foreach (var bar in bars)
         {
-            Debug.Log("LEVEL UP bar: ----" + bar.GetTurretTypeName() + "---- typeName: " + typeName);
+            Debug.Log("LEVEL UP bar: ----" + bar.GetTurretTypeName() + "[TurretDupeUI] typeName: " + typeName);
             if (bar != null && bar.GetTurretTypeName() == typeName)
             {
-                Debug.Log("Sincronizando barras");
+                Debug.Log("[TurretDupeUI] Syncing bars");
                 bar.UpdateDupeBar();
             }
         }

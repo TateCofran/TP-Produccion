@@ -8,7 +8,7 @@ public class EssenceDisplayUI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI redEssenceText;
 
     [Header("Panel Type")]
-    [Tooltip("Marca si este panel usa esencias azules (LabPanel) o rojas (WorkshopPanel)")]
+    [Tooltip("Whether this panel uses blue essences (LabPanel) or red essences (WorkshopPanel)")]
     [SerializeField] private bool isBluePanel = true;
 
     private void OnEnable()

@@ -10,6 +10,6 @@ public sealed class TutorialOpenButton : MonoBehaviour
         if (tutorial != null)
             tutorial.OpenTutorial();
         else
-            Debug.LogWarning("[TutorialOpenButton] Falta asignar 'tutorial' en el inspector.");
+            Debug.LogWarning("[TutorialOpenButton] 'tutorial' is not assigned in the inspector");
     }
 }

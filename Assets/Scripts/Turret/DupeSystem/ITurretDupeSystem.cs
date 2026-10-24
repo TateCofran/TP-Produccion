@@ -1,5 +1,4 @@
-﻿// ITurretDupeSystem.cs
-using UnityEngine;
+﻿using UnityEngine;
 
 public interface ITurretDupeSystem
 {
@@ -43,6 +42,6 @@ public class TurretLevelData
 
     public string GetStatusText()
     {
-        return $"Nvl {currentLevel} ({currentDupes}/{dupesRequiredForNextLevel})";
+        return $"Lv {currentLevel} ({currentDupes}/{dupesRequiredForNextLevel})";
     }
 }

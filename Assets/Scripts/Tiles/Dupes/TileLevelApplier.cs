@@ -42,6 +42,6 @@ public class TileLevelApplier : MonoBehaviour
     public string GetLevelStatus()
     {
 
-        return levelData?.GetStatusText() ?? "Nvl 1";
+        return levelData?.GetStatusText() ?? "Lv 1";
     }
 }

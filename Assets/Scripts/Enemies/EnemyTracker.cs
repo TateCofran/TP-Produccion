@@ -21,11 +21,10 @@ public static class EnemyTracker
         if (enemies.Contains(enemy))
         {
             enemies.Remove(enemy);
-            //Debug.Log($"[EnemyTracker] Enemy removido: {enemy.name} - Restantes: {enemies.Count}");
         }
         else
         {
-            Debug.LogWarning($"[EnemyTracker] Intento de remover enemigo no registrado: {enemy?.name}");
+            Debug.LogWarning($"[EnemyTracker] Tried to remove an unregistered enemy: {enemy?.name}");
         }
     }
 

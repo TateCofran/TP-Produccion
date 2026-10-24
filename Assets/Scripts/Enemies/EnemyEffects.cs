@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [DisallowMultipleComponent]
-public class EnemyEffects : MonoBehaviour, IPathAffectable
+public class EnemyEffects : MonoBehaviour, IPathAffectable, ISlowable
 {
     [SerializeField] private EnemyHealth health;
 
@@ -14,28 +14,22 @@ public class EnemyEffects : MonoBehaviour, IPathAffectable
         {
             if (IsStunned) return 0f;
 
-            // producto de multiplicadores de velocidad * (1 - slow)
             float mult = 1f;
 
-            // purgar vencidos (si tienen duración)
             PurgeExpired(_speedMults);
 
             foreach (var kv in _speedMults)
                 mult *= Mathf.Max(0f, kv.Value.value);
 
-            // tu slow legacy (0..1) ya existente
             mult *= Mathf.Clamp01(1f - _currentSlow);
 
             return Mathf.Clamp(mult, 0f, 2f);
         }
     }
 
-
-    // --- NUEVO: soporte para múltiples buffs de velocidad con expiración opcional ---
-    private struct TimedValue<T> { public T value; public float until; } // until<=0 => infinito
+    private struct TimedValue<T> { public T value; public float until; }
     private readonly Dictionary<object, TimedValue<float>> _speedMults = new();
     private static readonly List<object> _toRemove = new();
-
 
     private float _currentSlow, _slowUntil, _stunUntil;
     private Coroutine _dotCo;
@@ -53,7 +47,7 @@ public class EnemyEffects : MonoBehaviour, IPathAffectable
     public void AddSpeedMultiplier(object key, float multiplier)
     {
         if (key == null) key = this;
-        _speedMults[key] = new TimedValue<float> { value = multiplier, until = 0f }; // infinito
+        _speedMults[key] = new TimedValue<float> { value = multiplier, until = 0f };
     }
 
     public void AddSpeedMultiplier(object key, float multiplier, float duration)
@@ -69,7 +63,6 @@ public class EnemyEffects : MonoBehaviour, IPathAffectable
         _speedMults.Remove(key);
     }
 
-    // Utilidad para purgar expirados
     private void PurgeExpired(Dictionary<object, TimedValue<float>> dict)
     {
         if (dict.Count == 0) return;
@@ -85,15 +78,12 @@ public class EnemyEffects : MonoBehaviour, IPathAffectable
         _toRemove.Clear();
     }
 
-
-    // ----- NUEVO -----
     public void ApplyInstantDamage(int amount)
     {
         if (amount <= 0 || health == null) return;
         health.TakeDamage(amount);
     }
 
-    // ----- Legacy (podés no usarlos) -----
     public void ApplyDoT(float dps, float duration)
     {
         if (dps <= 0f || duration <= 0f || health == null) return;

@@ -1,11 +1,10 @@
-using System.Collections;
+ï»¿using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(TurretStats))]
 public class FireTurret : MonoBehaviour, IShootingBehavior
 {
-    private ITurretStats stats;
-
     [Header("Refs")]
     [SerializeField] private Transform firePoint;
 
@@ -16,31 +15,25 @@ public class FireTurret : MonoBehaviour, IShootingBehavior
     [SerializeField] private Vector3 targetOffset = new Vector3(0f, 0.35f, 0f);
     [SerializeField] private bool debugDraw;
 
-    [Header("Impact VFX (en la adquisición del objetivo)")]
+    [Header("Impact VFX")]
     [SerializeField] private GameObject impactVfxPrefab;
     [SerializeField] private float impactVfxOffsetAlongNormal = 0.03f;
     [SerializeField] private bool parentVfxToHit = true;
     [SerializeField] private float impactVfxLifetime = 1.5f;
 
-    [Header("Fireball (proyectil visual)")]
+    [Header("Fireball")]
     [SerializeField] private GameObject fireballPrefab;
     [SerializeField] private float fireballSpeed = 20f;
-    [Tooltip("Si se asigna, el fireball se parenta aquí. Si es null, queda en raíz.")]
-    [SerializeField] private Transform fireballParent;
-    [Tooltip("Si > 0, destruir el fireball por seguridad a los N segundos (además del impacto).")]
+    [Tooltip("Maximum fireball lifetime as a safety net.")]
     [SerializeField] private float fireballHardLifetime = 3f;
-    [Tooltip("Opcional: escalar el fireball al instanciarlo.")]
+    [Tooltip("Scale applied to the fireball when spawned.")]
     [SerializeField] private Vector3 fireballSpawnScale = Vector3.one;
 
-    [Header("Daño de fuego (DoT)")]
+    [Header("Burn Damage")]
     [SerializeField] private float tickRate = 1f;
     [SerializeField] private float damageFractionPerSecond = 1f / 2f;
-    [Tooltip("Opcional: instanciar VFX en cada tick (en el centro del enemigo).")]
+    [Tooltip("Spawn the impact VFX on every burn tick.")]
     [SerializeField] private bool vfxOnEachTick = false;
-
-    private float tickCountdown;
-    private Enemy burningTarget;
-    private float totalDamageApplied = 0f;
 
     [Header("Impact Sound")]
     [SerializeField] private AudioClip impactClip;
@@ -48,28 +41,43 @@ public class FireTurret : MonoBehaviour, IShootingBehavior
     [SerializeField] private float impactVolume = 1f;
     [SerializeField] private bool ensureAudioSource = true;
 
-    private AudioSource _audioSource;
+    private ITurretStats stats;
+    private AudioSource audioSource;
+    private readonly List<GameObject> activeFireballs = new();
+
+    private float tickCountdown;
+    private Enemy burningTarget;
+    private int burningSpawnId;
+    private float totalDamageApplied;
 
     private void Awake()
     {
         stats = GetComponent<ITurretStats>();
-        if (!firePoint) Debug.LogWarning("[FireTurret] Falta asignar firePoint.");
+        if (!firePoint) Debug.LogWarning("[FireTurret] firePoint is not assigned");
         tickCountdown = 0f;
 
         if (ensureAudioSource)
         {
-            _audioSource = GetComponent<AudioSource>();
-            if (_audioSource == null)
+            audioSource = GetComponent<AudioSource>();
+            if (audioSource == null)
             {
-                _audioSource = gameObject.AddComponent<AudioSource>();
-                _audioSource.playOnAwake = false;
-                _audioSource.spatialBlend = 1f;
-                _audioSource.rolloffMode = AudioRolloffMode.Linear;
-                _audioSource.minDistance = 1f;
-                _audioSource.maxDistance = 20f;
-                _audioSource.dopplerLevel = 0f;
+                audioSource = gameObject.AddComponent<AudioSource>();
+                audioSource.playOnAwake = false;
+                audioSource.spatialBlend = 1f;
+                audioSource.rolloffMode = AudioRolloffMode.Linear;
+                audioSource.minDistance = 1f;
+                audioSource.maxDistance = 20f;
+                audioSource.dopplerLevel = 0f;
             }
         }
+    }
+
+    private void OnDisable()
+    {
+        StopAllCoroutines();
+        for (int i = 0; i < activeFireballs.Count; i++)
+            VfxPool.Release(activeFireballs[i]);
+        activeFireballs.Clear();
     }
 
     private void Update()
@@ -80,7 +88,7 @@ public class FireTurret : MonoBehaviour, IShootingBehavior
         if (tickCountdown <= 0f)
         {
             ApplyBurnDamage();
-            tickCountdown = 1f / tickRate;
+            tickCountdown = 1f / Mathf.Max(0.01f, tickRate);
         }
     }
 
@@ -91,191 +99,170 @@ public class FireTurret : MonoBehaviour, IShootingBehavior
         ITurretStats effectiveStats = statsParam ?? stats;
         if (effectiveStats == null) return;
 
-        Vector3 o = firePoint.position;
-        Vector3 predicted = target.position + targetOffset;
-        Vector3 dir = (predicted - o);
+        Vector3 origin = firePoint.position;
+        Vector3 aim = target.position + targetOffset;
+        Vector3 dir = aim - origin;
         float dist = dir.magnitude;
         if (dist <= 0.001f) return;
 
         float maxRange = effectiveStats.Range;
-        if (dist > maxRange)
-        {
-            if (debugDraw)
-            {
-                Vector3 ndirDebug = dir / dist;
-                Debug.DrawLine(o, o + ndirDebug * maxRange, Color.yellow, 0.1f);
-            }
-            return; 
-        }
-
         Vector3 ndir = dir / dist;
 
-        if (losBlockers != 0 &&
-            Physics.Raycast(o, ndir, dist, losBlockers, QueryTriggerInteraction.Ignore))
+        if (dist > maxRange)
         {
-            if (debugDraw) Debug.DrawLine(o, predicted, Color.gray, 0.1f);
+            if (debugDraw) Debug.DrawLine(origin, origin + ndir * maxRange, Color.yellow, 0.1f);
+            return;
+        }
+
+        if (losBlockers != 0 &&
+            Physics.Raycast(origin, ndir, dist, losBlockers, QueryTriggerInteraction.Ignore))
+        {
+            if (debugDraw) Debug.DrawLine(origin, aim, Color.gray, 0.1f);
             return;
         }
 
         float maxRayDist = Mathf.Min(dist + 0.25f, maxRange);
 
-        if (Physics.Raycast(o, ndir, out RaycastHit hit, maxRayDist, hittableLayers, QueryTriggerInteraction.Ignore))
+        if (Physics.Raycast(origin, ndir, out RaycastHit hit, maxRayDist, hittableLayers, QueryTriggerInteraction.Ignore))
         {
-            HandleAcquiredHit(o, ndir, hit);
+            HandleAcquiredHit(origin, ndir, hit);
             return;
         }
 
         if (sphereCastRadius > 0f &&
-            Physics.SphereCast(o, sphereCastRadius, ndir, out RaycastHit shit, maxRayDist, hittableLayers, QueryTriggerInteraction.Ignore))
+            Physics.SphereCast(origin, sphereCastRadius, ndir, out RaycastHit sphereHit, maxRayDist, hittableLayers, QueryTriggerInteraction.Ignore))
         {
-            HandleAcquiredHit(o, ndir, shit);
-            return;
+            HandleAcquiredHit(origin, ndir, sphereHit);
         }
-
     }
 
     private void HandleAcquiredHit(Vector3 origin, Vector3 shotDir, RaycastHit hit)
     {
-        Enemy enemy = null;
-        TryGetEnemy(hit.collider.transform, out enemy);
+        TryGetEnemy(hit.collider.transform, out Enemy enemy);
+        int spawnId = enemy != null ? enemy.SpawnId : 0;
 
         if (fireballPrefab != null)
         {
-            StartCoroutine(FireballTravel(origin, hit, enemy));
+            StartCoroutine(FireballTravel(origin, hit, enemy, spawnId));
         }
         else
         {
             SpawnImpactVfx(hit, shotDir);
-            if (enemy != null) StartOrRefreshBurn(enemy);
+            if (enemy != null) StartOrRefreshBurn(enemy, spawnId);
         }
 
         if (debugDraw) Debug.DrawLine(origin, hit.point, Color.red, 0.15f);
     }
 
-    private IEnumerator FireballTravel(Vector3 start, RaycastHit hit, Enemy enemyAtShotTime)
+    private IEnumerator FireballTravel(Vector3 start, RaycastHit hit, Enemy enemyAtShot, int spawnIdAtShot)
     {
-        // Instancia del fireball
-        GameObject fb = Instantiate(fireballPrefab, start, Quaternion.identity, fireballParent ? fireballParent : null);
-        if (fireballSpawnScale != Vector3.one) fb.transform.localScale = fireballSpawnScale;
-
-        // Orientar hacia el punto de impacto (trayectoria recta del raycast)
-        Vector3 target = hit.point;
-        Vector3 toTarget = (target - start);
+        Vector3 toTarget = hit.point - start;
         float totalDist = toTarget.magnitude;
+
         if (totalDist <= 0.0001f)
         {
-            // Nada que recorrer: resolvemos impacto inmediatamente
-            Destroy(fb);
-            ResolveImpact(hit, enemyAtShotTime, -toTarget.normalized);
+            ResolveImpact(hit, enemyAtShot, spawnIdAtShot, Vector3.forward);
             yield break;
         }
 
         Vector3 dir = toTarget / totalDist;
-        fb.transform.rotation = Quaternion.LookRotation(dir, Vector3.up);
+        GameObject fireball = VfxPool.Spawn(fireballPrefab, start, Quaternion.LookRotation(dir, Vector3.up), fireballHardLifetime + 0.5f);
+        fireball.transform.localScale = fireballSpawnScale;
+        activeFireballs.Add(fireball);
 
-        // Seguridad de vida del proyectil
-        float killAt = (fireballHardLifetime > 0f) ? Time.time + fireballHardLifetime : float.PositiveInfinity;
-
-        // Movimiento lineal hasta el impacto
+        float killAt = fireballHardLifetime > 0f ? Time.time + fireballHardLifetime : float.PositiveInfinity;
         float remaining = totalDist;
-        Vector3 lastPos = fb.transform.position;
 
         while (remaining > 0f)
         {
             float step = fireballSpeed * Time.deltaTime;
-            if (step <= 0f) break;
+            if (step > 0f)
+            {
+                float advance = Mathf.Min(step, remaining);
+                fireball.transform.position += dir * advance;
+                remaining -= advance;
+            }
 
-            // Evitar overshoot
-            float advance = Mathf.Min(step, remaining);
-            fb.transform.position += dir * advance;
-            remaining -= advance;
-
-            // Si el proyectil tiene un Trail o VFX, ya seguirá su propio update
-
-            // Seguridad temporal
             if (Time.time >= killAt) break;
-
-            lastPos = fb.transform.position;
             yield return null;
         }
 
-        // Llegó (o timeout): resolver impacto visual y lógicas
-        Destroy(fb);
-        ResolveImpact(hit, enemyAtShotTime, -dir);
+        activeFireballs.Remove(fireball);
+        VfxPool.Release(fireball);
+        ResolveImpact(hit, enemyAtShot, spawnIdAtShot, -dir);
     }
 
-    private void ResolveImpact(RaycastHit hit, Enemy enemyAtShotTime, Vector3 fallbackDir)
+    private void ResolveImpact(RaycastHit hit, Enemy enemyAtShot, int spawnIdAtShot, Vector3 fallbackDir)
     {
-        // VFX + sonido
         SpawnImpactVfx(hit, fallbackDir);
 
-        // Iniciar/Refrescar DoT SOLO al impactar
-        if (enemyAtShotTime != null)
-        {
-            StartOrRefreshBurn(enemyAtShotTime);
-        }
+        if (enemyAtShot != null && enemyAtShot.IsSameSpawn(spawnIdAtShot))
+            StartOrRefreshBurn(enemyAtShot, spawnIdAtShot);
     }
 
-    private void StartOrRefreshBurn(Enemy enemy)
+    private void StartOrRefreshBurn(Enemy enemy, int spawnId)
     {
         if (enemy == null || enemy.Health == null || enemy.Health.IsDead()) return;
-        if (burningTarget == enemy) return;
+        if (burningTarget == enemy && burningSpawnId == spawnId) return;
 
         burningTarget = enemy;
+        burningSpawnId = spawnId;
         totalDamageApplied = 0f;
         tickCountdown = 0f;
+    }
+
+    private void ClearBurn()
+    {
+        burningTarget = null;
+        totalDamageApplied = 0f;
     }
 
     private void ApplyBurnDamage()
     {
         if (burningTarget == null || burningTarget.Health == null) return;
-        if (burningTarget.Health.IsDead())
+
+        if (burningTarget.Health.IsDead() || !burningTarget.IsSameSpawn(burningSpawnId))
         {
-            burningTarget = null;
-            totalDamageApplied = 0f;
+            ClearBurn();
             return;
         }
 
-        if (totalDamageApplied < stats.Damage)
+        if (totalDamageApplied >= stats.Damage)
         {
-            float remaining = stats.Damage - totalDamageApplied;
-            float dps = Mathf.Max(0f, stats.Damage * damageFractionPerSecond);
-            float damageThisTick = Mathf.Min(dps, remaining);
-
-            int dmgInt = Mathf.Max(1, Mathf.RoundToInt(damageThisTick));
-            float before = burningTarget.Health.GetCurrentHealth();
-            burningTarget.Health.TakeDamage(dmgInt);
-            float after = burningTarget.Health.GetCurrentHealth();
-
-            float realApplied = Mathf.Max(0f, before - after);
-            totalDamageApplied += realApplied;
-
-            if (vfxOnEachTick && impactVfxPrefab)
-            {
-                Vector3 pos = burningTarget.transform.position + Vector3.up * 0.35f;
-                GameObject fx = Instantiate(impactVfxPrefab, pos, Quaternion.identity, parentVfxToHit ? burningTarget.transform : null);
-                if (impactVfxLifetime > 0f) Destroy(fx, impactVfxLifetime);
-            }
+            ClearBurn();
+            return;
         }
-        else
+
+        float remaining = stats.Damage - totalDamageApplied;
+        float dps = Mathf.Max(0f, stats.Damage * damageFractionPerSecond);
+        float damageThisTick = Mathf.Min(dps, remaining);
+
+        int damage = Mathf.Max(1, Mathf.RoundToInt(damageThisTick));
+        float before = burningTarget.Health.GetCurrentHealth();
+        burningTarget.Health.TakeDamage(damage);
+        float after = burningTarget.Health.GetCurrentHealth();
+
+        totalDamageApplied += Mathf.Max(0f, before - after);
+
+        if (vfxOnEachTick && impactVfxPrefab)
         {
-            burningTarget = null;
-            totalDamageApplied = 0f;
+            Vector3 pos = burningTarget.transform.position + Vector3.up * 0.35f;
+            Transform follow = parentVfxToHit ? burningTarget.transform : null;
+            VfxPool.Spawn(impactVfxPrefab, pos, Quaternion.identity, impactVfxLifetime, follow);
         }
     }
 
     private void SpawnImpactVfx(RaycastHit hit, Vector3 fallbackDir)
     {
-        if (!impactVfxPrefab) return;
+        if (impactVfxPrefab)
+        {
+            Vector3 normal = hit.normal.sqrMagnitude > 0.0001f ? hit.normal : -fallbackDir;
+            Vector3 pos = hit.point + normal * impactVfxOffsetAlongNormal;
+            Transform follow = parentVfxToHit && hit.collider != null ? hit.collider.transform : null;
+            VfxPool.Spawn(impactVfxPrefab, pos, Quaternion.LookRotation(normal), impactVfxLifetime, follow);
+        }
 
-        Vector3 normal = hit.normal.sqrMagnitude > 0.0001f ? hit.normal : -fallbackDir;
-        Vector3 pos = hit.point + normal * impactVfxOffsetAlongNormal;
-        Quaternion rot = Quaternion.LookRotation(normal);
-        Transform parent = parentVfxToHit ? hit.collider.transform : null;
-
-        GameObject fx = Instantiate(impactVfxPrefab, pos, rot, parent);
-        if (impactVfxLifetime > 0f) Destroy(fx, impactVfxLifetime);
-        if (_audioSource && impactClip) _audioSource.PlayOneShot(impactClip, impactVolume);
+        if (audioSource && impactClip) audioSource.PlayOneShot(impactClip, impactVolume);
     }
 
     private static bool TryGetEnemy(Transform t, out Enemy enemy)
@@ -284,14 +271,6 @@ public class FireTurret : MonoBehaviour, IShootingBehavior
         if (!t) return false;
 
         enemy = t.GetComponentInParent<Enemy>();
-        if (enemy != null && enemy.Health != null) return true;
-
-        var health = t.GetComponentInParent<EnemyHealth>();
-        if (health != null)
-        {
-            enemy = health.GetComponentInParent<Enemy>();
-            return enemy != null && enemy.Health != null;
-        }
-        return false;
+        return enemy != null && enemy.Health != null;
     }
 }

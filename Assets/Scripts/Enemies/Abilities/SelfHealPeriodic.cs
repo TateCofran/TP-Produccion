@@ -1,9 +1,9 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class Ability_SelfHealPeriodic : MonoBehaviour, IEnemyAbility
 {
     [Header("Heal settings")]
-    [SerializeField, Range(0f, 1f)] private float healPercentOfMaxHP = 0.10f; // 0.10 = 10%
+    [SerializeField, Range(0f, 1f)] private float healPercentOfMaxHP = 0.10f;
     [SerializeField, Min(0.1f)] private float intervalSeconds = 5f;
 
     [Header("FX (optional)")]
@@ -37,19 +37,12 @@ public class Ability_SelfHealPeriodic : MonoBehaviour, IEnemyAbility
 
         if (healVfxPrefab != null)
         {
-            var vfx = Instantiate(
-                healVfxPrefab,
-                _ctx.Transform.position,
-                Quaternion.identity,
-                _ctx.Transform
-            );
-            Destroy(vfx, vfxLifetime);
+            VfxPool.Spawn(healVfxPrefab, _ctx.Transform.position, Quaternion.identity, vfxLifetime, _ctx.Transform);
         }
     }
 
     public void OnDamaged(float dmg, float currentHP, object source)
     {
-        // no-op
     }
 
     public void OnDeath()
@@ -64,7 +57,6 @@ public class Ability_SelfHealPeriodic : MonoBehaviour, IEnemyAbility
 
     public void OnWaypoint(int index)
     {
-        // no-op
     }
 
     public void ResetRuntime()

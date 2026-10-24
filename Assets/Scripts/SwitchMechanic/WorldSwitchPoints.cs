@@ -1,30 +1,30 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using UnityEngine.Events;
 
 public class WorldSwitchPoints : MonoBehaviour
 {
     [Header("Refs")]
-    [Tooltip("Arrastra el ShiftingWorldMechanic de la escena.")]
+    [Tooltip("ShiftingWorldMechanic from the scene.")]
     [SerializeField] private ShiftingWorldMechanic mechanic;
-    [SerializeField] private EssencePopupUI essenceUI; // referencia al único UI
+    [SerializeField] private EssencePopupUI essenceUI;
 
-    [Header("Esencias base al cambiar de mundo")]
-    [Tooltip("Al quedar en el mundo Normal - esencias AZULES ganadas.")]
+    [Header("Base Essences Per World Switch")]
+    [Tooltip("Blue essences gained when switching to the Normal world.")]
     [SerializeField] private int essencesOnNormal = 1;
-    [Tooltip("Al quedar en el Otro Mundo - esencias ROJAS ganadas.")]
+    [Tooltip("Red essences gained when switching to the Other world.")]
     [SerializeField] private int essencesOnOther = 1;
 
-    [Header("Bonos de mejoras permanentes")]
-    [Tooltip("ID de la mejora del Lab que aumenta las esencias AZULES al cambiar de mundo.")]
+    [Header("Permanent Upgrade Bonuses")]
+    [Tooltip("ID of the Lab upgrade that increases blue essences per world switch.")]
     [SerializeField] private string labBlueUpgradeId = "upgrade_moreEssencePerSwitchTile";
-    [Tooltip("Bonus plano o multiplicador por nivel (ej: 0.1 = +10% por nivel).")]
+    [Tooltip("Bonus per level (0.1 = +10% per level).")]
     [Range(0f, 5f)][SerializeField] private float blueBonusPerLevel = 0.1f;
 
-    [Tooltip("ID de la mejora del Workshop que aumenta las esencias ROJAS al cambiar de mundo.")]
+    [Tooltip("ID of the Workshop upgrade that increases red essences per world switch.")]
     [SerializeField] private string workshopRedUpgradeId = "upgrade_moreEssencePerSwitchTurret";
     [Range(0f, 5f)][SerializeField] private float redBonusPerLevel = 0.1f;
 
-    [Header("Totales")]
+    [Header("Totals")]
     [SerializeField] private int totalBlueEssences = 0;
     [SerializeField] private int totalRedEssences = 0;
 
@@ -52,7 +52,7 @@ public class WorldSwitchPoints : MonoBehaviour
     {
         if (mechanic == null)
         {
-            Debug.LogWarning("[WorldSwitchPoints] No se encontró ShiftingWorldMechanic en la escena.");
+            Debug.LogWarning("[WorldSwitchPoints] ShiftingWorldMechanic not found in the scene");
             enabled = false;
             return;
         }
@@ -61,27 +61,6 @@ public class WorldSwitchPoints : MonoBehaviour
         _init = true;
     }
 
-    /*private void Update()
-    {
-        if (!_init || mechanic == null) return;
-
-        var current = mechanic.GetCurrentWorld();
-        if (current != _lastWorld)
-        {
-            if (current == ShiftingWorldMechanic.World.Normal)
-            {
-                int amount = CalculateBlueEssence();
-                AddBlueEssence(amount);
-            }
-            else
-            {
-                int amount = CalculateRedEssence();
-                AddRedEssence(amount);
-            }
-
-            _lastWorld = current;
-        }
-    }*/
     private void Update()
 {
     if (!_init || mechanic == null) return;
@@ -89,7 +68,6 @@ public class WorldSwitchPoints : MonoBehaviour
     var current = mechanic.GetCurrentWorld();
     if (current != _lastWorld)
     {
-        // Actualiza el UI de acuerdo al mundo actual
         essenceUI.SetWorld(current == ShiftingWorldMechanic.World.Normal);
 
         if (current == ShiftingWorldMechanic.World.Normal)

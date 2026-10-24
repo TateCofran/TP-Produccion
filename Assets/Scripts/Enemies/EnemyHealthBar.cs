@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 using TMPro;
 using System.Collections;
@@ -9,14 +10,16 @@ public class EnemyHealthBar : MonoBehaviour, IHealthDisplay
     [SerializeField] private GameObject healthBarPrefab;
     [SerializeField] private float healthBarHeight = 1.5f;
 
-    [SerializeField] private float damageTextYOffset = 2f; // separación arriba de la barra
+    [SerializeField] private float damageTextYOffset = 2f;
     [SerializeField] private float damageTextXOffset = -30f;
 
     [SerializeField] private float reduceSpeed = 6f;
 
-    [Header("Altura barra de vida")]
-    [SerializeField] private bool usarAlturaDesdeCollider = true;
-    [SerializeField] private float extraAltura = 0.5f; // offset extra por enemigo (configurable en Inspector)
+    [Header("Health Bar Height")]
+    [FormerlySerializedAs("usarAlturaDesdeCollider")]
+    [SerializeField] private bool useColliderHeight = true;
+    [FormerlySerializedAs("extraAltura")]
+    [SerializeField] private float extraHeight = 0.5f;
 
     private GameObject healthBarInstance;
     private Image healthBarFill;
@@ -25,46 +28,37 @@ public class EnemyHealthBar : MonoBehaviour, IHealthDisplay
     private float targetFill = 1f;
     private Coroutine smoothBarRoutine;
 
-    // Overlay para el escudo
     private Image shieldOverlayFill;
-    private float shieldAlpha = 0.35f; // opacidad del overlay (puede ajustarse)
+    private float shieldAlpha = 0.35f;
 
-
-    // Llama esto cuando el enemigo se saca del pool o spawnea
     public void Initialize(Transform parent, float maxHealth)
     {
         if (healthBarPrefab == null)
         {
-            Debug.LogWarning("No se asignó el prefab de la barra de vida.");
+            Debug.LogWarning("[EnemyHealthBar] Health bar prefab is not assigned");
             return;
         }
 
-        // Altura base
         float yOffset = healthBarHeight;
 
-        // 🔹 Si está activado, calculamos desde el collider/render + extraAltura por enemigo
-        if (usarAlturaDesdeCollider && parent != null)
+        if (useColliderHeight && parent != null)
         {
             if (parent.TryGetComponent<Collider>(out var col))
             {
-                // Mitad de la altura del collider + offset extra
-                yOffset = col.bounds.extents.y + extraAltura;
+                yOffset = col.bounds.extents.y + extraHeight;
             }
             else if (parent.TryGetComponent<Renderer>(out var rend))
             {
-                // Fallback si no hay collider pero sí renderer
-                yOffset = rend.bounds.extents.y + extraAltura;
+                yOffset = rend.bounds.extents.y + extraHeight;
             }
             else
             {
-                // Si no hay nada, al menos aplicamos el extraAltura sobre el valor base
-                yOffset = healthBarHeight + extraAltura;
+                yOffset = healthBarHeight + extraHeight;
             }
         }
         else
         {
-            // No usamos collider: solo el valor base + offset extra
-            yOffset = healthBarHeight + extraAltura;
+            yOffset = healthBarHeight + extraHeight;
         }
 
         Vector3 barPosition = parent.position + Vector3.up * yOffset;
@@ -94,7 +88,6 @@ public class EnemyHealthBar : MonoBehaviour, IHealthDisplay
         healthBarFill.color = new Color(0.26f, 0.54f, 0.27f, 1f);
     }
 
-    // Llama esto cada vez que el enemigo recibe daño
     public void UpdateHealthBar(float currentHealth, float maxHealth)
     {
         if (healthBarFill == null) return;
@@ -115,7 +108,6 @@ public class EnemyHealthBar : MonoBehaviour, IHealthDisplay
             currentFill = Mathf.Lerp(healthBarFill.fillAmount, targetFill, reduceSpeed * Time.deltaTime);
             healthBarFill.fillAmount = currentFill;
 
-            //según el fill visual
             if (currentFill > 0.5f)
                 healthBarFill.color = new Color(0.26f, 0.54f, 0.27f, 1f);
             else if (currentFill > 0.3f)
@@ -123,7 +115,7 @@ public class EnemyHealthBar : MonoBehaviour, IHealthDisplay
             else
                 healthBarFill.color = new Color(0.9f, 0.1f, 0.1f, 1f);
 
-            yield return null; // espera al siguiente frame
+            yield return null;
         }
 
         smoothBarRoutine = null;
@@ -133,7 +125,6 @@ public class EnemyHealthBar : MonoBehaviour, IHealthDisplay
     {
         if (healthBarInstance == null) return;
 
-        // Referencia al texto dentro de la barra
         Transform damageTextTransform = healthBarInstance.transform.Find("DamageText");
         if (damageTextTransform == null) return;
 
@@ -146,43 +137,37 @@ public class EnemyHealthBar : MonoBehaviour, IHealthDisplay
             tmp.raycastTarget = false;
         }
 
-        // Trigger del popup
         var popup = damageTextTransform.GetComponent<DamageTextPopup>();
         if (popup != null) popup.Play();
     }
 
     public void SetShieldOverlay(float normalizedValue)
     {
-        // 1) crear overlay si no existe todavía
         if (shieldOverlayFill == null)
         {
             var bg = healthBarInstance?.transform.Find("Background");
             if (bg != null)
             {
-                // Creamos un duplicado del "Filled" pero más transparente
                 var overlayGO = new GameObject("ShieldOverlay", typeof(Image));
                 overlayGO.transform.SetParent(bg, false);
-                overlayGO.transform.SetSiblingIndex(1); // encima del fondo, debajo del fill real
+                overlayGO.transform.SetSiblingIndex(1);
 
                 shieldOverlayFill = overlayGO.GetComponent<Image>();
-                shieldOverlayFill.color = new Color(0f, 0.8f, 1f, shieldAlpha); // azul celeste translúcido
+                shieldOverlayFill.color = new Color(0f, 0.8f, 1f, shieldAlpha);
                 shieldOverlayFill.type = Image.Type.Filled;
                 shieldOverlayFill.fillMethod = Image.FillMethod.Horizontal;
                 shieldOverlayFill.raycastTarget = false;
             }
         }
 
-        // 2) aplicar valor (0–1)
         if (shieldOverlayFill != null)
         {
             shieldOverlayFill.fillAmount = Mathf.Clamp01(normalizedValue);
 
-            // si no hay escudo, esconder
             shieldOverlayFill.enabled = (normalizedValue > 0.001f);
         }
     }
 
-    // Llama esto cuando el enemigo muere o se devuelve al pool
     public void DestroyBar()
     {
         if (healthBarInstance != null)
@@ -192,7 +177,6 @@ public class EnemyHealthBar : MonoBehaviour, IHealthDisplay
         }
     }
 
-    // Hace que la barra SIEMPRE mire a la cámara
     private void LateUpdate()
     {
         if (healthBarInstance == null) return;
@@ -200,7 +184,6 @@ public class EnemyHealthBar : MonoBehaviour, IHealthDisplay
 
         Transform cam = Camera.main.transform;
 
-        // Hacemos que la barra mire hacia la cámara
         Vector3 dir = (healthBarInstance.transform.position - cam.position).normalized;
         healthBarInstance.transform.rotation = Quaternion.LookRotation(dir, Vector3.up);
     }

@@ -1,5 +1,4 @@
-﻿// TilePlacementSequencer.cs
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -7,19 +6,15 @@ using UnityEngine;
 public class TilePlacementSequencer : MonoBehaviour
 {
     [Header("Delays")]
-    [Tooltip("Retraso entre tiles (grupos Tile_X) cuando se invoca PlayForGroup con startDelay acumulable).")]
+    [Tooltip("Delay between tiles (Tile_X groups) when PlayForGroup is called with an accumulated startDelay.")]
     [SerializeField] private float perTileStartDelay = 0.0f;
 
-    [Tooltip("Retraso entre celdas dentro del mismo tile (children del grupo).")]
+    [Tooltip("Delay between cells inside the same tile (group children).")]
     [SerializeField] private float perCellDelay = 0.03f;
 
-    [Tooltip("Si true, baraja el orden de hijos antes de animar (aspecto más orgánico).")]
+    [Tooltip("If enabled, shuffles the children order before animating.")]
     [SerializeField] private bool shuffleChildren = false;
 
-    /// <summary>
-    /// Secuencia la animación de todos los hijos con un delay incremental.
-    /// Llamalo pasando el 'parent' que devuelve InstantiateLayout (el grupo Tile_X).
-    /// </summary>
     public void PlayForGroup(Transform tileGroup, float startDelay = 0f)
     {
         if (tileGroup == null) return;
@@ -31,7 +26,6 @@ public class TilePlacementSequencer : MonoBehaviour
         if (startDelay > 0f)
             yield return new WaitForSeconds(startDelay);
 
-        // Recolectar hijos a animar
         var toAnimate = new List<Transform>(group.childCount);
         for (int i = 0; i < group.childCount; i++)
         {
@@ -48,7 +42,6 @@ public class TilePlacementSequencer : MonoBehaviour
             }
         }
 
-        // Lanzar animaciones con offset incremental
         float acc = 0f;
         foreach (var tr in toAnimate)
         {
@@ -60,9 +53,6 @@ public class TilePlacementSequencer : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Helper por si querés computar un delay acumulado entre tiles.
-    /// </summary>
     public float GetNextTileStartDelay(int tileIndexFromZero)
     {
         return perTileStartDelay * Mathf.Max(0, tileIndexFromZero);

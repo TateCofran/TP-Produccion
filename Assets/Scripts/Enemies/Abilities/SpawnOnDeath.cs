@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 public class Ability_SpawnOnDeath : MonoBehaviour, IEnemyAbility
@@ -9,7 +9,7 @@ public class Ability_SpawnOnDeath : MonoBehaviour, IEnemyAbility
     [SerializeField, Min(0f)] private float spreadRadius = 0.75f;
 
     [Header("Flags")]
-    [SerializeField] private bool onlyOnce = true; // por si el enemigo revive, etc.
+    [SerializeField] private bool onlyOnce = true;
 
     [Header("FX (optional)")]
     [SerializeField] private GameObject spawnVfxPrefab;
@@ -26,12 +26,10 @@ public class Ability_SpawnOnDeath : MonoBehaviour, IEnemyAbility
 
     public void Tick(float dt)
     {
-        // no-op
     }
 
     public void OnDamaged(float dmg, float currentHP, object source)
     {
-        // no-op
     }
 
     public void OnDeath()
@@ -80,24 +78,22 @@ public class Ability_SpawnOnDeath : MonoBehaviour, IEnemyAbility
             {
                 var route = MakeChildRoute(spawnPos);
                 enemy.Init(route);
+                WaveManager.Instance?.RegisterExtraEnemies(1);
             }
 
             if (spawnVfxPrefab != null)
             {
-                var vfx = Object.Instantiate(spawnVfxPrefab, spawnPos, Quaternion.identity);
-                Object.Destroy(vfx, vfxLifetime);
+                VfxPool.Spawn(spawnVfxPrefab, spawnPos, Quaternion.identity, vfxLifetime);
             }
         }
     }
 
     public void OnArrivedToCore()
     {
-        // si quieres que no spawnee cuando llega al core, dejas vacio
     }
 
     public void OnWaypoint(int index)
     {
-        // no-op
     }
 
     public void ResetRuntime()

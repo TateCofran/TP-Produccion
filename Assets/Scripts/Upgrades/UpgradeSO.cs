@@ -1,4 +1,4 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 
 public enum UpgradeCategory { Lab, Workshop }
 
@@ -6,7 +6,7 @@ public enum UpgradeCategory { Lab, Workshop }
 public class UpgradeSO : ScriptableObject
 {
     [Header("Identity")]
-    [SerializeField] private string upgradeId;   // único, estable
+    [SerializeField] private string upgradeId;
     [SerializeField] private string displayName;
 
     [TextArea(2, 6)]
@@ -18,7 +18,7 @@ public class UpgradeSO : ScriptableObject
     [Header("Progression")]
     [Min(1)][SerializeField] private int maxLevel = 1;
 
-    [Tooltip("Costos por nivel (índice 0 = nivel 1). Si faltan entradas, se repite la última.")]
+    [Tooltip("Cost per level (index 0 = level 1). Missing entries repeat the last one.")]
     [SerializeField] private int[] costBluePerLevel;
     [SerializeField] private int[] costRedPerLevel;
 
@@ -30,14 +30,13 @@ public class UpgradeSO : ScriptableObject
 
     public (int blue, int red) GetCostForLevel(int nextLevel)
     {
-        if (nextLevel < 1) nextLevel = 1;
-        int idx = Mathf.Clamp(nextLevel - 1, 0, Mathf.Max(costBluePerLevel.Length, costRedPerLevel.Length) - 1);
-        int blue = costBluePerLevel != null && costBluePerLevel.Length > 0
-            ? costBluePerLevel[Mathf.Clamp(idx, 0, costBluePerLevel.Length - 1)]
-            : 0;
-        int red = costRedPerLevel != null && costRedPerLevel.Length > 0
-            ? costRedPerLevel[Mathf.Clamp(idx, 0, costRedPerLevel.Length - 1)]
-            : 0;
-        return (blue, red);
+        int index = Mathf.Max(0, nextLevel - 1);
+        return (GetCost(costBluePerLevel, index), GetCost(costRedPerLevel, index));
+    }
+
+    private static int GetCost(int[] costs, int index)
+    {
+        if (costs == null || costs.Length == 0) return 0;
+        return costs[Mathf.Min(index, costs.Length - 1)];
     }
 }

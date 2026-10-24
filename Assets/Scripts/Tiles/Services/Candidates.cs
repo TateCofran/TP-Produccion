@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 public sealed class CandidateProvider : ICandidateProvider
@@ -29,13 +29,13 @@ public sealed class CandidateProvider : ICandidateProvider
 
                     var o = orientation.GetOrientedData(candidate, rot, flip);
 
-                    bool okBorde =
+                    bool isOnEntryEdge =
                         (dirOut == Vector2Int.right) ? (o.entryOriented.x == 0) :
                         (dirOut == Vector2Int.left) ? (o.entryOriented.x == o.w - 1) :
                         (dirOut == Vector2Int.up) ? (o.entryOriented.y == (_worldPlusZUsesYZeroEdge ? 0 : o.h - 1)) :
                                                        (o.entryOriented.y == (_worldPlusZUsesYZeroEdge ? o.h - 1 : 0));
 
-                    if (okBorde) yield return (candidate, rot, flip);
+                    if (isOnEntryEdge) yield return (candidate, rot, flip);
                 }
             }
         }

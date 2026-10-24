@@ -3,11 +3,11 @@
 [DisallowMultipleComponent]
 public class ClickToPanel : MonoBehaviour
 {
-    [Header("Panel a abrir")]
+    [Header("Panel To Open")]
     [SerializeField] private GameObject panelToOpen;
 
-    [Header("Comportamiento")]
-    [Tooltip("Si está activo, cerrará todos los demás paneles registrados antes de abrir este.")]
+    [Header("Behavior")]
+    [Tooltip("If enabled, closes every other registered panel before opening this one.")]
     [SerializeField] private bool exclusiveShow = true;
 
     public void OpenPanel()
