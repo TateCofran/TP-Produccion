@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using UnityEngine;
 
@@ -99,7 +99,7 @@ public class WaveManager : MonoBehaviour
         if (waveStarted || WaveInProgress) return;
         if (IsLastWave()) return;
 
-        Debug.Log($"[WaveManager] Autostart from {source}. Current wave: {currentWave}, enemies alive: {enemiesAlive}");
+        Log.Info("WaveManager", $"Autostart from {source}. Current wave: {currentWave}, enemies alive: {enemiesAlive}");
         StartNextWave();
     }
 
@@ -126,7 +126,7 @@ public class WaveManager : MonoBehaviour
         enemiesAlive = enemiesThisWave;
         OnEnemiesRemainingChanged?.Invoke(enemiesAlive);
 
-        Debug.Log($"[WaveManager] Wave {currentWave} started with {enemiesThisWave} enemies");
+        Log.Info("WaveManager", $"Wave {currentWave} started with {enemiesThisWave} enemies");
         OnWaveStarted?.Invoke(currentWave, enemiesThisWave);
 
         TutorialEventHub.RaiseWaveStarted();
@@ -204,7 +204,7 @@ public class WaveManager : MonoBehaviour
 
         if (waveStarted && enemiesAlive <= 0)
         {
-            Debug.Log($"[WaveManager] Wave {currentWave} finished");
+            Log.Info("WaveManager", $"Wave {currentWave} finished");
             waveStarted = false;
             OnWaveEnded?.Invoke();
 
@@ -252,7 +252,7 @@ public class WaveManager : MonoBehaviour
         foreach (var step in recipe.steps)
             total += Mathf.Max(0, Mathf.CeilToInt(step.count * multiplier));
 
-        Debug.Log($"[WaveManager] Total enemies this wave: {total} (x{multiplier})");
+        Log.Info("WaveManager", $"Total enemies this wave: {total} (x{multiplier})");
         return total;
     }
 

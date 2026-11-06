@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class Ability_DestroyRandomTurretOnLowHP : MonoBehaviour, IEnemyAbility
@@ -103,7 +103,7 @@ public class Ability_DestroyRandomTurretOnLowHP : MonoBehaviour, IEnemyAbility
             VfxPool.Spawn(destroyVfxPrefab, pos, Quaternion.identity, vfxLifetime);
         }
 
-        Debug.Log("[Ability_DestroyRandomTurretOnLowHP] Destroying turret: " + target.name);
+        Log.Info("Ability_DestroyRandomTurretOnLowHP", "Destroying turret: " + target.name);
 
         Object.Destroy(target.gameObject);
 

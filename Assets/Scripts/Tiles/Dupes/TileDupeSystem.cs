@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -50,7 +50,7 @@ public sealed class TileDupeSystem : MonoBehaviour, ITileDupeSystem
         float extraChance = GameModifiersManager.Stat(ModifierStat.TileExtraDupeChance);
         if (extraChance > 0f && UnityEngine.Random.value < extraChance)
         {
-            Debug.Log($"[TileDupeSystem] Extra dupe granted for {layout.name}");
+            Log.Info("TileDupeSystem", $"Extra dupe granted for {layout.name}");
             leveledUp |= data.AddDupe();
         }
 

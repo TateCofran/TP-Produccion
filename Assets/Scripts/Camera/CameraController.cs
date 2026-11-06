@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Unity.Cinemachine;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -18,6 +18,8 @@ public class CameraController : MonoBehaviour
     public float maxZoom = 40f;
     [Tooltip("How fast the FOV reaches the target. Higher is snappier.")]
     [Min(0.01f)] public float zoomSmoothing = 10f;
+    [Tooltip("Normalized zoom above which the camera counts as zoomed out (tutorial event).")]
+    [Range(0f, 1f)] public float zoomedOutThreshold = 0.8f;
 
     public event Action<float> OnZoomChanged;
 
@@ -28,6 +30,7 @@ public class CameraController : MonoBehaviour
     private float targetFov;
     private float currentFov;
     private float lastNotifiedZoom = -1f;
+    private bool zoomedOut;
 
     private void Start()
     {
@@ -119,5 +122,9 @@ public class CameraController : MonoBehaviour
         if (Mathf.Abs(z - lastNotifiedZoom) < 0.0005f) return;
         lastNotifiedZoom = z;
         OnZoomChanged?.Invoke(z);
+
+        bool nowZoomedOut = z >= zoomedOutThreshold;
+        if (nowZoomedOut && !zoomedOut) TutorialEventHub.RaiseZoomedOut();
+        zoomedOut = nowZoomedOut;
     }
 }

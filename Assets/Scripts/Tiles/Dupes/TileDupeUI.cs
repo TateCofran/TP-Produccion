@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class TileDupeUI : MonoBehaviour
@@ -64,7 +64,7 @@ public class TileDupeUI : MonoBehaviour
         dupeSystem.OnDupeChanged += HandleDupeChanged;
         dupeSystem.OnTileLevelUp += HandleTileLevelUp;
 
-        Debug.Log("[TileDupeUI] Connected to TileDupeSystem.");
+        Log.Info("TileDupeUI", "Connected to TileDupeSystem.");
     }
 
     private void HandleDupeChanged(TileLayout layout)
@@ -95,7 +95,7 @@ public class TileDupeUI : MonoBehaviour
             levelData.dupesRequiredForNextLevel
         );
 
-        Debug.Log($"[TileDupeUI] {typeName} reached level {levelData.currentLevel}.");
+        Log.Info("TileDupeUI", $"{typeName} reached level {levelData.currentLevel}.");
 
         SyncBars(typeName);
     }

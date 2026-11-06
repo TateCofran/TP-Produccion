@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 public class ShiftingWorldMechanic : MonoBehaviour
 {
@@ -97,7 +97,7 @@ public class ShiftingWorldMechanic : MonoBehaviour
                 if (charge > 0f) normalProgress = Mathf.Min(100f, normalProgress + charge);
             }
 
-            Debug.Log($"[ShiftingWorldMechanic] Switched world to {currentWorld}");
+            Log.Info("ShiftingWorldMechanic", $"Switched world to {currentWorld}");
 
             TutorialEventHub.RaiseWorldSwitched();
         }
@@ -136,18 +136,19 @@ public class ShiftingWorldMechanic : MonoBehaviour
     private void TryFireNormalReached()
     {
         if (normalWaitingChoice || normalPanelOpen) return;
+        if (ModalPanelQueue.ModifierPanelActive) return;
         if (Mathf.FloorToInt(normalProgress) >= 100)
         {
             normalWaitingChoice = true;
             normalPanelOpen = true;
             if (ui != null)
             {
-                ui.ShowNormalReached(() =>
+                ModalPanelQueue.Instance.Enqueue(() => ui.ShowNormalReached(() =>
                 {
                     normalPanelOpen = false;
                     normalWaitingChoice = false;
                     normalProgress = 0f;
-                });
+                }), () => ui != null && ui.IsTileChoiceActive, ModalPriority.TileOrTurret, "Tile panel");
             }
         }
     }
@@ -155,18 +156,19 @@ public class ShiftingWorldMechanic : MonoBehaviour
     private void TryFireOtherReached()
     {
         if (otherWaitingChoice || otherPanelOpen) return;
+        if (ModalPanelQueue.ModifierPanelActive) return;
         if (Mathf.FloorToInt(otherProgress) >= 100)
         {
             otherWaitingChoice = true;
             otherPanelOpen = true;
             if (ui != null)
             {
-                ui.ShowOtherReached(() =>
+                ModalPanelQueue.Instance.Enqueue(() => ui.ShowOtherReached(() =>
                 {
                     otherPanelOpen = false;
                     otherWaitingChoice = false;
                     otherProgress = 0f;
-                });
+                }), () => ui != null && ui.IsTurretChoiceActive, ModalPriority.TileOrTurret, "Turret panel");
             }
         }
     }
@@ -183,7 +185,7 @@ public class ShiftingWorldMechanic : MonoBehaviour
 
     private void HandleTurretLevelUp(TurretDataSO turret, TurretLevelData levelData)
     {
-        Debug.Log($"[ShiftingWorldMechanic] {turret.displayName} reached level {levelData.currentLevel}");
+        Log.Info("ShiftingWorldMechanic", $"{turret.displayName} reached level {levelData.currentLevel}");
     }
 
     private void HandleTurretChosen(TurretDataSO so) {  }

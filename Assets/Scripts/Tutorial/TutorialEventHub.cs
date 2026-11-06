@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 public static class TutorialEventHub
 {
@@ -25,4 +25,13 @@ public static class TutorialEventHub
 
     public static event Action WaveCompleted;
     public static void RaiseWaveCompleted() => WaveCompleted?.Invoke();
+
+    public static event Action ModifierChosen;
+    public static void RaiseModifierChosen() => ModifierChosen?.Invoke();
+
+    public static event Action RewardClaimed;
+    public static void RaiseRewardClaimed() => RewardClaimed?.Invoke();
+
+    public static event Action ZoomedOut;
+    public static void RaiseZoomedOut() => ZoomedOut?.Invoke();
 }

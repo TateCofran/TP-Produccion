@@ -70,11 +70,14 @@ public class ModifierWaveTrigger : MonoBehaviour
             return;
         }
 
-        GameTime.RequestPause();
-        pausedByTrigger = true;
-        Debug.Log($"[ModifierWaveTrigger] Offering {options.Count} {category} modifiers after wave {wave}");
-
-        panel.OpenPanel(options, ReleaseIfPaused);
+        var targetPanel = panel;
+        ModalPanelQueue.Instance.Enqueue(() =>
+        {
+            GameTime.RequestPause();
+            pausedByTrigger = true;
+            Debug.Log($"[ModifierWaveTrigger] Offering {options.Count} {category} modifiers after wave {wave}");
+            targetPanel.OpenPanel(options, ReleaseIfPaused);
+        }, () => targetPanel != null && targetPanel.IsOpen, ModalPriority.Modifier, "Modifier panel");
     }
 
     private void ReleaseIfPaused()

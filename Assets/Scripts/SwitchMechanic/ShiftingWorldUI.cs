@@ -254,6 +254,9 @@ public class ShiftingWorldUI : MonoBehaviour
         }
     }
 
+    public bool IsTileChoiceActive => onTileClosed != null || tilePlacingMode || (tilePanelRoot && tilePanelRoot.activeSelf);
+    public bool IsTurretChoiceActive => onTurretClosed != null || turretPlacingMode || (turretPanelRoot && turretPanelRoot.activeSelf);
+
     public void ShowNormalReached(Action closedCb = null)
     {
         if (TutorialManager.Instance != null && !TutorialManager.Instance.AllowPlaceTiles)
@@ -342,7 +345,7 @@ public class ShiftingWorldUI : MonoBehaviour
         tileRerollsLeft--;
         BuildNormalOptions();
         RefreshRerollButton();
-        Debug.Log($"[ShiftingWorldUI] Tile options rerolled. Rerolls left: {tileRerollsLeft}");
+        Log.Info("ShiftingWorldUI", $"Tile options rerolled. Rerolls left: {tileRerollsLeft}");
     }
 
     private void RefreshRerollButton()
@@ -388,7 +391,7 @@ public class ShiftingWorldUI : MonoBehaviour
 
     private void CancelTilePlacement()
     {
-        Debug.Log("[ShiftingWorldUI] Tile placement cancelled");
+        Log.Info("ShiftingWorldUI", "Tile placement cancelled");
         tilePlacingMode = false;
         selectedTileLayout = null;
         tileChoiceLocked = false;
@@ -622,7 +625,7 @@ public class ShiftingWorldUI : MonoBehaviour
 
         if (ok)
         {
-            Debug.Log($"[ShiftingWorldUI] Tile {selectedTileLayout.name} placed on exit {exitLabel}");
+            Log.Info("ShiftingWorldUI", $"Tile {selectedTileLayout.name} placed on exit {exitLabel}");
 
             PlacementEvents.RaiseTileApplied(new PlacementEvents.TileAppliedInfo
             {
@@ -739,7 +742,7 @@ public class ShiftingWorldUI : MonoBehaviour
             OnTurretChosen?.Invoke(so);
         }
 
-        Debug.Log($"[ShiftingWorldUI] Turret selected: {so.displayName}. Select a cell");
+        Log.Info("ShiftingWorldUI", $"Turret selected: {so.displayName}. Select a cell");
     }
 
     private TurretLevelData GetTurretLevel(TurretDataSO turret)
@@ -779,7 +782,7 @@ public class ShiftingWorldUI : MonoBehaviour
                 if (turretGhost != null) turretGhost.End();
                 if (slot.TryPlace(selectedTurret.prefab, selectedTurret))
                 {
-                    Debug.Log("[ShiftingWorldUI] Turret placed");
+                    Log.Info("ShiftingWorldUI", "Turret placed");
                     HandleDupeSystem(selectedTurret);
                     OnTurretPlacedSuccessfully?.Invoke(World.Other);
 
@@ -788,7 +791,7 @@ public class ShiftingWorldUI : MonoBehaviour
                 else
                 {
                     if (turretGhost != null) turretGhost.Begin(selectedTurret, GetTurretLevel(selectedTurret));
-                    Debug.Log("[ShiftingWorldUI] Cell is occupied. Try another one");
+                    Log.Info("ShiftingWorldUI", "Cell is occupied. Try another one");
                 }
             }
         }
@@ -803,7 +806,7 @@ public class ShiftingWorldUI : MonoBehaviour
 
     private void CancelTurretPlacement()
     {
-        Debug.Log("[ShiftingWorldUI] Turret placement cancelled");
+        Log.Info("ShiftingWorldUI", "Turret placement cancelled");
         EndTurretPlacement();
         if (turretPanelRoot) turretPanelRoot.SetActive(true);
     }
@@ -828,7 +831,7 @@ public class ShiftingWorldUI : MonoBehaviour
 
     public void NotifyTurretPlacementCancelled()
     {
-        Debug.Log("[ShiftingWorldUI] Turret placement cancelled");
+        Log.Info("ShiftingWorldUI", "Turret placement cancelled");
         selectedTurret = null;
         turretPlacingMode = false;
         if (turretPanelRoot && currentTurretOptions.Count > 0) turretPanelRoot.SetActive(true);

@@ -1,4 +1,4 @@
-﻿public enum TutorialEventType
+public enum TutorialEventType
 {
     Manual,
     TilePlaced,
@@ -6,7 +6,10 @@
     WaveStarted,
     CoreDamaged,
     WorldSwitched,
-    WaveCompleted
+    WaveCompleted,
+    ModifierChosen,
+    RewardClaimed,
+    ZoomedOut
 }
 
 [System.Serializable]

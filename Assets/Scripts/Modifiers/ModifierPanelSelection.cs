@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -134,6 +134,7 @@ public class ModifierPanelSelection : MonoBehaviour
             GameModifiersManager.Instance.ApplyModifier(chosen);
 
         ClosePanel();
+        TutorialEventHub.RaiseModifierChosen();
 
         var callback = onModifierChosen;
         onModifierChosen = null;

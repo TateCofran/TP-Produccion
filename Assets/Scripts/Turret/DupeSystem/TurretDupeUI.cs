@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class TurretDupeUI : MonoBehaviour
@@ -50,7 +50,7 @@ public class TurretDupeUI : MonoBehaviour
         dupeSystem.OnDupeChanged += HandleDupeChanged;
         dupeSystem.OnTurretLevelUp += HandleTurretLevelUp;
 
-        Debug.Log("[TurretDupeUI] Connected to TurretDupeSystem");
+        Log.Info("TurretDupeUI", "Connected to TurretDupeSystem");
     }
 
     private void InitializeData()
@@ -74,16 +74,14 @@ public class TurretDupeUI : MonoBehaviour
             data.dupesRequiredForNextLevel
         );
 
-        Debug.Log($"[TurretDupeUI] Dupes updated for {typeName}: {data.currentDupes}/{data.dupesRequiredForNextLevel}");
+        Log.Info("TurretDupeUI", $"Dupes updated for {typeName}: {data.currentDupes}/{data.dupesRequiredForNextLevel}");
 
         var bars = FindObjectsByType<DupeBarUI>(FindObjectsSortMode.None);
-        Debug.Log("bars: " + bars);
         foreach (var bar in bars)
         {
-            Debug.Log("bar: ----" + bar.GetTurretTypeName());
             if (bar != null && bar.GetTurretTypeName() == typeName)
             {
-                Debug.Log("[TurretDupeUI] Syncing bars");
+                Log.Info("TurretDupeUI", "Syncing bars");
                 bar.UpdateDupeBar();
             }
         }
@@ -98,17 +96,15 @@ public class TurretDupeUI : MonoBehaviour
             levelData.dupesRequiredForNextLevel
         );
 
-        Debug.Log($"[TurretDupeUI] {typeName} reached level {levelData.currentLevel}");
+        Log.Info("TurretDupeUI", $"{typeName} reached level {levelData.currentLevel}");
 
         var bars = FindObjectsByType<DupeBarUI>(FindObjectsSortMode.None);
-        Debug.Log("bars: " + bars);
 
         foreach (var bar in bars)
         {
-            Debug.Log("LEVEL UP bar: ----" + bar.GetTurretTypeName() + "[TurretDupeUI] typeName: " + typeName);
             if (bar != null && bar.GetTurretTypeName() == typeName)
             {
-                Debug.Log("[TurretDupeUI] Syncing bars");
+                Log.Info("TurretDupeUI", "Syncing bars");
                 bar.UpdateDupeBar();
             }
         }

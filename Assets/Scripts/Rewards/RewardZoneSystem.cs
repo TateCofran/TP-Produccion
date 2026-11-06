@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -128,7 +128,7 @@ public class RewardZoneSystem : MonoBehaviour
         int farthest = GetFarthestPlacedDistance();
         int min = Mathf.Max(minDistanceTiles, farthest + 1);
         if (TrySpawnZone(min, min + maxDistanceTiles))
-            Debug.Log($"[RewardZoneSystem] New reward zone after wave {wave}");
+            Log.Info("RewardZoneSystem", $"New reward zone after wave {wave}");
     }
 
     private void HandleZoomChanged(float zoom)
@@ -176,7 +176,7 @@ public class RewardZoneSystem : MonoBehaviour
 
         if (candidates.Count == 0)
         {
-            Debug.Log($"[RewardZoneSystem] No fog position available between {minDistance} and {maxDistance} tiles");
+            Log.Info("RewardZoneSystem", $"No fog position available between {minDistance} and {maxDistance} tiles");
             return false;
         }
 
@@ -267,6 +267,7 @@ public class RewardZoneSystem : MonoBehaviour
             activeZones.Remove(zone);
             PlayClaimFeedback(zone.transform.position);
             Grant(zone.Reward, zone.Amount);
+            TutorialEventHub.RaiseRewardClaimed();
             zone.gameObject.SetActive(false);
             pool.Enqueue(zone);
         }
@@ -387,12 +388,12 @@ public class RewardZoneSystem : MonoBehaviour
         }
 
         ShowToast("Extra modifier pick");
-        panel.OpenExtraPick();
+        ModalPanelQueue.Instance.Enqueue(() => panel.OpenExtraPick(), () => panel != null && panel.IsOpen, ModalPriority.ExtraPick, "Extra pick");
     }
 
     private void ShowToast(string message)
     {
-        Debug.Log($"[RewardZoneSystem] Reward: {message}");
+        Log.Info("RewardZoneSystem", $"Reward: {message}");
         if (toastText == null) return;
 
         if (toastRoutine != null) StopCoroutine(toastRoutine);

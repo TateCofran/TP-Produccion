@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class TurretDupeSystem : MonoBehaviour, ITurretDupeSystem
@@ -37,7 +37,7 @@ public class TurretDupeSystem : MonoBehaviour, ITurretDupeSystem
         float extraChance = GameModifiersManager.Stat(ModifierStat.TurretExtraDupeChance);
         if (extraChance > 0f && Random.value < extraChance)
         {
-            Debug.Log($"[TurretDupeSystem] Extra dupe granted for {turretId}");
+            Log.Info("TurretDupeSystem", $"Extra dupe granted for {turretId}");
             levelData.AddDupe();
         }
 

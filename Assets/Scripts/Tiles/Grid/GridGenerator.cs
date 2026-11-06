@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -375,7 +375,7 @@ public class GridGenerator : MonoBehaviour, ITileGenerator
 
         AttachAndApplyDupe(parent, layout);
 
-        Debug.Log($"[GridGenerator] Connected via exit {fromExit.label}, new tile #{newIndex} (rot={rot * 90} deg, flip={flip}), instances: {count}");
+        Log.Info("GridGenerator", $"Connected via exit {fromExit.label}, new tile #{newIndex} (rot={rot * 90} deg, flip={flip}), instances: {count}");
         TutorialEventHub.RaiseTilePlaced();
         OnTilePlaced?.Invoke(chain.Get(newIndex));
     }
@@ -479,7 +479,7 @@ public class GridGenerator : MonoBehaviour, ITileGenerator
             int otherExit = FindOpenExit(otherTile, otherCell);
             if (otherExit >= 0) exits.MarkUsed(otherExit);
 
-            Debug.Log($"[GridGenerator] Joined exit of tile #{rec.tileIndex} with the path of tile #{otherTile}");
+            Log.Info("GridGenerator", $"Joined exit of tile #{rec.tileIndex} with the path of tile #{otherTile}");
         }
 
         for (int i = 0; i < exits.Count; i++)
@@ -493,7 +493,7 @@ public class GridGenerator : MonoBehaviour, ITileGenerator
             if (!farEnough)
             {
                 exits.MarkClosed(i, "DEAD_END");
-                Debug.Log($"[GridGenerator] Exit of tile #{rec.tileIndex} is blocked too close to the core. Closed as a dead end");
+                Log.Info("GridGenerator", $"Exit of tile #{rec.tileIndex} is blocked too close to the core. Closed as a dead end");
                 continue;
             }
 

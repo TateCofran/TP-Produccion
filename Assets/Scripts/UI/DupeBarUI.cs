@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -41,7 +41,7 @@ public class DupeBarUI : MonoBehaviour
 
         string typeName = turretType.text;
         var data = TurretDupeUI.Instance.GetTurretData(typeName);
-        Debug.Log("[DupeBarUI] Current data type: " + data);
+        Log.Info("DupeBarUI", "Current data type: " + data);
 
         float width = (80f - ((data.maxDupes - 1) * 4f)) / data.maxDupes;
 
@@ -62,6 +62,6 @@ public class DupeBarUI : MonoBehaviour
             turretLevelText.text = $"Lv {data.level}";
         }
 
-        Debug.Log($"[DupeBarUI] Dupes UI built for {typeName}: {data.currentDupes}/{data.maxDupes} (width {width})");
+        Log.Info("DupeBarUI", $"Dupes UI built for {typeName}: {data.currentDupes}/{data.maxDupes} (width {width})");
     }
 }

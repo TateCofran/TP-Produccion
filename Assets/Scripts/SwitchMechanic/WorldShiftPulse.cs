@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -97,7 +97,7 @@ public class WorldShiftPulse : MonoBehaviour
                 vfx.transform.localScale = Vector3.one * radius;
         }
 
-        Debug.Log($"[WorldShiftPulse] Power {power:0.00}, enemies hit {_buffer.Count}");
+        Log.Info("WorldShiftPulse", $"Power {power:0.00}, enemies hit {_buffer.Count}");
         OnPulse?.Invoke(power);
         _buffer.Clear();
     }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using TMPro;
 using UnityEngine;
@@ -85,6 +85,9 @@ public class TutorialManager : MonoBehaviour
         TutorialEventHub.CoreDamaged += HandleCoreDamaged;
         TutorialEventHub.WorldSwitched += HandleWorldSwitched;
         TutorialEventHub.WaveCompleted += HandleWaveCompleted;
+        TutorialEventHub.ModifierChosen += HandleModifierChosen;
+        TutorialEventHub.RewardClaimed += HandleRewardClaimed;
+        TutorialEventHub.ZoomedOut += HandleZoomedOut;
     }
 
     private void OnDisable()
@@ -95,6 +98,9 @@ public class TutorialManager : MonoBehaviour
         TutorialEventHub.CoreDamaged -= HandleCoreDamaged;
         TutorialEventHub.WorldSwitched -= HandleWorldSwitched;
         TutorialEventHub.WaveCompleted -= HandleWaveCompleted;
+        TutorialEventHub.ModifierChosen -= HandleModifierChosen;
+        TutorialEventHub.RewardClaimed -= HandleRewardClaimed;
+        TutorialEventHub.ZoomedOut -= HandleZoomedOut;
     }
 
     private void Start()
@@ -140,10 +146,35 @@ public class TutorialManager : MonoBehaviour
                 allowTiles:false, allowTurrets:false, allowWave:false, allowWorld:false
             ),
             new TutorialStep(
+                "Fog Of War",
+                "The land around your path is hidden by fog.\n" +
+                "Every tile you place clears the fog under it.\n\n" +
+                "Zoom out with the MOUSE WHEEL (or R) to see more of the map.",
+                TutorialEventType.ZoomedOut,
+                allowTiles:false, allowTurrets:false, allowWave:false, allowWorld:false
+            ),
+            new TutorialStep(
                 "Place Your First Tile",
-                "Choose a tile and place a path.",
+                "Choose a tile and place a path.\n" +
+                "Hover an exit arrow to preview where the tile will go.",
                 TutorialEventType.TilePlaced,
                 allowTiles:true, allowTurrets:false, allowWave:false, allowWorld:false
+            ),
+            new TutorialStep(
+                "Tile Copies",
+                "Every time you place a tile you already own, it gets a copy.\n" +
+                "Collect enough copies and that tile levels up: all of its cells " +
+                "deal more damage, slow more or stun longer.\n\n" +
+                "The bar under each option shows its copies.",
+                TutorialEventType.Manual,
+                allowTiles:false, allowTurrets:false, allowWave:false, allowWorld:false
+            ),
+            new TutorialStep(
+                "Reward Zones",
+                "Golden squares inside the fog are reward zones.\n" +
+                "Place a tile over one to claim it: essences or an extra modifier.",
+                TutorialEventType.Manual,
+                allowTiles:false, allowTurrets:false, allowWave:false, allowWorld:false
             ),
 
             new TutorialStep(
@@ -182,9 +213,18 @@ public class TutorialManager : MonoBehaviour
             ),
 
             new TutorialStep(
-                "Essences Per World Switch",
-                "Every time you switch worlds you earn essences.\n" +
-                "Essences are spent on permanent upgrades in the Lab and the Workshop.\n",
+                "Essences Per Kill",
+                "Every enemy you kill gives essences.\n" +
+                "In the Normal World you earn <color=#4FA3FF>blue</color> essences, " +
+                "in the Other World <color=#FF5A4F>red</color> essences.\n" +
+                "Spend them on permanent upgrades in the Lab and the Workshop.",
+                TutorialEventType.Manual,
+                allowTiles:true, allowTurrets:true, allowWave:true, allowWorld:true
+            ),
+            new TutorialStep(
+                "Modifiers",
+                "Every few waves you will choose one modifier out of several cards.\n" +
+                "Modifiers last the whole run. The cards depend on the world you are in.",
                 TutorialEventType.Manual,
                 allowTiles:true, allowTurrets:true, allowWave:true, allowWorld:true
             ),
@@ -240,7 +280,7 @@ public class TutorialManager : MonoBehaviour
         AllowStartWave = true;
         AllowWorldSwitch = true;
 
-        Debug.Log("[Tutorial] COMPLETADO.");
+        Debug.Log("[TutorialManager] Tutorial completed");
     }
 
     private void ApplyStep(TutorialStep s)
@@ -308,6 +348,21 @@ public class TutorialManager : MonoBehaviour
     private void HandleWaveCompleted()
     {
         CheckEvent(TutorialEventType.WaveCompleted);
+    }
+
+    private void HandleModifierChosen()
+    {
+        CheckEvent(TutorialEventType.ModifierChosen);
+    }
+
+    private void HandleRewardClaimed()
+    {
+        CheckEvent(TutorialEventType.RewardClaimed);
+    }
+
+    private void HandleZoomedOut()
+    {
+        CheckEvent(TutorialEventType.ZoomedOut);
     }
     public void NotifyCoreDamaged()
     {

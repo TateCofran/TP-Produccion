@@ -215,7 +215,7 @@ public class FogOfWarSystem : MonoBehaviour
         if (amount <= 0) return;
 
         essences.AddBlueEssence(amount);
-        Debug.Log($"[FogOfWarSystem] Granted {amount} blue essences for {count} revealed fog tiles");
+        Log.Info("FogOfWarSystem", $"Granted {amount} blue essences for {count} revealed fog tiles");
     }
 
     private void SpawnFogTile(Vector2Int index)
