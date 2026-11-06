@@ -151,7 +151,7 @@ MonoBehaviour:
   grid: {fileID: 6620364335412929145}
   fog: {fileID: 2048374533}
   cameraController: {fileID: 3362800846911844978}
-  rewardTable: {fileID: 0}
+  rewardTable: {fileID: 11400000, guid: 961598e1ae584c14e8e7dc5dacc72384, type: 2}
   zonePrefab: {fileID: 0}
   zoneRoot: {fileID: 0}
   initialZones: 3
