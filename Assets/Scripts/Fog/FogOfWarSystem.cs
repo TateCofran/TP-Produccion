@@ -24,6 +24,15 @@ public class FogOfWarSystem : MonoBehaviour
     [Header("Layer")]
     [SerializeField] private string fogLayerName = "Fog";
 
+    [Header("Dissolve")]
+    [Tooltip("Seconds each fog tile takes to dissolve after a tile is placed over it.")]
+    [SerializeField, Min(0f)] private float dissolveDuration = 0.4f;
+    [Tooltip("Random extra delay per fog tile so the edge looks noisy.")]
+    [SerializeField, Min(0f)] private float dissolveNoiseDelay = 0.08f;
+    [Tooltip("Extra delay per world unit of distance from the placed tile, so the dissolve travels away from it.")]
+    [SerializeField, Min(0f)] private float dissolveDelayPerUnit = 0.02f;
+    [SerializeField] private float dissolveSink = 0.15f;
+
     public event Action<int> OnFogRevealed;
     public event Action OnGridInitialized;
 
@@ -33,6 +42,23 @@ public class FogOfWarSystem : MonoBehaviour
     private readonly List<GameObject> allTiles = new List<GameObject>();
     private readonly List<(Vector3 min, Vector3 max)> placedBounds = new List<(Vector3, Vector3)>();
     private readonly List<Vector2Int> toReveal = new List<Vector2Int>();
+
+    private struct Dissolving
+    {
+        public GameObject go;
+        public Vector3 center;
+        public Vector3 away;
+        public float start;
+        public float duration;
+        public bool hasProperty;
+    }
+
+    private static readonly int DissolveId = Shader.PropertyToID("_Dissolve");
+    private static readonly int DissolveDirectionId = Shader.PropertyToID("_DissolveDirection");
+    private readonly List<Dissolving> dissolving = new List<Dissolving>();
+    private MaterialPropertyBlock dissolveBlock;
+
+    public int DissolvingCount => dissolving.Count;
 
     private bool initialized;
     private Vector3 gridOrigin;
@@ -187,13 +213,13 @@ public class FogOfWarSystem : MonoBehaviour
             if (Overlaps(fMin, fMax, min, max)) toReveal.Add(kv.Key);
         }
 
+        Vector3 source = (min + max) * 0.5f;
         foreach (var index in toReveal)
         {
             var go = activeTiles[index];
             activeTiles.Remove(index);
             revealed.Add(index);
-            go.SetActive(false);
-            pool.Enqueue(go);
+            StartDissolve(go, source);
         }
 
         if (toReveal.Count > 0)
@@ -201,6 +227,94 @@ public class FogOfWarSystem : MonoBehaviour
             OnFogRevealed?.Invoke(toReveal.Count);
             GrantFogEssence(toReveal.Count);
         }
+    }
+
+    private void StartDissolve(GameObject go, Vector3 source)
+    {
+        if (go == null) return;
+        if (dissolveDuration <= 0f)
+        {
+            go.SetActive(false);
+            pool.Enqueue(go);
+            return;
+        }
+
+        Vector3 center = go.transform.position;
+        Vector3 away = center - source;
+        away.y = 0f;
+        if (Mathf.Abs(away.x) >= Mathf.Abs(away.z)) away = new Vector3(Mathf.Sign(away.x == 0f ? 1f : away.x), 0f, 0f);
+        else away = new Vector3(0f, 0f, Mathf.Sign(away.z));
+
+        float distance = Vector3.Distance(new Vector3(center.x, 0f, center.z), new Vector3(source.x, 0f, source.z));
+        float delay = UnityEngine.Random.Range(0f, dissolveNoiseDelay) + distance * dissolveDelayPerUnit;
+
+        bool hasProperty = false;
+        foreach (var r in go.GetComponentsInChildren<Renderer>())
+            if (r.sharedMaterial != null && r.sharedMaterial.HasProperty(DissolveId)) { hasProperty = true; break; }
+
+        dissolving.Add(new Dissolving
+        {
+            go = go,
+            center = center,
+            away = away,
+            start = Time.time + delay,
+            duration = dissolveDuration,
+            hasProperty = hasProperty
+        });
+    }
+
+    private void Update()
+    {
+        if (dissolving.Count == 0) return;
+        float now = Time.time;
+
+        for (int i = dissolving.Count - 1; i >= 0; i--)
+        {
+            var d = dissolving[i];
+            if (d.go == null)
+            {
+                dissolving.RemoveAt(i);
+                continue;
+            }
+
+            float k = Mathf.Clamp01((now - d.start) / d.duration);
+            if (k <= 0f) continue;
+
+            if (d.hasProperty) ApplyDissolveProperty(d, k);
+            else ApplyDissolveTransform(d, k);
+
+            if (k < 1f) continue;
+
+            d.go.SetActive(false);
+            d.go.transform.position = d.center;
+            d.go.transform.localScale = new Vector3(footprint, 1f, footprint);
+            if (d.hasProperty) ApplyDissolveProperty(d, 0f);
+            pool.Enqueue(d.go);
+            dissolving.RemoveAt(i);
+        }
+    }
+
+    private void ApplyDissolveProperty(Dissolving d, float k)
+    {
+        dissolveBlock ??= new MaterialPropertyBlock();
+        foreach (var r in d.go.GetComponentsInChildren<Renderer>())
+        {
+            r.GetPropertyBlock(dissolveBlock);
+            dissolveBlock.SetFloat(DissolveId, k);
+            dissolveBlock.SetVector(DissolveDirectionId, d.away);
+            r.SetPropertyBlock(dissolveBlock);
+        }
+    }
+
+    private void ApplyDissolveTransform(Dissolving d, float k)
+    {
+        float eased = k * k * (3f - 2f * k);
+        float remaining = Mathf.Max(0.001f, 1f - eased);
+        bool alongX = Mathf.Abs(d.away.x) > 0.5f;
+        var scale = new Vector3(alongX ? footprint * remaining : footprint, 1f, alongX ? footprint : footprint * remaining);
+        d.go.transform.localScale = scale;
+        Vector3 shift = d.away * (footprint * 0.5f * (1f - remaining));
+        d.go.transform.position = d.center + shift + Vector3.down * dissolveSink * eased;
     }
 
     private void GrantFogEssence(int count)

@@ -67,6 +67,16 @@ public class FeedbackFxPool : MonoBehaviour
         pool.SpawnLine(from, to, color, width, duration, 0f, 2);
     }
 
+    public static void Beam(Vector3 from, Vector3 to, Color color, float width, float duration)
+    {
+        var pool = Instance;
+        if (pool == null) return;
+        float mult = FeedbackSettings.Current.FlashMultiplier;
+        if (mult <= 0f) mult = 0.35f;
+        color.a *= mult;
+        pool.SpawnLine(from, to, color, width, duration, 0f, 2);
+    }
+
     public static void Lightning(Vector3 from, Vector3 to, Color color, float width, float duration, float jitter, int segments)
     {
         var pool = Instance;

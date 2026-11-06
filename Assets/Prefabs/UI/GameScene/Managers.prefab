@@ -53,6 +53,13 @@ MonoBehaviour:
   nextWaveCountdownText: {fileID: 0}
   nextWaveButton: {fileID: 0}
   nextWavePanel: {fileID: 0}
+  modifierCountdownText: {fileID: 0}
+  modifierPulseScale: 1.15
+  modifierPulseSpeed: 6
+  modifierPulseColor: {r: 1, g: 0.85, b: 0.2, a: 1}
+  coreHealthPulseScale: 1.25
+  coreHealthPulseDuration: 0.25
+  coreHealthPulseColor: {r: 1, g: 0.25, b: 0.2, a: 1}
 --- !u!114 &2515103373664879767
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -68,7 +75,6 @@ MonoBehaviour:
   panelRoot: {fileID: 0}
   nameText: {fileID: 0}
   damageText: {fileID: 0}
-  dpsText: {fileID: 0}
   rangeText: {fileID: 0}
   levelText: {fileID: 0}
   targetModeText: {fileID: 0}
@@ -283,8 +289,8 @@ MonoBehaviour:
   allowFlip: 1
   worldPlusZUsesYZeroEdge: 1
   selectedExitIndex: 0
-  minDistanceToCore: 0
-  excludeCoreNeighbors: 1
+  minSpawnRouteCells: 5
+  joinTolerance: 0.6
   exitRunnerPrefab: {fileID: 5019013483156572802, guid: e2686766e99fe794da66a7d840a2b3b0, type: 3}
   runnerYOffset: 0.05
   autoSpawnRunnersOnAppend: 1
@@ -370,6 +376,9 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+  dropHeight: 1.2
+  fallPortion: 0.65
+  bounceHeight: 0.12
 --- !u!1 &2531771615937604481
 GameObject:
   m_ObjectHideFlags: 0
@@ -414,12 +423,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0d2faf8505a3b5b43b5fe2e0bc2a160a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  turretRangeMultiplier: 1
-  turretFireRateMultiplier: 1
-  turretDamageMultiplier: 1
-  enemyCountMultiplier: 1
-  enemySpeedMultiplier: 1
-  enemyDamageTakenMultiplier: 1
+  normalPool: []
+  otherPool: []
 --- !u!1 &3655966774633379463
 GameObject:
   m_ObjectHideFlags: 0
@@ -541,6 +546,11 @@ MonoBehaviour:
   bigEnemyPrefab2: {fileID: 5019013483156572802, guid: 6c3c9fab13150704cb0d65bd10a35285, type: 3}
   miniBossPrefab2: {fileID: 5019013483156572802, guid: cfe83ca5f9656664b91fcd02fa01c1eb, type: 3}
   bossPrefab2: {fileID: 5019013483156572802, guid: 197ba61de064d59488355ff62b2dbf9b, type: 3}
+  minionEnemyPrefab3: {fileID: 0}
+  sprintEnemyPrefab3: {fileID: 0}
+  bigEnemyPrefab3: {fileID: 0}
+  miniBossPrefab3: {fileID: 0}
+  bossPrefab3: {fileID: 0}
   initialSizePerType: 10
   poolRoot: {fileID: 0}
 --- !u!114 &8002569605435751785
@@ -560,7 +570,9 @@ MonoBehaviour:
   enemyPool: {fileID: 3659157835321779541}
   defaultSpawnYOffset: 0
   fallbackLineToCore: 1
+  farthestSpawnTypes: 04000000090000000e000000
   yieldBetweenSteps: 1
+  enemyDatabase: []
 --- !u!82 &1376444150937798674
 AudioSource:
   m_ObjectHideFlags: 0
@@ -820,6 +832,13 @@ MonoBehaviour:
   stunMultiplier: 1
   stunMax: 10
   stunCooldown: 8
+  enableWorldFlip: 1
+  otherWorldSlowDamage: 4
+  otherWorldSlowDamageInterval: 1
+  knockbackPerStunSecond: 1.5
+  maxKnockbackDistance: 3
+  knockbackImmunity: 3
+  maxKnockbacksPerEnemy: 3
 --- !u!1 &7385469374571141968
 GameObject:
   m_ObjectHideFlags: 0
@@ -947,6 +966,7 @@ MonoBehaviour:
   grid: {fileID: 9115440098663383584}
   ui: {fileID: 642024714435750825}
   shiftingWorldAudio: {fileID: 5369460290404863403}
+  fogWorld: {fileID: 0}
   currentWorld: 0
   normalProgress: 0
   otherProgress: 0
@@ -973,6 +993,9 @@ MonoBehaviour:
   - {fileID: 0}
   - {fileID: 0}
   tileLabels: []
+  tileRerollButton: {fileID: 0}
+  tileRerollLabel: {fileID: 0}
+  baseOptionsCount: 3
   turretPanelRoot: {fileID: 0}
   turretButtons:
   - {fileID: 0}
@@ -981,6 +1004,13 @@ MonoBehaviour:
   turretLabels: []
   exitButtonPrefab: {fileID: 8400451156531096281, guid: 405ba3f95d9cb374682b065a092ec0e9, type: 3}
   exitButtonsCanvas: {fileID: 0}
+  exitArrowSize: 36
+  exitIconSize: 40
+  exitArrowColor: {r: 1, g: 1, b: 1, a: 1}
+  exitSelectedScale: 1.2
+  tileIconPalette: {fileID: 0}
+  tileGhost: {fileID: 0}
+  turretGhost: {fileID: 0}
   turretDatabase: {fileID: 11400000, guid: deb3e0656e011244e8d1f20e17b7ed9a, type: 2}
   turretPool:
   - {fileID: 11400000, guid: 094b4a67ef6d5dc498c98d6534972009, type: 2}
@@ -991,18 +1021,24 @@ MonoBehaviour:
   cellLayers:
     serializedVersion: 2
     m_Bits: 4294967295
-  turretYOffset: 1
   placeWithUI: 0
   enableDupesSystem: 1
   normalWorldFill: {fileID: 0}
   otherWorldFill: {fileID: 0}
   worldToggleCooldownFill: {fileID: 0}
+  meterGraphic: {fileID: 0}
+  meterValue: 0
   worldIcon: {fileID: 0}
   normalWorldSprite: {fileID: 21300000, guid: 11280c14b45b11742bcb3456a060abc0, type: 3}
   otherWorldSprite: {fileID: 21300000, guid: 8ca198d934481ed44b65324829353f9d, type: 3}
   pulseScale: 1.2
   pulseSpeed: 2.5
   uiContainer: {fileID: 0}
+  blinkSpeed: 0.6
+  blinkColor: {r: 1.5, g: 1.5, b: 1.5, a: 1.5}
+  cooldownRing: {fileID: 0}
+  ringShakeDistance: 8
+  ringShakeDuration: 0.25
   buttonWorldYOffset: 1
   buttonScreenYOffset: 24
   buttonPivotBottom: 1
@@ -1019,8 +1055,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mechanic: {fileID: 4262767322320497845}
-  essencesOnNormal: 1
-  essencesOnOther: 1
+  essenceUI: {fileID: 0}
   labBlueUpgradeId: upgrade_moreEssencePerSwitchTile
   blueBonusPerLevel: 1
   workshopRedUpgradeId: upgrade_moreEssencePerSwitchTurret
@@ -1168,6 +1203,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   normalWorldClip: {fileID: 8300000, guid: c3d9f7a8f84027840ac05ca9f78ac774, type: 3}
   otherWorldClip: {fileID: 8300000, guid: 64285a3e371f7ef4eb324e7557e28aa3, type: 3}
+  crossfadeDuration: 0.5
+  targetVolume: 1
+  endFadeDuration: 0.5
+  useLowPass: 1
+  lowPassStartCutoff: 900
+  lowPassEndCutoff: 22000
+  unavailableClip: {fileID: 0}
+  unavailableVolume: 0.5
 --- !u!1 &9003019134753429953
 GameObject:
   m_ObjectHideFlags: 0

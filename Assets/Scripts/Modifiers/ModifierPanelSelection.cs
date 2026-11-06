@@ -14,6 +14,12 @@ public class ModifierPanelSelection : MonoBehaviour
     [Header("Extra Pick")]
     [SerializeField, Min(1)] private int extraPickOptions = 3;
 
+    [Header("Confirm Animation (unscaled)")]
+    [SerializeField, Min(0f)] private float confirmDuration = 0.3f;
+
+    private readonly List<ModifierCardUI> spawnedCardUIs = new List<ModifierCardUI>();
+    private bool confirming;
+
     private Action onModifierChosen;
     private readonly List<GameObject> spawnedCards = new List<GameObject>();
     private readonly List<ModifierSO> currentOptions = new List<ModifierSO>();
@@ -76,7 +82,8 @@ public class ModifierPanelSelection : MonoBehaviour
             int optionIndex = i;
             var card = go.GetComponent<ModifierCardUI>();
             if (card == null) card = go.AddComponent<ModifierCardUI>();
-            card.Bind(modifier, () => OnModifierSelected(optionIndex));
+            card.Bind(modifier, () => OnModifierSelected(optionIndex), spawnedCardUIs.Count);
+            spawnedCardUIs.Add(card);
         }
     }
 
@@ -127,6 +134,39 @@ public class ModifierPanelSelection : MonoBehaviour
 
     private void OnModifierSelected(int idx)
     {
+        if (idx < 0 || idx >= currentOptions.Count || confirming) return;
+
+        if (confirmDuration > 0f && isActiveAndEnabled)
+        {
+            StartCoroutine(ConfirmRoutine(idx));
+            return;
+        }
+
+        ApplySelection(idx);
+    }
+
+    private System.Collections.IEnumerator ConfirmRoutine(int idx)
+    {
+        confirming = true;
+        for (int i = 0; i < spawnedCardUIs.Count; i++)
+        {
+            var card = spawnedCardUIs[i];
+            if (card != null) StartCoroutine(card.PlayConfirm(i == idx, confirmDuration));
+        }
+
+        float t = 0f;
+        while (t < confirmDuration)
+        {
+            t += Time.unscaledDeltaTime;
+            yield return null;
+        }
+
+        confirming = false;
+        ApplySelection(idx);
+    }
+
+    private void ApplySelection(int idx)
+    {
         if (idx < 0 || idx >= currentOptions.Count) return;
 
         var chosen = currentOptions[idx];
@@ -153,5 +193,6 @@ public class ModifierPanelSelection : MonoBehaviour
         foreach (var card in spawnedCards)
             if (card != null) Destroy(card);
         spawnedCards.Clear();
+        spawnedCardUIs.Clear();
     }
 }

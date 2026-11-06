@@ -15,22 +15,50 @@ public class TilePlacementSequencer : MonoBehaviour
     [Tooltip("If enabled, shuffles the children order before animating.")]
     [SerializeField] private bool shuffleChildren = false;
 
+    [Header("Dust")]
+    [Tooltip("Small dust puff spawned when each cell lands. Pooled with VfxPool.")]
+    [SerializeField] private GameObject dustPrefab;
+    [SerializeField, Min(0.1f)] private float dustLifetime = 1f;
+
     public void PlayForGroup(Transform tileGroup, float startDelay = 0f)
     {
         if (tileGroup == null) return;
-        StartCoroutine(Co_PlayGroup(tileGroup, startDelay));
+        StartCoroutine(Co_PlayGroup(tileGroup, startDelay, null, 1f));
     }
 
-    private IEnumerator Co_PlayGroup(Transform group, float startDelay)
+    public void PlayForGroup(Transform tileGroup, float startDelay, Vector3 entryWorld, float cellSize)
     {
-        if (startDelay > 0f)
-            yield return new WaitForSeconds(startDelay);
+        if (tileGroup == null) return;
+        StartCoroutine(Co_PlayGroup(tileGroup, startDelay, entryWorld, Mathf.Max(0.01f, cellSize)));
+    }
 
+    private IEnumerator Co_PlayGroup(Transform group, float startDelay, Vector3? entryWorld, float cellSize)
+    {
         var toAnimate = new List<Transform>(group.childCount);
         for (int i = 0; i < group.childCount; i++)
         {
             var child = group.GetChild(i);
             toAnimate.Add(child);
+            var pre = child.GetComponent<TilePlacementAnimator>();
+            if (pre != null && startDelay > 0f) child.localScale = Vector3.zero;
+        }
+
+        if (startDelay > 0f)
+            yield return new WaitForSeconds(startDelay);
+
+        if (entryWorld.HasValue)
+        {
+            Vector3 entry = entryWorld.Value;
+            foreach (var tr in toAnimate)
+            {
+                if (tr == null) continue;
+                var anim = tr.GetComponent<TilePlacementAnimator>();
+                if (anim == null) continue;
+                Vector3 d = tr.position - entry;
+                float cells = (Mathf.Abs(d.x) + Mathf.Abs(d.z)) / cellSize;
+                anim.Play(cells * perCellDelay, dustPrefab, dustLifetime);
+            }
+            yield break;
         }
 
         if (shuffleChildren)
@@ -48,7 +76,7 @@ public class TilePlacementSequencer : MonoBehaviour
             if (tr == null) continue;
             var anim = tr.GetComponent<TilePlacementAnimator>();
             if (anim != null)
-                anim.Play(acc);
+                anim.Play(acc, dustPrefab, dustLifetime);
             acc += perCellDelay;
         }
     }

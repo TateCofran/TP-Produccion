@@ -71,7 +71,12 @@ public class ShiftingWorldMechanic : MonoBehaviour
                 : 1f - (toggleCooldownLeft / toggleCooldownSeconds);
             ui.SetWorldToggleCooldown(cooldownNormalized);
         }
-        if (!GameTime.IsPaused && Input.GetKeyDown(toggleKey) && toggleCooldownLeft <= 0f)
+        if (!GameTime.IsPaused && Input.GetKeyDown(toggleKey) && toggleCooldownLeft > 0f)
+        {
+            if (ui != null) ui.ShakeCooldownRing();
+            if (shiftingWorldAudio != null) shiftingWorldAudio.PlayUnavailable();
+        }
+        else if (!GameTime.IsPaused && Input.GetKeyDown(toggleKey) && toggleCooldownLeft <= 0f)
         {
             if (TutorialManager.Instance != null && !TutorialManager.Instance.AllowWorldSwitch)
                 return;
@@ -96,6 +101,10 @@ public class ShiftingWorldMechanic : MonoBehaviour
                 float charge = GameModifiersManager.Stat(ModifierStat.ShiftChargeTileBar);
                 if (charge > 0f) normalProgress = Mathf.Min(100f, normalProgress + charge);
             }
+
+            var feedback = FeedbackSettings.Current;
+            SlowMotion.Play(feedback.worldShiftSlowScale, feedback.worldShiftSlowDuration);
+            WorldShiftPostFX.Pulse();
 
             Log.Info("ShiftingWorldMechanic", $"Switched world to {currentWorld}");
 

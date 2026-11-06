@@ -43,6 +43,27 @@ public class RewardZoneSystem : MonoBehaviour
     [SerializeField] private TMP_Text toastText;
     [SerializeField, Min(0f)] private float toastSeconds = 2.5f;
 
+    [System.Serializable]
+    public class RewardClip
+    {
+        public RewardType type;
+        public AudioClip clip;
+    }
+
+    [Header("Claim Juice")]
+    [Tooltip("Particle burst tinted with the reward color. Pooled with VfxPool.")]
+    [SerializeField] private GameObject claimBurstPrefab;
+    [SerializeField, Min(0.1f)] private float claimBurstLifetime = 1.5f;
+    [SerializeField, Min(0f)] private float beamHeight = 8f;
+    [SerializeField, Min(0.01f)] private float beamWidth = 0.9f;
+    [SerializeField, Min(0.01f)] private float beamDuration = 0.6f;
+    [Tooltip("Optional clip per reward type. A generated tone is used when missing.")]
+    [SerializeField] private List<RewardClip> claimClips = new List<RewardClip>();
+    [SerializeField, Range(0f, 1f)] private float claimVolume = 0.6f;
+    [SerializeField] private Canvas toastCanvas;
+
+    private AudioClip generatedClaimTone;
+
     [Header("Fallback Amounts")]
     [SerializeField, Min(0)] private int fallbackEssenceAmount = 25;
 
@@ -265,7 +286,7 @@ public class RewardZoneSystem : MonoBehaviour
         foreach (var zone in claimed)
         {
             activeZones.Remove(zone);
-            PlayClaimFeedback(zone.transform.position);
+            PlayClaimFeedback(zone.transform.position, zone.Reward);
             Grant(zone.Reward, zone.Amount);
             TutorialEventHub.RaiseRewardClaimed();
             zone.gameObject.SetActive(false);
@@ -273,10 +294,42 @@ public class RewardZoneSystem : MonoBehaviour
         }
     }
 
-    private void PlayClaimFeedback(Vector3 position)
+    private void PlayClaimFeedback(Vector3 position, RewardType type)
     {
+        Color color = RewardClaimFX.ColorFor(type);
         if (claimVfxPrefab != null) VfxPool.Spawn(claimVfxPrefab, position, Quaternion.identity, claimVfxLifetime);
-        if (claimAudioSource != null && claimClip != null) claimAudioSource.PlayOneShot(claimClip);
+        RewardClaimFX.Beam(position, color, beamHeight, beamWidth, beamDuration);
+        RewardClaimFX.Burst(claimBurstPrefab, position, color, claimBurstLifetime);
+        PlayClaimSound(type);
+    }
+
+    private void PlayClaimSound(RewardType type)
+    {
+        if (claimAudioSource == null)
+        {
+            claimAudioSource = gameObject.AddComponent<AudioSource>();
+            claimAudioSource.playOnAwake = false;
+            claimAudioSource.spatialBlend = 0f;
+        }
+
+        AudioClip clip = null;
+        foreach (var rc in claimClips)
+            if (rc != null && rc.type == type && rc.clip != null) { clip = rc.clip; break; }
+
+        float pitch = 1f;
+        if (clip == null)
+        {
+            clip = claimClip;
+            if (clip == null)
+            {
+                if (generatedClaimTone == null) generatedClaimTone = RewardClaimFX.BuildTone(660f);
+                clip = generatedClaimTone;
+            }
+            pitch = RewardClaimFX.PitchFor(type);
+        }
+
+        claimAudioSource.pitch = pitch;
+        claimAudioSource.PlayOneShot(clip, claimVolume);
     }
 
     public void Grant(RewardType type, int amount)
@@ -394,17 +447,58 @@ public class RewardZoneSystem : MonoBehaviour
     private void ShowToast(string message)
     {
         Log.Info("RewardZoneSystem", $"Reward: {message}");
+        EnsureToast();
         if (toastText == null) return;
 
         if (toastRoutine != null) StopCoroutine(toastRoutine);
         toastRoutine = StartCoroutine(ToastRoutine(message));
     }
 
+    private void EnsureToast()
+    {
+        if (toastText != null) return;
+        if (toastCanvas == null)
+        {
+            var ui = FindFirstObjectByType<UIController>();
+            if (ui != null) toastCanvas = ui.GetComponentInParent<Canvas>();
+            if (toastCanvas == null) toastCanvas = FindFirstObjectByType<Canvas>();
+        }
+        if (toastCanvas == null) return;
+
+        var go = new GameObject("RewardToast", typeof(RectTransform));
+        var rt = (RectTransform)go.transform;
+        rt.SetParent(toastCanvas.rootCanvas.transform, false);
+        rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 0.78f);
+        rt.sizeDelta = new Vector2(700f, 60f);
+        var tmp = go.AddComponent<TextMeshProUGUI>();
+        tmp.fontSize = 36f;
+        tmp.fontStyle = FontStyles.Bold;
+        tmp.alignment = TextAlignmentOptions.Center;
+        tmp.color = new Color(1f, 0.9f, 0.4f, 1f);
+        tmp.outlineWidth = 0.2f;
+        tmp.raycastTarget = false;
+        toastText = tmp;
+        go.SetActive(false);
+    }
+
     private IEnumerator ToastRoutine(string message)
     {
         toastText.text = message;
         toastText.gameObject.SetActive(true);
-        yield return new WaitForSecondsRealtime(toastSeconds);
+        var rt = toastText.rectTransform;
+        Color baseColor = toastText.color;
+        float t = 0f;
+        while (t < toastSeconds)
+        {
+            t += Time.unscaledDeltaTime;
+            float k = t / toastSeconds;
+            rt.localScale = Vector3.one * (k < 0.1f ? Mathf.Lerp(1.3f, 1f, k / 0.1f) : 1f);
+            var c = baseColor;
+            c.a = k > 0.8f ? Mathf.Clamp01((1f - k) / 0.2f) : 1f;
+            toastText.color = c;
+            yield return null;
+        }
+        toastText.color = baseColor;
         toastText.gameObject.SetActive(false);
         toastRoutine = null;
     }

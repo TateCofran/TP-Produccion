@@ -1,9 +1,11 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 public class TileLevelApplier : MonoBehaviour
 {
     [SerializeField] private TileLayout layout;
     [SerializeField] private TileLevelData levelData;
+
+    public TileLayout Layout => layout;
 
     private TileDupeSystem dupeSystem;
     private bool trackLevel;

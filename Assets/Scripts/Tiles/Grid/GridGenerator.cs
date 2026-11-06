@@ -358,7 +358,8 @@ public class GridGenerator : MonoBehaviour, ITileGenerator
         if (placementSequencer != null)
         {
             float startDelay = placementSequencer.GetNextTileStartDelay(chain.Count);
-            placementSequencer.PlayForGroup(parent, startDelay);
+            Vector3 entryWorld = origin + orient.CellToWorldLocal(layout.entry, layout, rot, flip);
+            placementSequencer.PlayForGroup(parent, startDelay, entryWorld, layout.cellSize);
         }
 
         var placed = new PlacedTile { layout = layout, worldOrigin = origin, rotSteps = rot, flipped = flip, parent = parent, aabbMin = nMin, aabbMax = nMax };

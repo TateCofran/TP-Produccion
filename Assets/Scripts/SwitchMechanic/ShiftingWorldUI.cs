@@ -106,6 +106,17 @@ public class ShiftingWorldUI : MonoBehaviour
 
     private ShiftingWorldMechanic.World currentWorld;
 
+    [Header("Cooldown Ring Shake")]
+    [Tooltip("Shaken when the switch key is pressed during the cooldown. Uses the cooldown fill when empty.")]
+    [SerializeField] private RectTransform cooldownRing;
+    [SerializeField, Min(0f)] private float ringShakeDistance = 8f;
+    [SerializeField, Min(0.01f)] private float ringShakeDuration = 0.25f;
+    private Coroutine ringShakeRoutine;
+    private Vector2 ringRestPosition;
+    private bool ringShaking;
+
+    public bool IsRingShaking => ringShaking;
+
     private void OnValidate()
     {
         if (!grid) grid = FindFirstObjectByType<GridGenerator>();
@@ -985,6 +996,36 @@ public class ShiftingWorldUI : MonoBehaviour
         }
     }
 
+    public void ShakeCooldownRing()
+    {
+        var ring = cooldownRing != null ? cooldownRing : (worldToggleCooldownFill != null ? worldToggleCooldownFill.rectTransform : null);
+        if (ring == null) return;
+        if (ringShakeRoutine != null)
+        {
+            StopCoroutine(ringShakeRoutine);
+            ring.anchoredPosition = ringRestPosition;
+        }
+        ringShakeRoutine = StartCoroutine(RingShake(ring));
+    }
+
+    private IEnumerator RingShake(RectTransform ring)
+    {
+        ringShaking = true;
+        ringRestPosition = ring.anchoredPosition;
+        float t = 0f;
+        while (t < ringShakeDuration)
+        {
+            t += Time.unscaledDeltaTime;
+            float k = Mathf.Clamp01(t / ringShakeDuration);
+            float offset = Mathf.Sin(k * Mathf.PI * 8f) * ringShakeDistance * (1f - k);
+            ring.anchoredPosition = ringRestPosition + new Vector2(offset, 0f);
+            yield return null;
+        }
+        ring.anchoredPosition = ringRestPosition;
+        ringShaking = false;
+        ringShakeRoutine = null;
+    }
+
     public void SetWorldIcon(ShiftingWorldMechanic.World world)
     {
         if (worldIcon == null) return;
@@ -1007,6 +1048,9 @@ public class ShiftingWorldUI : MonoBehaviour
         if (uiContainer != null)
         {
             StopAllCoroutines();
+            ringShaking = false;
+            ringShakeRoutine = null;
+            blinkRoutine = null;
             StartCoroutine(AnimatePulse(uiContainer));
         }
     }

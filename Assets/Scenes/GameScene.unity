@@ -168,6 +168,14 @@ MonoBehaviour:
   claimClip: {fileID: 0}
   toastText: {fileID: 0}
   toastSeconds: 2.5
+  claimBurstPrefab: {fileID: 811347322201787520, guid: 1e6c908ecc8db9f4289ae00f5a05e7ed, type: 3}
+  claimBurstLifetime: 1.5
+  beamHeight: 8
+  beamWidth: 0.9
+  beamDuration: 0.6
+  claimClips: []
+  claimVolume: 0.6
+  toastCanvas: {fileID: 8916574750150079094}
   fallbackEssenceAmount: 25
 --- !u!4 &41648271
 Transform:
@@ -2990,7 +2998,7 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4294967295
+    rgba: 4294960831
   m_fontColor: {r: 0.75, g: 0.9, b: 1, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
@@ -3003,7 +3011,7 @@ MonoBehaviour:
   m_spriteAsset: {fileID: 0}
   m_tintAllSprites: 0
   m_StyleSheet: {fileID: 0}
-  m_TextStyleHashCode: 0
+  m_TextStyleHashCode: -1183493901
   m_overrideHtmlColors: 0
   m_faceColor:
     serializedVersion: 2
@@ -5595,6 +5603,55 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 874036897}
   m_CullTransparentMesh: 1
+--- !u!1 &894951505
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 894951506}
+  - component: {fileID: 894951507}
+  m_Layer: 0
+  m_Name: WorldShiftPostFX
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &894951506
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 894951505}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 908732469}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &894951507
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 894951505}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 38a38f67d645784449cf5872379a1015, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::WorldShiftPostFX
+  volume: {fileID: 0}
+  volumePriority: 50
+  duration: 0.2
+  chromaticIntensity: 1
+  distortionIntensity: -0.25
 --- !u!1 &902611691
 GameObject:
   m_ObjectHideFlags: 0
@@ -5770,6 +5827,8 @@ Transform:
   - {fileID: 1943884352}
   - {fileID: 706055007}
   - {fileID: 1813534449}
+  - {fileID: 1153675365}
+  - {fileID: 894951506}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &929269972
@@ -6535,6 +6594,163 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1116267686}
   m_CullTransparentMesh: 1
+--- !u!1 &1153675364
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1153675365}
+  - component: {fileID: 1153675367}
+  - component: {fileID: 1153675366}
+  m_Layer: 0
+  m_Name: LevelUpFeedback
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1153675365
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1153675364}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 908732469}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1153675366
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1153675364}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7ef5c091ce0ac78458e2dee241256602, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LevelUpFeedback
+  turretDupes: {fileID: 8486497302188729064}
+  tileDupes: {fileID: 1349948625879067574}
+  font: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  turretFlashColor: {r: 1, g: 0.85, b: 0.3, a: 1}
+  tileFlashColor: {r: 0.6, g: 1, b: 0.6, a: 1}
+  flashIntensity: 2
+  flashDuration: 0.45
+  labelDuration: 1.2
+  labelRise: 1.5
+  labelOffset: {x: 0, y: 2, z: 0}
+  labelFontSize: 5
+  levelUpClip: {fileID: 0}
+  volume: 0.5
+  pitchPerLevel: 0.08
+  maxPitch: 2
+--- !u!82 &1153675367
+AudioSource:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1153675364}
+  m_Enabled: 1
+  serializedVersion: 4
+  OutputAudioMixerGroup: {fileID: 0}
+  m_audioClip: {fileID: 0}
+  m_Resource: {fileID: 0}
+  m_PlayOnAwake: 1
+  m_Volume: 1
+  m_Pitch: 1
+  Loop: 0
+  Mute: 0
+  Spatialize: 0
+  SpatializePostEffects: 0
+  Priority: 128
+  DopplerLevel: 1
+  MinDistance: 1
+  MaxDistance: 500
+  Pan2D: 0
+  rolloffMode: 0
+  BypassEffects: 0
+  BypassListenerEffects: 0
+  BypassReverbZones: 0
+  rolloffCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  panLevelCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  spreadCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  reverbZoneMixCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
 --- !u!1 &1173157600
 GameObject:
   m_ObjectHideFlags: 0
@@ -9240,7 +9456,7 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4294967295
+    rgba: 4283811327
   m_fontColor: {r: 1, g: 0.7725491, b: 0.33333334, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
@@ -9253,7 +9469,7 @@ MonoBehaviour:
   m_spriteAsset: {fileID: 0}
   m_tintAllSprites: 0
   m_StyleSheet: {fileID: 0}
-  m_TextStyleHashCode: 0
+  m_TextStyleHashCode: -1183493901
   m_overrideHtmlColors: 0
   m_faceColor:
     serializedVersion: 2
@@ -9327,7 +9543,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: -43}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 220, y: 24}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &1609967771
@@ -10373,7 +10589,7 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4294967295
+    rgba: 4294960831
   m_fontColor: {r: 0.75, g: 0.9, b: 1, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
@@ -10386,7 +10602,7 @@ MonoBehaviour:
   m_spriteAsset: {fileID: 0}
   m_tintAllSprites: 0
   m_StyleSheet: {fileID: 0}
-  m_TextStyleHashCode: 0
+  m_TextStyleHashCode: -1183493901
   m_overrideHtmlColors: 0
   m_faceColor:
     serializedVersion: 2
@@ -10751,7 +10967,7 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4294967295
+    rgba: 4294960831
   m_fontColor: {r: 0.75, g: 0.9, b: 1, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
@@ -10764,7 +10980,7 @@ MonoBehaviour:
   m_spriteAsset: {fileID: 0}
   m_tintAllSprites: 0
   m_StyleSheet: {fileID: 0}
-  m_TextStyleHashCode: 0
+  m_TextStyleHashCode: -1183493901
   m_overrideHtmlColors: 0
   m_faceColor:
     serializedVersion: 2
@@ -12719,6 +12935,10 @@ MonoBehaviour:
   normalWorldMaterial: {fileID: 2100000, guid: 6c95633699f9a1a4baa4703aaabd89d6, type: 2}
   otherWorldMaterial: {fileID: 2100000, guid: 0a87f9acfd4b5184ca3880d193ec9710, type: 2}
   fogLayerName: Fog
+  dissolveDuration: 0.4
+  dissolveNoiseDelay: 0.08
+  dissolveDelayPerUnit: 0.02
+  dissolveSink: 0.15
 --- !u!4 &2048374534
 Transform:
   m_ObjectHideFlags: 0
@@ -15193,6 +15413,7 @@ GameObject:
   - component: {fileID: 464523077944493742}
   - component: {fileID: 8328910552600130467}
   - component: {fileID: 4924837196615615793}
+  - component: {fileID: 9011762128856941363}
   m_Layer: 0
   m_Name: GridManager
   m_TagString: Untagged
@@ -15864,6 +16085,9 @@ MonoBehaviour:
   uiContainer: {fileID: 417707442287562383}
   blinkSpeed: 0.6
   blinkColor: {r: 1.5, g: 1.5, b: 1.5, a: 1.5}
+  cooldownRing: {fileID: 0}
+  ringShakeDistance: 8
+  ringShakeDuration: 0.25
   buttonWorldYOffset: 1
   buttonScreenYOffset: 24
   buttonPivotBottom: 1
@@ -17342,6 +17566,9 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+  dropHeight: 1.2
+  fallPortion: 0.65
+  bounceHeight: 0.12
 --- !u!1 &5071297902120830060
 GameObject:
   m_ObjectHideFlags: 0
@@ -19154,7 +19381,7 @@ MonoBehaviour:
   runnerYOffset: 0.05
   autoSpawnRunnersOnAppend: 1
   tileDupeSystem: {fileID: 1349948625879067574}
-  placementSequencer: {fileID: 0}
+  placementSequencer: {fileID: 9011762128856941363}
   permanentSpawnPrefab: {fileID: 5293037424692568470, guid: de5c705818cba6c41b7dad1e179b51a7, type: 3}
   permanentSpawnYOffset: 0.1
   permanentSpawnRoot: {fileID: 0}
@@ -21080,6 +21307,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   normalWorldClip: {fileID: 8300000, guid: 7a544678983aab748af510227520e4ad, type: 3}
   otherWorldClip: {fileID: 8300000, guid: 7d5ebc5b1da7cc543828c50a7b7be639, type: 3}
+  crossfadeDuration: 0.5
+  targetVolume: 1
+  endFadeDuration: 0.5
+  useLowPass: 1
+  lowPassStartCutoff: 900
+  lowPassEndCutoff: 22000
+  unavailableClip: {fileID: 0}
+  unavailableVolume: 0.5
 --- !u!224 &8093663495761489504
 RectTransform:
   m_ObjectHideFlags: 0
@@ -22202,6 +22437,23 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   initialPoolSize: 100
   useObjectPooling: 1
+--- !u!114 &9011762128856941363
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2417650858540916109}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b9a498a71a45ef3428588c2f3092f512, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TilePlacementSequencer
+  perTileStartDelay: 0
+  perCellDelay: 0.035
+  shuffleChildren: 0
+  dustPrefab: {fileID: 3817128125287122822, guid: 7bfb95b283a99824993f5488bb9d1dd2, type: 3}
+  dustLifetime: 1
 --- !u!114 &9014124855400078069
 MonoBehaviour:
   m_ObjectHideFlags: 0
