@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ModifierSO
   id: O09
   displayName: Power Grid
-  description: Energy turret effect radius increased by 30%.
+  description: Energy turrets generate 30% more energy.
   icon: {fileID: 0}
   category: 1
   entries:

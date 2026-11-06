@@ -81,6 +81,6 @@ public sealed class TurretEnergy : MonoBehaviour, IWorldEnergySource
         int level = Mathf.Max(1, stats.UpgradeLevel);
 
         float factor = 1f + perLevelMultiplier * (level - 1);
-        return baseEnergyPerSecond * factor;
+        return baseEnergyPerSecond * factor * GameModifiersManager.Multiplier(ModifierStat.EnergyOutput);
     }
 }

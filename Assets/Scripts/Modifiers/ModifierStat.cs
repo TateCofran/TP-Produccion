@@ -23,7 +23,7 @@ public enum ModifierStat
     FireSpreadOnDeath,
     TeslaExtraTargets,
     SniperNthShotDouble,
-    EnergyRadius,
+    EnergyOutput,
     TurretExtraDupeChance,
     ExecuteBonus,
     BossBonus,

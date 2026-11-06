@@ -102,7 +102,7 @@ public static class ModifierAssetCreator
         yield return O("O06", "Wildfire", "When a burning enemy dies, the burn spreads to the closest enemy.", (ModifierStat.FireSpreadOnDeath, 1f));
         yield return O("O07", "Chain Lightning", "Tesla turrets hit one more enemy.", (ModifierStat.TeslaExtraTargets, 1f));
         yield return O("O08", "Deadeye", "Every 4th Sniper shot deals double damage.", (ModifierStat.SniperNthShotDouble, 4f));
-        yield return O("O09", "Power Grid", "Energy turret effect radius increased by 30%.", (ModifierStat.EnergyRadius, 0.3f));
+        yield return O("O09", "Power Grid", "Energy turrets generate 30% more energy.", (ModifierStat.EnergyOutput, 0.3f));
         yield return O("O10", "Twin Forge", "20% chance to gain an extra copy when choosing a turret.", (ModifierStat.TurretExtraDupeChance, 0.2f));
         yield return O("O11", "Executioner", "Turrets deal 50% more damage to enemies below 25% health.", (ModifierStat.ExecuteBonus, 0.5f));
         yield return O("O12", "Boss Hunter", "Turrets deal 30% more damage to mini bosses and bosses.", (ModifierStat.BossBonus, 0.3f));
