@@ -3,45 +3,30 @@
 [System.Serializable]
 public class TileLevelData
 {
-    public int currentLevel = 1;
-    public int currentDupes = 0;
-    public int dupesRequiredForNextLevel = 1;
+    [SerializeField] private DupeProgression progression = new DupeProgression();
 
-    public float valueMultiplier = 1f;
-    public float spawnChanceMultiplier = 1f;
-    public float sizeMultiplier = 1f;
+    public float damageMultiplier = 1f;
+    public float slowMultiplier = 1f;
+    public float stunMultiplier = 1f;
 
-    private static ITileLevelingPermissionProvider _levelingProvider;
+    public int currentLevel => progression.currentLevel;
+    public int currentDupes => progression.currentDupes;
+    public int dupesRequiredForNextLevel => progression.dupesRequiredForNextLevel;
 
-    public static void SetLevelingProvider(ITileLevelingPermissionProvider provider)
+    public bool AddDupe()
     {
-        _levelingProvider = provider;
+        bool leveledUp = progression.AddDupe();
+        if (leveledUp) RecalculateMultipliers();
+        return leveledUp;
     }
 
-    public void AddDupe()
+    private void RecalculateMultipliers()
     {
-        currentDupes++;
-
-        if (_levelingProvider != null && !_levelingProvider.IsLevelingEnabled())
-        {
-            currentDupes = Mathf.Min(currentDupes, dupesRequiredForNextLevel);
-            return;
-        }
-
-        if (currentDupes >= dupesRequiredForNextLevel)
-            LevelUp();
+        int steps = Mathf.Max(0, currentLevel - 1);
+        damageMultiplier = 1f + 0.2f * steps;
+        slowMultiplier = 1f + 0.1f * steps;
+        stunMultiplier = 1f + 0.1f * steps;
     }
 
-    private void LevelUp()
-    {
-        currentLevel++;
-        currentDupes = 0;
-
-        dupesRequiredForNextLevel = Mathf.CeilToInt(dupesRequiredForNextLevel * 1.5f);
-    }
-
-    public string GetStatusText()
-    {
-        return $"Lv {currentLevel} ({currentDupes}/{dupesRequiredForNextLevel})";
-    }
+    public string GetStatusText() => progression.GetStatusText();
 }

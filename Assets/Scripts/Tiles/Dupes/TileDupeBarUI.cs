@@ -12,6 +12,13 @@ public class TileDupeBarUI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI tileLevelText;
 
     private readonly List<GameObject> activeDupes = new();
+    private string layoutKey;
+
+    public void SetLayout(TileLayout layout)
+    {
+        layoutKey = TileDupeUI.GetTileTypeName(layout);
+        UpdateDupeBar();
+    }
 
     private void OnEnable()
     {
@@ -29,6 +36,7 @@ public class TileDupeBarUI : MonoBehaviour
 
     public string GetTileTypeName()
     {
+        if (!string.IsNullOrEmpty(layoutKey)) return layoutKey;
         return tileTypeText != null ? tileTypeText.text : string.Empty;
     }
 

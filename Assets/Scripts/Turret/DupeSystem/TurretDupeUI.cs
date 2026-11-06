@@ -19,8 +19,18 @@ public class TurretDupeUI : MonoBehaviour
         }
 
         Instance = this;
-        DontDestroyOnLoad(gameObject);
         InitializeData();
+    }
+
+    private void OnDestroy()
+    {
+        if (dupeSystem != null)
+        {
+            dupeSystem.OnDupeChanged -= HandleDupeChanged;
+            dupeSystem.OnTurretLevelUp -= HandleTurretLevelUp;
+        }
+
+        if (Instance == this) Instance = null;
     }
 
     public void ConnectToSystem(TurretDupeSystem system)
@@ -34,6 +44,8 @@ public class TurretDupeUI : MonoBehaviour
         }
 
         dupeSystem = system;
+        turretData.Clear();
+        InitializeData();
 
         dupeSystem.OnDupeChanged += HandleDupeChanged;
         dupeSystem.OnTurretLevelUp += HandleTurretLevelUp;
@@ -43,11 +55,12 @@ public class TurretDupeUI : MonoBehaviour
 
     private void InitializeData()
     {
-        turretData["Turret Basic"] = (1, 0, 2);
-        turretData["Energy Turret"] = (1, 0, 2);
-        turretData["Fire Turret"] = (1, 0, 2);
-        turretData["Turret Tesla"] = (1, 0, 2);
-        turretData["Turret Sniper"] = (1, 0, 2);
+        int initial = DupeProgression.InitialDupesRequired;
+        turretData["Turret Basic"] = (1, 0, initial);
+        turretData["Energy Turret"] = (1, 0, initial);
+        turretData["Fire Turret"] = (1, 0, initial);
+        turretData["Turret Tesla"] = (1, 0, initial);
+        turretData["Turret Sniper"] = (1, 0, initial);
     }
 
     private void HandleDupeChanged(TurretDataSO turret)

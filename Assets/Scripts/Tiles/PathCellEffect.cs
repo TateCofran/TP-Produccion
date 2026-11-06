@@ -18,11 +18,37 @@ public class PathCellEffect : MonoBehaviour
 
     private readonly Dictionary<int, float> _nextSlowRefresh = new Dictionary<int, float>();
 
+    private float _baseDamage;
+    private float _baseSlow;
+    private float _baseStun;
+    private float _damageMultiplier = 1f;
+    private float _slowMultiplier = 1f;
+    private float _stunMultiplier = 1f;
+
     public void Setup(float damageOrPrevDps, float slow, float stun)
     {
-        this.damagePerHit = Mathf.Max(0, Mathf.RoundToInt(damageOrPrevDps));
-        this.slow = Mathf.Clamp01(slow);
-        this.stun = Mathf.Max(0, stun);
+        _baseDamage = Mathf.Max(0f, damageOrPrevDps);
+        _baseSlow = Mathf.Clamp01(slow);
+        _baseStun = Mathf.Max(0f, stun);
+        _damageMultiplier = 1f;
+        _slowMultiplier = 1f;
+        _stunMultiplier = 1f;
+        RecalculateEffective();
+    }
+
+    public void SetLevelMultipliers(float dmg, float slowMult, float stunMult)
+    {
+        _damageMultiplier = Mathf.Max(0f, dmg);
+        _slowMultiplier = Mathf.Max(0f, slowMult);
+        _stunMultiplier = Mathf.Max(0f, stunMult);
+        RecalculateEffective();
+    }
+
+    private void RecalculateEffective()
+    {
+        damagePerHit = Mathf.Max(0, Mathf.RoundToInt(_baseDamage * _damageMultiplier));
+        slow = Mathf.Clamp01(_baseSlow * _slowMultiplier);
+        stun = Mathf.Max(0f, _baseStun * _stunMultiplier);
     }
 
     private void Reset()

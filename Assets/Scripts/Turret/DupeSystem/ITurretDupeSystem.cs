@@ -11,34 +11,35 @@ public interface ITurretDupeSystem
 [System.Serializable]
 public class TurretLevelData
 {
-    public int currentLevel = 1;
-    public int currentDupes = 0;
-    public int dupesRequiredForNextLevel = 2;
+    [SerializeField] private DupeProgression progression = new DupeProgression();
 
     public float damageMultiplier = 1f;
     public float rangeMultiplier = 1f;
     public float fireRateMultiplier = 1f;
 
+    public int currentLevel => progression.currentLevel;
+    public int currentDupes => progression.currentDupes;
+    public int dupesRequiredForNextLevel => progression.dupesRequiredForNextLevel;
+
     public void AddDupe()
     {
-        currentDupes++;
-
-        if (currentDupes >= dupesRequiredForNextLevel)
-        {
-            LevelUp();
-        }
+        if (progression.AddDupe())
+            RecalculateMultipliers();
     }
 
-    private void LevelUp()
+    private void RecalculateMultipliers()
     {
-        currentLevel++;
-        currentDupes = 0;
-        dupesRequiredForNextLevel = Mathf.CeilToInt(dupesRequiredForNextLevel * 1.5f);
+        damageMultiplier = 1f;
+        rangeMultiplier = 1f;
+        fireRateMultiplier = 1f;
 
-        var bonus = GetLevelBonus(currentLevel);
-        damageMultiplier += bonus.damage;
-        rangeMultiplier += bonus.range;
-        fireRateMultiplier += bonus.fireRate;
+        for (int level = 2; level <= currentLevel; level++)
+        {
+            var bonus = GetLevelBonus(level);
+            damageMultiplier += bonus.damage;
+            rangeMultiplier += bonus.range;
+            fireRateMultiplier += bonus.fireRate;
+        }
     }
 
     public static (float damage, float range, float fireRate) GetLevelBonus(int level)
@@ -46,8 +47,5 @@ public class TurretLevelData
         return (0.2f, 0.1f, 0.15f);
     }
 
-    public string GetStatusText()
-    {
-        return $"Lv {currentLevel} ({currentDupes}/{dupesRequiredForNextLevel})";
-    }
+    public string GetStatusText() => progression.GetStatusText();
 }

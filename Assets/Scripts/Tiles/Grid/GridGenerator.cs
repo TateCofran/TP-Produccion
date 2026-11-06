@@ -38,8 +38,6 @@ public class GridGenerator : MonoBehaviour, ITileGenerator
     [SerializeField] private GameObject exitRunnerPrefab; [SerializeField] private float runnerYOffset = 0.05f; [SerializeField] private bool autoSpawnRunnersOnAppend = false;
 
     [Header("Tile Dupe System")][SerializeField] private TileDupeSystem tileDupeSystem;
-    [SerializeField] private TileDataSO defaultTileData;
-    [SerializeField] private List<TileDataBinding> tileDataBindings = new();
 
     [SerializeField] private TilePlacementSequencer placementSequencer;
 
@@ -67,13 +65,6 @@ public class GridGenerator : MonoBehaviour, ITileGenerator
     private IRunnerService runners;
 
     private System.Random rng = new System.Random();
-
-    [Serializable]
-    public class TileDataBinding
-    {
-        public TileLayout layout;
-        public TileDataSO tileData;
-    }
 
     private void Awake()
     {
@@ -144,6 +135,9 @@ public class GridGenerator : MonoBehaviour, ITileGenerator
             core?.ClearCore();
         }
 
+        if (tileDupeSystem == null) tileDupeSystem = FindFirstObjectByType<TileDupeSystem>();
+        tileDupeSystem?.ResetAllLevels();
+
         tilesRoot = EnsureRoot(tilesRoot, rootName);
 
         var group = CreateTileParent(tilesRoot, $"{tileGroupBaseName}{chain.Count}");
@@ -188,7 +182,7 @@ public class GridGenerator : MonoBehaviour, ITileGenerator
         AddTileExitsToPool(chain.Count - 1, excludeAssetCell: null);
         exits.Relabel();
 
-        AttachAndApplyDupe(group, initialLayout);
+        AttachLevelApplier(group, initialLayout, false);
 
         ResolveBlockedExits();
         exits.Relabel();
@@ -871,22 +865,17 @@ public class GridGenerator : MonoBehaviour, ITileGenerator
 
     private void AttachAndApplyDupe(Transform parent, TileLayout layout)
     {
-        var data = ResolveTileData(layout);
-        if (data == null) return;
-        var applier = parent.GetComponent<TileLevelApplier>();
-        if (applier == null) applier = parent.gameObject.AddComponent<TileLevelApplier>();
-        applier.Initialize(data);
+        if (layout == null) return;
+        AttachLevelApplier(parent, layout, true);
         if (tileDupeSystem == null) tileDupeSystem = FindFirstObjectByType<TileDupeSystem>();
-        tileDupeSystem?.AddDupe(data);
+        tileDupeSystem?.AddDupe(layout);
     }
 
-    private TileDataSO ResolveTileData(TileLayout layout)
+    private void AttachLevelApplier(Transform parent, TileLayout layout, bool followLevel)
     {
-        for (int i = 0; i < tileDataBindings.Count; i++)
-        {
-            var b = tileDataBindings[i];
-            if (b != null && b.layout == layout && b.tileData != null) return b.tileData;
-        }
-        return defaultTileData;
+        if (parent == null || layout == null) return;
+        var applier = parent.GetComponent<TileLevelApplier>();
+        if (applier == null) applier = parent.gameObject.AddComponent<TileLevelApplier>();
+        applier.Initialize(layout, followLevel);
     }
 }

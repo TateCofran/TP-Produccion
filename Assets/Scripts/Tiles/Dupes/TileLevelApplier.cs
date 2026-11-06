@@ -1,47 +1,71 @@
 ﻿using UnityEngine;
 
-[RequireComponent(typeof(TileStats))]
 public class TileLevelApplier : MonoBehaviour
 {
-    [SerializeField] private TileDataSO tileData;
+    [SerializeField] private TileLayout layout;
     [SerializeField] private TileLevelData levelData;
 
-    private TileStats tileStats;
-    private ITileDupeSystem dupeSystem;
+    private TileDupeSystem dupeSystem;
+    private bool trackLevel;
+    private bool subscribed;
 
-    private void Awake()
+    private void OnEnable()
     {
-        tileStats = GetComponent<TileStats>();
-        dupeSystem = FindFirstObjectByType<TileDupeSystem>();
+        Subscribe();
     }
 
-    public void Initialize(TileDataSO data)
+    private void OnDisable()
     {
-        tileData = data;
-
-        if (dupeSystem != null)
-        {
-
-            levelData = dupeSystem.GetTileLevelData(data);
-        }
-
-        ApplyBaseStats();
+        Unsubscribe();
     }
 
-    private void ApplyBaseStats()
+    public void Initialize(TileLayout tileLayout, bool followLevel = true)
     {
-        if (tileStats == null || tileData == null) return;
+        layout = tileLayout;
+        trackLevel = followLevel;
 
-        float baseValue = tileData.value;
-        float baseSpawnChance = tileData.spawnChance;
-        float baseSize = tileData.size;
+        if (dupeSystem == null) dupeSystem = FindFirstObjectByType<TileDupeSystem>();
 
-        tileStats.ApplyLevelModifiers(baseValue, baseSpawnChance, baseSize);
+        levelData = (trackLevel && dupeSystem != null) ? dupeSystem.GetTileLevelData(layout) : null;
+
+        if (isActiveAndEnabled) Subscribe();
+        ApplyLevel();
+    }
+
+    private void Subscribe()
+    {
+        if (subscribed || !trackLevel || dupeSystem == null) return;
+        dupeSystem.OnTileLevelUp += HandleTileLevelUp;
+        subscribed = true;
+    }
+
+    private void Unsubscribe()
+    {
+        if (!subscribed || dupeSystem == null) return;
+        dupeSystem.OnTileLevelUp -= HandleTileLevelUp;
+        subscribed = false;
+    }
+
+    private void HandleTileLevelUp(TileLayout leveledLayout, TileLevelData data)
+    {
+        if (leveledLayout == null || leveledLayout != layout) return;
+        levelData = data;
+        ApplyLevel();
+    }
+
+    private void ApplyLevel()
+    {
+        float dmg = levelData != null ? levelData.damageMultiplier : 1f;
+        float slow = levelData != null ? levelData.slowMultiplier : 1f;
+        float stun = levelData != null ? levelData.stunMultiplier : 1f;
+
+        var effects = GetComponentsInChildren<PathCellEffect>(true);
+        foreach (var effect in effects)
+            effect.SetLevelMultipliers(dmg, slow, stun);
     }
 
     public string GetLevelStatus()
     {
-
         return levelData?.GetStatusText() ?? "Lv 1";
     }
 }

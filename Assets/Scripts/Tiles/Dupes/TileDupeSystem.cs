@@ -4,78 +4,53 @@ using UnityEngine;
 
 public interface ITileDupeSystem
 {
-    TileLevelData GetTileLevelData(TileDataSO tile);
-    void AddDupe(TileDataSO tile);
+    TileLevelData GetTileLevelData(TileLayout layout);
+    void AddDupe(TileLayout layout);
 
+    event Action<TileLayout, TileLevelData> OnTileLevelUp;
 
-    event Action<TileDataSO, TileLevelData> OnTileLevelUp;
-
-    event Action<TileDataSO> OnDupeChanged;
+    event Action<TileLayout> OnDupeChanged;
 }
 
 public sealed class TileDupeSystem : MonoBehaviour, ITileDupeSystem
 {
-    private readonly Dictionary<string, TileLevelData> tileLevels = new();
+    private readonly Dictionary<TileLayout, TileLevelData> tileLevels = new();
 
-    public event Action<TileDataSO, TileLevelData> OnTileLevelUp;
-    public event Action<TileDataSO> OnDupeChanged;
+    public event Action<TileLayout, TileLevelData> OnTileLevelUp;
+    public event Action<TileLayout> OnDupeChanged;
 
-    private void Awake()
+    public TileLevelData GetTileLevelData(TileLayout layout)
     {
-        var provider = FindFirstObjectByType<TileLevelingPermissionProvider>();
-        if (provider != null)
+        if (layout == null)
         {
-            TileLevelData.SetLevelingProvider(provider);
-        }
-        else
-        {
-            Debug.LogWarning("[TileDupeSystem] No TileLevelingPermissionProvider found in scene.");
-        }
-    }
-
-    public TileLevelData GetTileLevelData(TileDataSO tile)
-    {
-        if (tile == null)
-        {
-            Debug.LogWarning("[TileDupeSystem] GetTileLevelData called with null tile.");
+            Debug.LogWarning("[TileDupeSystem] GetTileLevelData called with null layout.");
             return new TileLevelData();
         }
 
-        string id = GetTileId(tile);
-
-        if (!tileLevels.TryGetValue(id, out var data))
+        if (!tileLevels.TryGetValue(layout, out var data))
         {
             data = new TileLevelData();
-            tileLevels[id] = data;
+            tileLevels[layout] = data;
         }
 
         return data;
     }
 
-    public void AddDupe(TileDataSO tile)
+    public void AddDupe(TileLayout layout)
     {
-        if (tile == null)
+        if (layout == null)
         {
-            Debug.LogWarning("[TileDupeSystem] AddDupe called with null tile.");
+            Debug.LogWarning("[TileDupeSystem] AddDupe called with null layout.");
             return;
         }
 
-        var data = GetTileLevelData(tile);
-        int previousLevel = data.currentLevel;
+        var data = GetTileLevelData(layout);
+        bool leveledUp = data.AddDupe();
 
-        data.AddDupe();
+        OnDupeChanged?.Invoke(layout);
 
-        OnDupeChanged?.Invoke(tile);
-
-        if (data.currentLevel > previousLevel)
-        {
-            OnTileLevelUp?.Invoke(tile, data);
-        }
-    }
-
-    private string GetTileId(TileDataSO tile)
-    {
-        return !string.IsNullOrEmpty(tile.id) ? tile.id : tile.name;
+        if (leveledUp)
+            OnTileLevelUp?.Invoke(layout, data);
     }
 
     public void ResetAllLevels()

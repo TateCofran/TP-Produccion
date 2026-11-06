@@ -7471,7 +7471,6 @@ GameObject:
   - component: {fileID: 1048117081}
   - component: {fileID: 1048117080}
   - component: {fileID: 1048117082}
-  - component: {fileID: 1048117084}
   m_Layer: 0
   m_Name: UpgradeSystem
   m_TagString: Untagged
@@ -7518,19 +7517,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e63a859767420eb4d88f26a616503d22, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &1048117084
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1048117079}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4905dc5cc4b39f44e873826acc493146, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  tileLevelingUnlock: {fileID: 11400000, guid: 2d90ac646cdac4a4baf85cbf585c26da, type: 2}
 --- !u!1 &1095629949
 GameObject:
   m_ObjectHideFlags: 0

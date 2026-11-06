@@ -16380,56 +16380,6 @@ MonoBehaviour:
   runnerYOffset: 0.05
   autoSpawnRunnersOnAppend: 1
   tileDupeSystem: {fileID: 1349948625879067574}
-  defaultTileData: {fileID: 11400000, guid: 9b5beb9fb9011764eb44bc12670b1abe, type: 2}
-  tileDataBindings:
-  - layout: {fileID: 11400000, guid: b6a2c2e70dcc78346bfdf5f0d350172d, type: 2}
-    tileData: {fileID: 11400000, guid: c5796ba9770902148904ad711f048eb5, type: 2}
-  - layout: {fileID: 11400000, guid: a90150de0d4f5484098b53709c915b8a, type: 2}
-    tileData: {fileID: 11400000, guid: 987a4eb8dcbe20444bef1180e56711f7, type: 2}
-  - layout: {fileID: 11400000, guid: e022c332bedf6d94f97a9121500d89ee, type: 2}
-    tileData: {fileID: 11400000, guid: 2822e171140f2dc40b2cfe2db2503ba6, type: 2}
-  - layout: {fileID: 11400000, guid: c61d5635d1d30b24490139bea635675a, type: 2}
-    tileData: {fileID: 11400000, guid: d852c8e1cac4577438e7f0844719df0a, type: 2}
-  - layout: {fileID: 11400000, guid: cb2772025a736704c9e4876ca23cf1bc, type: 2}
-    tileData: {fileID: 11400000, guid: 3ee352f36d3f2064b9a05814a0648443, type: 2}
-  - layout: {fileID: 11400000, guid: af7fe2e1a6435d741b52a0b4637cbf3b, type: 2}
-    tileData: {fileID: 11400000, guid: e53d91babf7eb1740ab3ae32e794a428, type: 2}
-  - layout: {fileID: 11400000, guid: 9ecdbed1bc6ab3b48905137c97f81b0f, type: 2}
-    tileData: {fileID: 11400000, guid: c25e7f4bf922762419d7356d66432aee, type: 2}
-  - layout: {fileID: 11400000, guid: 7f292781b6cbf664fad9c1211e49e167, type: 2}
-    tileData: {fileID: 11400000, guid: 1088e39a675033c4685b7c3bc1aea406, type: 2}
-  - layout: {fileID: 11400000, guid: f8a57e171747dfc46877db782761214a, type: 2}
-    tileData: {fileID: 11400000, guid: 222744226eeb08b4bbb62c60404961db, type: 2}
-  - layout: {fileID: 11400000, guid: a0aeda22ae29d794194f7f9a7413c5c5, type: 2}
-    tileData: {fileID: 11400000, guid: 49c0304083703a84fa2765610d61d768, type: 2}
-  - layout: {fileID: 11400000, guid: 8ca84305f49189c49a27eccec77b6d4b, type: 2}
-    tileData: {fileID: 11400000, guid: b8d2ac0046605fc4ea5efb5edabb1625, type: 2}
-  - layout: {fileID: 11400000, guid: 2a25e41b42e19a84b945716f236cb3cf, type: 2}
-    tileData: {fileID: 11400000, guid: 9fd836502b2ae7a40a2998e6ba26b649, type: 2}
-  - layout: {fileID: 11400000, guid: d80751cc7b4a377498ccd319a39995f6, type: 2}
-    tileData: {fileID: 11400000, guid: 171f3f436c7364d498dc08454a41db38, type: 2}
-  - layout: {fileID: 11400000, guid: 437728d596b185e4d8c147263fdecaaf, type: 2}
-    tileData: {fileID: 11400000, guid: 2d3da15ec87e0434c8a3dd6bab64337f, type: 2}
-  - layout: {fileID: 11400000, guid: 1b32119190b81eb4d9e3ae602ab363f5, type: 2}
-    tileData: {fileID: 11400000, guid: 8e9322dbda367b34480bce9ad1c6566a, type: 2}
-  - layout: {fileID: 11400000, guid: f1288d5393b7c1f4fbd3fd81ffc8f21c, type: 2}
-    tileData: {fileID: 11400000, guid: c1d0348f2d9184d4692242874a86d670, type: 2}
-  - layout: {fileID: 11400000, guid: 036a31d0fbf837f43a86b44b8edecbcd, type: 2}
-    tileData: {fileID: 11400000, guid: 8bcc3a48ee1d057418e1d39aeec1d41a, type: 2}
-  - layout: {fileID: 11400000, guid: 51a16c75a254c72489fa6487a56c036d, type: 2}
-    tileData: {fileID: 11400000, guid: ab08888cfb95aeb4eaf5b77dc5d12517, type: 2}
-  - layout: {fileID: 11400000, guid: 0ea3789402429e04cabc650854f6974c, type: 2}
-    tileData: {fileID: 11400000, guid: 99cf8b463a761384d929eb2e8221ea21, type: 2}
-  - layout: {fileID: 11400000, guid: eb2f6d256f133be4284aed4d6b6150d6, type: 2}
-    tileData: {fileID: 11400000, guid: 817b60172c4e95e40b58fe1c382cb882, type: 2}
-  - layout: {fileID: 11400000, guid: df43f9408ba2ed94c8f67638f1a8c637, type: 2}
-    tileData: {fileID: 11400000, guid: 9c545f3d23554a048878b74e347f6fd6, type: 2}
-  - layout: {fileID: 11400000, guid: 5e94e4ea8dd8af74582dbc5896f1db7a, type: 2}
-    tileData: {fileID: 11400000, guid: b3717dd2755a0f947851215f22ecc45e, type: 2}
-  - layout: {fileID: 11400000, guid: 68a83c233eb7f1a4dab84fa98825a6d2, type: 2}
-    tileData: {fileID: 11400000, guid: 0a4a37dd307c79f4a96d78243407b18f, type: 2}
-  - layout: {fileID: 11400000, guid: d6e6fda150c4a9242b7e8b9a3284728f, type: 2}
-    tileData: {fileID: 11400000, guid: 3944a6d3705366f43a8e1c16262f1247, type: 2}
   placementSequencer: {fileID: 0}
   permanentSpawnPrefab: {fileID: 5293037424692568470, guid: de5c705818cba6c41b7dad1e179b51a7, type: 3}
   permanentSpawnYOffset: 0.1

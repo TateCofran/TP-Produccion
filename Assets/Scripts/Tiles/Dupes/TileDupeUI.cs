@@ -19,7 +19,17 @@ public class TileDupeUI : MonoBehaviour
         }
 
         Instance = this;
-        DontDestroyOnLoad(gameObject);
+    }
+
+    private void OnDestroy()
+    {
+        if (dupeSystem != null)
+        {
+            dupeSystem.OnDupeChanged -= HandleDupeChanged;
+            dupeSystem.OnTileLevelUp -= HandleTileLevelUp;
+        }
+
+        if (Instance == this) Instance = null;
     }
 
     private void Start()
@@ -49,6 +59,7 @@ public class TileDupeUI : MonoBehaviour
         }
 
         dupeSystem = system;
+        tileData.Clear();
 
         dupeSystem.OnDupeChanged += HandleDupeChanged;
         dupeSystem.OnTileLevelUp += HandleTileLevelUp;
@@ -56,12 +67,12 @@ public class TileDupeUI : MonoBehaviour
         Debug.Log("[TileDupeUI] Connected to TileDupeSystem.");
     }
 
-    private void HandleDupeChanged(TileDataSO tile)
+    private void HandleDupeChanged(TileLayout layout)
     {
-        if (tile == null || dupeSystem == null) return;
+        if (layout == null || dupeSystem == null) return;
 
-        string typeName = GetTileTypeName(tile);
-        var data = dupeSystem.GetTileLevelData(tile);
+        string typeName = GetTileTypeName(layout);
+        var data = dupeSystem.GetTileLevelData(layout);
 
         tileData[typeName] = (
             data.currentLevel,
@@ -72,11 +83,11 @@ public class TileDupeUI : MonoBehaviour
         SyncBars(typeName);
     }
 
-    private void HandleTileLevelUp(TileDataSO tile, TileLevelData levelData)
+    private void HandleTileLevelUp(TileLayout layout, TileLevelData levelData)
     {
-        if (tile == null) return;
+        if (layout == null) return;
 
-        string typeName = GetTileTypeName(tile);
+        string typeName = GetTileTypeName(layout);
 
         tileData[typeName] = (
             levelData.currentLevel,
@@ -101,9 +112,9 @@ public class TileDupeUI : MonoBehaviour
         }
     }
 
-    private string GetTileTypeName(TileDataSO tile)
+    public static string GetTileTypeName(TileLayout layout)
     {
-        return !string.IsNullOrEmpty(tile.id) ? tile.id : tile.name;
+        return layout != null ? layout.name : string.Empty;
     }
 
     public (int level, int currentDupes, int maxDupes) GetTileData(string tileType)
@@ -111,6 +122,6 @@ public class TileDupeUI : MonoBehaviour
         if (tileData.TryGetValue(tileType, out var data))
             return data;
 
-        return (1, 0, 1);
+        return (1, 0, DupeProgression.InitialDupesRequired);
     }
 }

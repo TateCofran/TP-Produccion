@@ -85,6 +85,9 @@ public class PathEffectManager : MonoBehaviour
         else
             outStun = 0;
 
+        outSlow = Mathf.Min(outSlow, slowMax);
+        outStun = Mathf.Min(outStun, stunMax);
+
         outDamageCd = Mathf.Max(0.05f, damageCooldown);
         outStunCd = Mathf.Max(0.05f, stunCooldown);
     }

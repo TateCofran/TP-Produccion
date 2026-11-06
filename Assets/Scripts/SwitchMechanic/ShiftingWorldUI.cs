@@ -56,6 +56,7 @@ public class ShiftingWorldUI : MonoBehaviour
     private Action onTurretClosed;
 
     private ITurretDupeSystem dupeSystem;
+    private TileDupeSystem tileDupeSystem;
 
     private readonly List<TileLayout> currentTileOptions = new();
     private readonly List<TurretDataSO> currentTurretOptions = new();
@@ -267,8 +268,25 @@ public class ShiftingWorldUI : MonoBehaviour
             }
 
             int idx = i;
-            BindButton(tileButtons, tileLabels, i, layout.name, () => OnChooseTile(idx));
+            BindButton(tileButtons, tileLabels, i, GetTileOptionLabel(layout), () => OnChooseTile(idx));
+            UpdateTileDupeBar(i, layout);
         }
+    }
+
+    private string GetTileOptionLabel(TileLayout layout)
+    {
+        if (tileDupeSystem == null) tileDupeSystem = FindFirstObjectByType<TileDupeSystem>();
+        if (tileDupeSystem == null) return layout.name;
+
+        var data = tileDupeSystem.GetTileLevelData(layout);
+        return $"{layout.name}  {data.GetStatusText()}";
+    }
+
+    private void UpdateTileDupeBar(int index, TileLayout layout)
+    {
+        if (tileButtons == null || index < 0 || index >= tileButtons.Length || !tileButtons[index]) return;
+        var bar = tileButtons[index].GetComponentInChildren<TileDupeBarUI>(true);
+        if (bar != null) bar.SetLayout(layout);
     }
 
     private bool HasAnyTileOption()
