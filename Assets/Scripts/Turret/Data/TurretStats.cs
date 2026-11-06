@@ -7,7 +7,6 @@ public class TurretStats : MonoBehaviour, ITurretStats
     [SerializeField] private float fireRate;
     [SerializeField] private float damage;
     [SerializeField] private int upgradeLevel = 1;
-    [SerializeField] private int maxUpgradeLevel = 15;
 
     private float baseDamage;
     private float baseRange;
@@ -35,7 +34,6 @@ public class TurretStats : MonoBehaviour, ITurretStats
     public float Range => currentRange;
     public float FireRate => currentFireRate;
     public int UpgradeLevel => upgradeLevel;
-    public int MaxUpgradeLevel => maxUpgradeLevel;
     public WorldAffinity Affinity => affinity;
     public bool IsInAffinityWorld => affinity != WorldAffinity.Neutral && WorldState.Matches(affinity);
     public float AffinityMultiplier
@@ -101,7 +99,7 @@ public class TurretStats : MonoBehaviour, ITurretStats
 
     public void SetLevel(int level, float damageMult, float rangeMult, float fireRateMult)
     {
-        upgradeLevel = Mathf.Clamp(level, 1, maxUpgradeLevel);
+        upgradeLevel = Mathf.Max(1, level);
         levelDamageMult = damageMult;
         levelRangeMult = rangeMult;
         levelFireRateMult = fireRateMult;

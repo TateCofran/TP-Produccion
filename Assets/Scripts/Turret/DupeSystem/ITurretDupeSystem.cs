@@ -35,9 +35,15 @@ public class TurretLevelData
         currentDupes = 0;
         dupesRequiredForNextLevel = Mathf.CeilToInt(dupesRequiredForNextLevel * 1.5f);
 
-        damageMultiplier += 0.2f;
-        rangeMultiplier += 0.1f;
-        fireRateMultiplier += 0.15f;
+        var bonus = GetLevelBonus(currentLevel);
+        damageMultiplier += bonus.damage;
+        rangeMultiplier += bonus.range;
+        fireRateMultiplier += bonus.fireRate;
+    }
+
+    public static (float damage, float range, float fireRate) GetLevelBonus(int level)
+    {
+        return (0.2f, 0.1f, 0.15f);
     }
 
     public string GetStatusText()
