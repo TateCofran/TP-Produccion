@@ -282,10 +282,7 @@ public class GameManager : MonoBehaviour
         WaveManager.Instance?.ResetWaves();
         var essences = FindFirstObjectByType<WorldSwitchPoints>();
         if (essences != null)
-        {
-            essences.AddBlueEssence(-essences.TotalBlue);
-            essences.AddRedEssence(-essences.TotalRed);
-        }
+            essences.ResetTotals();
 
         SceneManager.LoadScene(gameplayScene);
     }

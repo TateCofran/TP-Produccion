@@ -14,6 +14,9 @@ public class GameModifiersManager : MonoBehaviour
     public float enemySpeedMultiplier = 1f;
     public float enemyDamageTakenMultiplier = 1f;
 
+    public float blueEssenceMultiplier = 1f;
+    public float redEssenceMultiplier = 1f;
+
     public List<IGameModifier> modifiersNormalWorld = new List<IGameModifier>();
     public List<IGameModifier> modifiersOtherWorld = new List<IGameModifier>();
     public List<IGameModifier> modifiersShiftWorld = new List<IGameModifier>();

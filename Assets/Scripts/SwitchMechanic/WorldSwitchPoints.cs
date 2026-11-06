@@ -8,19 +8,13 @@ public class WorldSwitchPoints : MonoBehaviour
     [SerializeField] private ShiftingWorldMechanic mechanic;
     [SerializeField] private EssencePopupUI essenceUI;
 
-    [Header("Base Essences Per World Switch")]
-    [Tooltip("Blue essences gained when switching to the Normal world.")]
-    [SerializeField] private int essencesOnNormal = 1;
-    [Tooltip("Red essences gained when switching to the Other world.")]
-    [SerializeField] private int essencesOnOther = 1;
-
     [Header("Permanent Upgrade Bonuses")]
-    [Tooltip("ID of the Lab upgrade that increases blue essences per world switch.")]
+    [Tooltip("ID of the Lab upgrade that increases blue essences per kill.")]
     [SerializeField] private string labBlueUpgradeId = "upgrade_moreEssencePerSwitchTile";
     [Tooltip("Bonus per level (0.1 = +10% per level).")]
     [Range(0f, 5f)][SerializeField] private float blueBonusPerLevel = 0.1f;
 
-    [Tooltip("ID of the Workshop upgrade that increases red essences per world switch.")]
+    [Tooltip("ID of the Workshop upgrade that increases red essences per kill.")]
     [SerializeField] private string workshopRedUpgradeId = "upgrade_moreEssencePerSwitchTurret";
     [Range(0f, 5f)][SerializeField] private float redBonusPerLevel = 0.1f;
 
@@ -31,9 +25,6 @@ public class WorldSwitchPoints : MonoBehaviour
     [System.Serializable] public class EssenceEvent : UnityEvent<int, int> { }
     public EssenceEvent OnBlueEssenceGained;
     public EssenceEvent OnRedEssenceGained;
-
-    private ShiftingWorldMechanic.World _lastWorld;
-    private bool _init;
 
     public int TotalBlue => totalBlueEssences;
     public int TotalRed => totalRedEssences;
@@ -48,58 +39,64 @@ public class WorldSwitchPoints : MonoBehaviour
         if (mechanic == null) mechanic = FindFirstObjectByType<ShiftingWorldMechanic>();
     }
 
-    private void Start()
+    private void OnEnable()
     {
-        if (mechanic == null)
-        {
-            Debug.LogWarning("[WorldSwitchPoints] ShiftingWorldMechanic not found in the scene");
-            enabled = false;
-            return;
-        }
-
-        _lastWorld = mechanic.GetCurrentWorld();
-        _init = true;
+        Enemy.OnAnyEnemyKilled += HandleEnemyKilled;
+        WorldState.OnWorldChanged += HandleWorldChanged;
     }
 
-    private void Update()
-{
-    if (!_init || mechanic == null) return;
-
-    var current = mechanic.GetCurrentWorld();
-    if (current != _lastWorld)
+    private void OnDisable()
     {
-        essenceUI.SetWorld(current == ShiftingWorldMechanic.World.Normal);
+        Enemy.OnAnyEnemyKilled -= HandleEnemyKilled;
+        WorldState.OnWorldChanged -= HandleWorldChanged;
+    }
 
-        if (current == ShiftingWorldMechanic.World.Normal)
+    private void Start()
+    {
+        if (essenceUI != null)
+            essenceUI.SetWorld(WorldState.Current == ShiftingWorldMechanic.World.Normal);
+    }
+
+    private void HandleWorldChanged(ShiftingWorldMechanic.World world)
+    {
+        if (essenceUI != null)
+            essenceUI.SetWorld(world == ShiftingWorldMechanic.World.Normal);
+    }
+
+    private void HandleEnemyKilled(Enemy e)
+    {
+        if (e == null || e.ReachedCore || e.IsSummoned || e.Data == null) return;
+
+        bool isNormal = WorldState.Current == ShiftingWorldMechanic.World.Normal;
+        float multiplier = isNormal ? GetBlueMultiplier() : GetRedMultiplier();
+        int amount = Mathf.Max(1, Mathf.RoundToInt(e.Data.essenceReward * multiplier));
+
+        if (isNormal)
         {
-            int amount = CalculateBlueEssence();
             totalBlueEssences += amount;
-            essenceUI.HandleEssence(amount, totalBlueEssences);
+            OnBlueEssenceGained?.Invoke(amount, totalBlueEssences);
+            if (essenceUI != null) essenceUI.QueueEssence(amount, totalBlueEssences);
         }
         else
         {
-            int amount = CalculateRedEssence();
             totalRedEssences += amount;
-            essenceUI.HandleEssence(amount, totalRedEssences);
+            OnRedEssenceGained?.Invoke(amount, totalRedEssences);
+            if (essenceUI != null) essenceUI.QueueEssence(amount, totalRedEssences);
         }
-
-        _lastWorld = current;
     }
-}
-    private int CalculateBlueEssence()
+
+    private float GetBlueMultiplier()
     {
         int level = UpgradeLevels.Get(labBlueUpgradeId);
-        float multiplier = 1f + (blueBonusPerLevel * level);
-        int total = Mathf.RoundToInt(essencesOnNormal * multiplier);
-        return Mathf.Max(1, total);
+        float modifier = GameModifiersManager.Instance != null ? GameModifiersManager.Instance.blueEssenceMultiplier : 1f;
+        return (1f + blueBonusPerLevel * level) * modifier;
     }
 
-    private int CalculateRedEssence()
+    private float GetRedMultiplier()
     {
         int level = UpgradeLevels.Get(workshopRedUpgradeId);
-        float multiplier = 1f + (redBonusPerLevel * level);
-        int total = Mathf.RoundToInt(essencesOnOther * multiplier);
-        return Mathf.Max(1, total);
+        float modifier = GameModifiersManager.Instance != null ? GameModifiersManager.Instance.redEssenceMultiplier : 1f;
+        return (1f + redBonusPerLevel * level) * modifier;
     }
 
     public void AddBlueEssence(int amount)
@@ -114,5 +111,12 @@ public class WorldSwitchPoints : MonoBehaviour
         if (amount <= 0) return;
         totalRedEssences += amount;
         OnRedEssenceGained?.Invoke(amount, totalRedEssences);
+    }
+
+    public void ResetTotals()
+    {
+        totalBlueEssences = 0;
+        totalRedEssences = 0;
+        if (essenceUI != null) essenceUI.ResetTotals();
     }
 }

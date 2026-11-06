@@ -26,6 +26,10 @@ public class EssencePopupUI : MonoBehaviour
     [SerializeField] private float outTime = 0.20f;
     [SerializeField] private float risePixels = 16f;
 
+    [Header("Batching")]
+    [Tooltip("Unscaled seconds during which gained essences are accumulated into a single popup.")]
+    [Min(0f)][SerializeField] private float batchWindow = 0.5f;
+
     [Header("State")]
     [SerializeField] private int totalBlue = 0;
     [SerializeField] private int totalRed = 0;
@@ -38,6 +42,11 @@ public class EssencePopupUI : MonoBehaviour
     private Color _popupHidden;
     private Color _popupVisible;
     private bool showingNormalWorld = true;
+
+    private int _pendingDelta;
+    private int _pendingTotal;
+    private float _pendingFlushAt;
+    private bool _hasPending;
 
     private void Awake()
     {
@@ -55,8 +64,63 @@ public class EssencePopupUI : MonoBehaviour
         transform.localScale = _popupScale0;
     }
 
+    private void Update()
+    {
+        if (_hasPending && Time.unscaledTime >= _pendingFlushAt)
+            FlushPending();
+    }
+
+    private void OnDisable()
+    {
+        _hasPending = false;
+        _pendingDelta = 0;
+    }
+
+    public void QueueEssence(int delta, int newTotal)
+    {
+        if (delta <= 0) return;
+
+        if (batchWindow <= 0f)
+        {
+            HandleEssence(delta, newTotal);
+            return;
+        }
+
+        if (!_hasPending)
+        {
+            _hasPending = true;
+            _pendingDelta = 0;
+            _pendingFlushAt = Time.unscaledTime + batchWindow;
+        }
+
+        _pendingDelta += delta;
+        _pendingTotal = newTotal;
+    }
+
+    public void ResetTotals()
+    {
+        _hasPending = false;
+        _pendingDelta = 0;
+        totalBlue = 0;
+        totalRed = 0;
+        UpdateCounterText();
+    }
+
+    private void FlushPending()
+    {
+        if (!_hasPending) return;
+        _hasPending = false;
+
+        int delta = _pendingDelta;
+        _pendingDelta = 0;
+        if (delta > 0) HandleEssence(delta, _pendingTotal);
+    }
+
     public void SetWorld(bool isNormalWorld)
     {
+        if (isNormalWorld != showingNormalWorld)
+            FlushPending();
+
         showingNormalWorld = isNormalWorld;
 
         if (counterLabel != null)

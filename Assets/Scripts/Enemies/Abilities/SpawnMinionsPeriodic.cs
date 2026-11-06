@@ -96,6 +96,7 @@ public class Ability_SpawnMinionsPeriodic : MonoBehaviour, IEnemyAbility
 
             var route = MakeChildRoute(spawnPos);
             enemy.Init(route);
+            enemy.MarkAsSummoned();
             WaveManager.Instance?.RegisterExtraEnemies(1);
 
             if (spawnVfxPrefab != null)

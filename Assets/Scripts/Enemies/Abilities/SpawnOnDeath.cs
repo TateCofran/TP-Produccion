@@ -78,6 +78,7 @@ public class Ability_SpawnOnDeath : MonoBehaviour, IEnemyAbility
             {
                 var route = MakeChildRoute(spawnPos);
                 enemy.Init(route);
+                enemy.MarkAsSummoned();
                 WaveManager.Instance?.RegisterExtraEnemies(1);
             }
 

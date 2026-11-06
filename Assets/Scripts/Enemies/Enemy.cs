@@ -13,6 +13,9 @@ public class Enemy : MonoBehaviour, IEnemyDeathHandler, IWorldAware
 
     public bool ReachedCore => hasHitCore;
 
+    public bool IsSummoned { get; private set; }
+    public void MarkAsSummoned() => IsSummoned = true;
+
     private static int _nextSpawnId;
     public int SpawnId { get; private set; }
     public bool IsSameSpawn(int spawnId) => isActiveAndEnabled && !_removedFromWave && SpawnId == spawnId;
@@ -63,6 +66,7 @@ public class Enemy : MonoBehaviour, IEnemyDeathHandler, IWorldAware
 
         _removedFromWave = false;
         hasHitCore = false;
+        IsSummoned = false;
         _knockbackImmuneUntil = 0f;
         _knockbackCount = 0;
 

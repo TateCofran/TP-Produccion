@@ -17,6 +17,7 @@ MonoBehaviour:
   defense: 0
   moveSpeed: 1
   damageToCore: 100
+  essenceReward: 50
   abilityDescription: The fallen angel has a lot of health and as it advances, it
     weakens towers along the path for 10 seconds. When its HP reaches 25%, it destroys
     a random tower and doubles its movement speed

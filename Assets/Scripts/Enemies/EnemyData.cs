@@ -8,6 +8,7 @@ public class EnemyData : ScriptableObject
     public float defense;
     public float moveSpeed;
     public int damageToCore;
+    public int essenceReward = 1;
     public string abilityDescription;
 
     public EnemyType type;

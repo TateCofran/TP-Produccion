@@ -17,6 +17,7 @@ MonoBehaviour:
   defense: 0
   moveSpeed: 0.8
   damageToCore: 100
+  essenceReward: 50
   abilityDescription: The necromancer has moderate health and a shield that is impenetrable.
     It does not disappear until you eliminate the 5 skeletons it summons.
   type: 9
