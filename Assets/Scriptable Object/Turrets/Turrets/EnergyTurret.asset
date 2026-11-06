@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   id: energy_Turret
   type: 
+  turretType: 3
   displayName: Energy Turret
   damage: 2
   range: 2

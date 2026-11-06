@@ -11038,6 +11038,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2818205942294807717}
   - component: {fileID: 6813770304182493643}
+  - component: {fileID: 6813770304182493644}
   m_Layer: 0
   m_Name: Game Modifier
   m_TagString: Untagged
@@ -13166,6 +13167,9 @@ MonoBehaviour:
   - {fileID: 105127152}
   - {fileID: 1021510861}
   tileLabels: []
+  tileRerollButton: {fileID: 0}
+  tileRerollLabel: {fileID: 0}
+  baseOptionsCount: 3
   turretPanelRoot: {fileID: 7133632770698482872}
   turretButtons:
   - {fileID: 132090216}
@@ -15944,6 +15948,7 @@ MonoBehaviour:
   holdTime: 0.8
   outTime: 0.2
   risePixels: 16
+  batchWindow: 0.5
   totalBlue: 0
   totalRed: 0
   showCounterAtZero: 1
@@ -16491,8 +16496,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   mechanic: {fileID: 2182181466141838572}
   essenceUI: {fileID: 6402472055481174259}
-  essencesOnNormal: 1
-  essencesOnOther: 1
   labBlueUpgradeId: upgrade_moreEssencePerSwitchTile
   blueBonusPerLevel: 1
   workshopRedUpgradeId: upgrade_moreEssencePerSwitchTurret
@@ -16592,12 +16595,52 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0d2faf8505a3b5b43b5fe2e0bc2a160a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  turretRangeMultiplier: 1
-  turretFireRateMultiplier: 1
-  turretDamageMultiplier: 1
-  enemyCountMultiplier: 1
-  enemySpeedMultiplier: 1
-  enemyDamageTakenMultiplier: 1
+  normalPool:
+  - {fileID: 11400000, guid: b0a9a4b6794c75342b91e2364e199ae6, type: 2}
+  - {fileID: 11400000, guid: d583c6756034e5b418c3f54530bea980, type: 2}
+  - {fileID: 11400000, guid: f940f2e2971de7c48816a72dd0fe70e3, type: 2}
+  - {fileID: 11400000, guid: 9d0d9cb91be97744b819b65238a5d652, type: 2}
+  - {fileID: 11400000, guid: 4e6b51a57e383a44a8eef81da77628a7, type: 2}
+  - {fileID: 11400000, guid: 4d75dafcc2f90dc46b9eb4748ea80bc1, type: 2}
+  - {fileID: 11400000, guid: 5a894119ad9bbca409c906996cbf5c49, type: 2}
+  - {fileID: 11400000, guid: bcd31cafbbf4ca5468a4666544cc5c7c, type: 2}
+  - {fileID: 11400000, guid: 6fb6566bf54055f4bbb948ab041dd319, type: 2}
+  - {fileID: 11400000, guid: b75846e0c9806a645b354aee630f2b1f, type: 2}
+  - {fileID: 11400000, guid: 804b772c4000c9c4d8f8b170cc3fae07, type: 2}
+  - {fileID: 11400000, guid: 2f305fd6decae79458bace815b6c1650, type: 2}
+  - {fileID: 11400000, guid: 2fea19d9c3674334da87bb5a22ba856d, type: 2}
+  - {fileID: 11400000, guid: 363e25188eb8ebf4590860908dc1eab0, type: 2}
+  - {fileID: 11400000, guid: 3250a9768d37bd54aa65f7b1b0a15307, type: 2}
+  otherPool:
+  - {fileID: 11400000, guid: 1264d23db86a67e4fa3e6e9e22e12810, type: 2}
+  - {fileID: 11400000, guid: ad4df57f04ced124480328d75c07451d, type: 2}
+  - {fileID: 11400000, guid: 69a34bb07a72edb408f4efe73c19ce16, type: 2}
+  - {fileID: 11400000, guid: ea03a6b46031def49b2760ba86c2426a, type: 2}
+  - {fileID: 11400000, guid: 2dabd8f426172f74f9ebf12b44cbfc9b, type: 2}
+  - {fileID: 11400000, guid: c7bcf26a7975c0442ad7877323862e33, type: 2}
+  - {fileID: 11400000, guid: 643f72f9cc71f8346ac1a2df12d529d5, type: 2}
+  - {fileID: 11400000, guid: 1978232dadee3a74bac1b6bb2fddb529, type: 2}
+  - {fileID: 11400000, guid: a6c0fcb2dc44b2d47bad7a25adf847f3, type: 2}
+  - {fileID: 11400000, guid: b570f78ea2653a047b9be510ea18966e, type: 2}
+  - {fileID: 11400000, guid: d31f9100533a5c046b4e99bbfed6f96e, type: 2}
+  - {fileID: 11400000, guid: 67ffe11b9f0790049aa38adc694df06f, type: 2}
+  - {fileID: 11400000, guid: 37c0b020efa7d7b418189b969b740caf, type: 2}
+  - {fileID: 11400000, guid: 00e05eece938ac540ba5728052755b0c, type: 2}
+--- !u!114 &6813770304182493644
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 451036088832461784}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 051d53ef6a9845946b64115c7561fbe1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ModifierWaveTrigger
+  panel: {fileID: 0}
+  everyNWaves: 3
+  optionsCount: 3
 --- !u!114 &6829792564838995626
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -16637,6 +16680,7 @@ MonoBehaviour:
   holdTime: 0.8
   outTime: 0.2
   risePixels: 16
+  batchWindow: 0.5
   totalBlue: 0
   totalRed: 0
   showCounterAtZero: 1

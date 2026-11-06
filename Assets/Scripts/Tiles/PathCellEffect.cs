@@ -57,6 +57,13 @@ public class PathCellEffect : MonoBehaviour
         if (col) col.isTrigger = true;
     }
 
+    private bool IsBasicCell => _baseDamage <= 0f && _baseSlow <= 0f && _baseStun <= 0f;
+
+    private static float GetLingerSeconds()
+    {
+        return Mathf.Max(0f, GameModifiersManager.Stat(ModifierStat.EffectLingerSeconds));
+    }
+
     private float GetStatusInterval()
     {
         var man = PathEffectManager.Instance;
@@ -82,10 +89,14 @@ public class PathCellEffect : MonoBehaviour
     {
         if (!TryGetAffectable(other, out var aff, out var id)) return;
 
+        int baseDamage = damagePerHit;
+        if (IsBasicCell)
+            baseDamage = Mathf.Max(0, Mathf.RoundToInt(GameModifiersManager.Stat(ModifierStat.BasicTileDamage)));
+
         int effDmg; float effSlow, effStun, dmgCd, stunCd;
         var man = PathEffectManager.Instance;
-        if (man) man.GetEffective(damagePerHit, slow, stun, out effDmg, out effSlow, out effStun, out dmgCd, out stunCd);
-        else { effDmg = damagePerHit; effSlow = slow; effStun = stun; dmgCd = 0.5f; stunCd = 0.5f; }
+        if (man) man.GetEffective(baseDamage, slow, stun, out effDmg, out effSlow, out effStun, out dmgCd, out stunCd);
+        else { effDmg = baseDamage; effSlow = slow; effStun = stun; dmgCd = 0.5f; stunCd = 0.5f; }
 
         if (effDmg <= 0) return;
 
@@ -119,7 +130,7 @@ public class PathCellEffect : MonoBehaviour
             else
             {
                 float dt = GetStatusInterval();
-                aff.ApplySlow(effSlow, dt + 0.05f);
+                aff.ApplySlow(effSlow, dt + 0.05f + GetLingerSeconds());
                 _nextSlowRefresh[id] = now + dt;
             }
         }
@@ -137,7 +148,7 @@ public class PathCellEffect : MonoBehaviour
             }
             else
             {
-                aff.ApplyStun(effStun);
+                aff.ApplyStun(effStun + GetLingerSeconds());
             }
             _nextStunAllowed[id] = now + stunCd;
         }

@@ -138,7 +138,8 @@ public class TeslaTurret : MonoBehaviour, IShootingBehavior
         int currentSpawnId = current.SpawnId;
         Vector3 segmentOrigin = firePoint.position;
 
-        for (int hop = 0; hop < maxChainTargets; hop++)
+        int chainTargets = maxChainTargets + Mathf.Max(0, Mathf.RoundToInt(GameModifiersManager.Stat(ModifierStat.TeslaExtraTargets)));
+        for (int hop = 0; hop < chainTargets; hop++)
         {
             if (current == null || !current.IsSameSpawn(currentSpawnId) || current.Health.IsDead()) break;
 
@@ -237,10 +238,8 @@ public class TeslaTurret : MonoBehaviour, IShootingBehavior
     {
         SpawnImpactVfx(hit, fallbackDir);
 
-        int damage = Mathf.Max(1, Mathf.RoundToInt(stats.Damage));
-
         if (enemyAtShot != null && enemyAtShot.IsSameSpawn(spawnIdAtShot) && !enemyAtShot.Health.IsDead())
-            enemyAtShot.Health.TakeDamage(damage);
+            enemyAtShot.Health.TakeDamage(TurretDamageCalculator.ComputeInt(stats.Damage, enemyAtShot));
 
         if (audioSource && impactClip) audioSource.PlayOneShot(impactClip, impactVolume);
     }

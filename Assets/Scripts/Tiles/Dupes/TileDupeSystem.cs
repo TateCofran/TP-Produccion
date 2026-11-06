@@ -47,6 +47,13 @@ public sealed class TileDupeSystem : MonoBehaviour, ITileDupeSystem
         var data = GetTileLevelData(layout);
         bool leveledUp = data.AddDupe();
 
+        float extraChance = GameModifiersManager.Stat(ModifierStat.TileExtraDupeChance);
+        if (extraChance > 0f && UnityEngine.Random.value < extraChance)
+        {
+            Debug.Log($"[TileDupeSystem] Extra dupe granted for {layout.name}");
+            leveledUp |= data.AddDupe();
+        }
+
         OnDupeChanged?.Invoke(layout);
 
         if (leveledUp)

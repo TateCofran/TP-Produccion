@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   id: basic_Turret
   type: 
+  turretType: 1
   displayName: Turret Basic
   damage: 7
   range: 2

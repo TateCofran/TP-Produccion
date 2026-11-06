@@ -11,90 +11,146 @@ public class ModifierPanelSelection : MonoBehaviour
     public GameObject cardOtherWorldPrefab;
     public GameObject cardShiftWorldPrefab;
 
+    [Header("Extra Pick")]
+    [SerializeField, Min(1)] private int extraPickOptions = 3;
+
     private Action onModifierChosen;
-    private List<GameObject> spawnedCards = new List<GameObject>();
-    private List<IGameModifier> currentOptions = new List<IGameModifier>();
+    private readonly List<GameObject> spawnedCards = new List<GameObject>();
+    private readonly List<ModifierSO> currentOptions = new List<ModifierSO>();
+    private bool extraPickPaused;
+
     public static ModifierPanelSelection Instance { get; private set; }
-    void Awake() { Instance = this; }
+    public bool IsOpen => panel != null && panel.activeSelf;
 
-    public void OpenPanel(Action callback)
+    private void Awake()
     {
-        panel.SetActive(true);
-        onModifierChosen = callback;
+        Instance = this;
+        if (panel) panel.SetActive(false);
+    }
 
-        foreach (var card in spawnedCards)
-            Destroy(card);
-        spawnedCards.Clear();
+    private void Start()
+    {
+        if (GameModifiersManager.Instance != null)
+            GameModifiersManager.Instance.InjectModifierPanelSelection(this);
+    }
 
-        currentOptions = GetRandomModifiers(3);
+    private void OnDestroy()
+    {
+        if (Instance == this) Instance = null;
+        if (extraPickPaused)
+        {
+            extraPickPaused = false;
+            GameTime.ReleasePause();
+        }
+    }
+
+    public void OpenPanel(List<ModifierSO> options, Action onChosen)
+    {
+        if (options == null || options.Count == 0)
+        {
+            Debug.LogWarning("[ModifierPanelSelection] No modifier options to show");
+            onChosen?.Invoke();
+            return;
+        }
+
+        if (panel) panel.SetActive(true);
+        onModifierChosen = onChosen;
+
+        ClearCards();
+        currentOptions.Clear();
+        currentOptions.AddRange(options);
 
         for (int i = 0; i < currentOptions.Count; i++)
         {
             var modifier = currentOptions[i];
-            int stacks = GameModifiersManager.Instance.GetModifierStacks(modifier);
-
-            GameObject prefabToUse = cardNormalWorldPrefab;
-            switch (modifier.Category)
+            GameObject prefabToUse = GetPrefabFor(modifier.Category);
+            if (prefabToUse == null)
             {
-                case ModifierCategory.NormalWorld:
-                    prefabToUse = cardNormalWorldPrefab;
-                    break;
-                case ModifierCategory.OtherWorld:
-                    prefabToUse = cardOtherWorldPrefab;
-                    break;
-                case ModifierCategory.ShiftWorld:
-                    prefabToUse = cardShiftWorldPrefab;
-                    break;
+                Debug.LogWarning("[ModifierPanelSelection] No card prefab assigned for " + modifier.Category);
+                continue;
             }
 
             GameObject go = Instantiate(prefabToUse, cardContainer);
+            spawnedCards.Add(go);
 
             int optionIndex = i;
+            var card = go.GetComponent<ModifierCardUI>();
+            if (card == null) card = go.AddComponent<ModifierCardUI>();
+            card.Bind(modifier, () => OnModifierSelected(optionIndex));
+        }
+    }
 
-            spawnedCards.Add(go);
+    public void OpenExtraPick(Action onChosen = null)
+    {
+        if (GameModifiersManager.Instance == null)
+        {
+            onChosen?.Invoke();
+            return;
+        }
+
+        var category = GameModifiersManager.CategoryForCurrentWorld();
+        var options = GameModifiersManager.Instance.GetRandomAvailable(category, extraPickOptions);
+        if (options.Count == 0)
+        {
+            Debug.Log("[ModifierPanelSelection] No modifiers left for an extra pick");
+            onChosen?.Invoke();
+            return;
+        }
+
+        GameTime.RequestPause();
+        extraPickPaused = true;
+
+        OpenPanel(options, () =>
+        {
+            if (extraPickPaused)
+            {
+                extraPickPaused = false;
+                GameTime.ReleasePause();
+            }
+            onChosen?.Invoke();
+        });
+    }
+
+    private GameObject GetPrefabFor(ModifierCategory category)
+    {
+        switch (category)
+        {
+            case ModifierCategory.OtherWorld:
+            case ModifierCategory.LegendaryOther:
+                return cardOtherWorldPrefab != null ? cardOtherWorldPrefab : cardNormalWorldPrefab;
+            case ModifierCategory.ShiftWorld:
+                return cardShiftWorldPrefab != null ? cardShiftWorldPrefab : cardNormalWorldPrefab;
+            default:
+                return cardNormalWorldPrefab;
         }
     }
 
     private void OnModifierSelected(int idx)
     {
-        GameModifiersManager.Instance.ApplyModifier(currentOptions[idx]);
+        if (idx < 0 || idx >= currentOptions.Count) return;
 
-        onModifierChosen?.Invoke();
+        var chosen = currentOptions[idx];
+        if (GameModifiersManager.Instance != null)
+            GameModifiersManager.Instance.ApplyModifier(chosen);
+
+        ClosePanel();
+
+        var callback = onModifierChosen;
+        onModifierChosen = null;
+        callback?.Invoke();
     }
 
-    private List<IGameModifier> GetRandomModifiers(int count)
+    private void ClosePanel()
     {
-        var pool = new List<IGameModifier>(GameModifiersManager.Instance.allModifiers);
-        var selected = new List<IGameModifier>();
-
-        System.Random rng = new System.Random();
-        for (int i = 0; i < count && pool.Count > 0; i++)
-        {
-            int idx = rng.Next(pool.Count);
-            selected.Add(pool[idx]);
-            pool.RemoveAt(idx);
-        }
-        return selected;
+        ClearCards();
+        currentOptions.Clear();
+        if (panel) panel.SetActive(false);
     }
-    public void ShowLegendaryModifier(IGameModifier legendaryModifier)
-    {
-        panel.SetActive(true);
 
+    private void ClearCards()
+    {
         foreach (var card in spawnedCards)
-            Destroy(card);
+            if (card != null) Destroy(card);
         spawnedCards.Clear();
-
-        GameObject prefabToUse = cardNormalWorldPrefab;
-        switch (legendaryModifier.Category)
-        {
-            case ModifierCategory.LegendaryNormal:
-                prefabToUse = cardNormalWorldPrefab;
-                break;
-            case ModifierCategory.LegendaryOther:
-                prefabToUse = cardOtherWorldPrefab;
-                break;
-        }
-
-        GameObject go = Instantiate(prefabToUse, cardContainer);
     }
 }

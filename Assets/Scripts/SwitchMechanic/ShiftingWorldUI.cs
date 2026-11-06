@@ -16,7 +16,12 @@ public class ShiftingWorldUI : MonoBehaviour
     [SerializeField] private GameObject tilePanelRoot;
     [SerializeField] private Button[] tileButtons;
     [SerializeField] private TMP_Text[] tileLabels;
+    [Tooltip("Optional button that rerolls the tile options (Reroll modifier).")]
+    [SerializeField] private Button tileRerollButton;
+    [SerializeField] private TMP_Text tileRerollLabel;
+    [SerializeField, Min(1)] private int baseOptionsCount = 3;
     private bool tileChoiceLocked = false;
+    private int tileRerollsLeft;
 
     [Header("Turret Selection (Other)")]
     [SerializeField] private GameObject turretPanelRoot;
@@ -223,7 +228,9 @@ public class ShiftingWorldUI : MonoBehaviour
         tileChoiceLocked = false;
         onTileClosed = closedCb;
 
+        tileRerollsLeft = Mathf.Max(0, Mathf.RoundToInt(GameModifiersManager.Stat(ModifierStat.TileRerolls)));
         BuildNormalOptions();
+        RefreshRerollButton();
 
         if (!HasAnyTileOption())
         {
@@ -254,9 +261,17 @@ public class ShiftingWorldUI : MonoBehaviour
         currentTileOptions.Clear();
         if (!grid) return;
 
-        var candidates = grid.GetRandomCandidateSet(3);
-        for (int i = 0; i < 3; i++)
+        int optionsCount = GetOptionsCount(ModifierStat.TileOptionsCount, tileButtons);
+        var candidates = grid.GetRandomCandidateSet(optionsCount);
+        int buttonCount = tileButtons != null ? tileButtons.Length : 0;
+        for (int i = 0; i < buttonCount; i++)
         {
+            if (i >= optionsCount)
+            {
+                if (tileButtons[i]) tileButtons[i].gameObject.SetActive(false);
+                continue;
+            }
+
             var layout = (i < candidates.Count) ? candidates[i] : null;
             currentTileOptions.Add(layout);
 
@@ -271,6 +286,34 @@ public class ShiftingWorldUI : MonoBehaviour
             BindButton(tileButtons, tileLabels, i, GetTileOptionLabel(layout), () => OnChooseTile(idx));
             UpdateTileDupeBar(i, layout);
         }
+    }
+
+    private int GetOptionsCount(ModifierStat stat, Button[] buttons)
+    {
+        int max = buttons != null ? buttons.Length : 0;
+        int wanted = baseOptionsCount + Mathf.RoundToInt(GameModifiersManager.Stat(stat));
+        return Mathf.Clamp(wanted, 1, Mathf.Max(1, max));
+    }
+
+    public void RerollTileOptions()
+    {
+        if (tileRerollsLeft <= 0 || tileChoiceLocked || tilePlacingMode) return;
+        tileRerollsLeft--;
+        BuildNormalOptions();
+        RefreshRerollButton();
+        Debug.Log($"[ShiftingWorldUI] Tile options rerolled. Rerolls left: {tileRerollsLeft}");
+    }
+
+    private void RefreshRerollButton()
+    {
+        if (!tileRerollButton) return;
+
+        bool available = tileRerollsLeft > 0;
+        tileRerollButton.gameObject.SetActive(available);
+        tileRerollButton.onClick.RemoveListener(RerollTileOptions);
+        tileRerollButton.onClick.AddListener(RerollTileOptions);
+        tileRerollButton.interactable = available;
+        if (tileRerollLabel) tileRerollLabel.text = $"Reroll ({tileRerollsLeft})";
     }
 
     private string GetTileOptionLabel(TileLayout layout)
@@ -491,8 +534,16 @@ public class ShiftingWorldUI : MonoBehaviour
 
         Shuffle(pool);
 
-        for (int i = 0; i < 3; i++)
+        int optionsCount = GetOptionsCount(ModifierStat.TurretOptionsCount, turretButtons);
+        int buttonCount = turretButtons != null ? turretButtons.Length : 0;
+        for (int i = 0; i < buttonCount; i++)
         {
+            if (i >= optionsCount)
+            {
+                if (turretButtons[i]) turretButtons[i].gameObject.SetActive(false);
+                continue;
+            }
+
             var so = pool[i % pool.Count];
             currentTurretOptions.Add(so);
 

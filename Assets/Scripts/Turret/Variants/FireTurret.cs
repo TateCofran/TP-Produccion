@@ -34,6 +34,8 @@ public class FireTurret : MonoBehaviour, IShootingBehavior
     [SerializeField] private float damageFractionPerSecond = 1f / 2f;
     [Tooltip("Spawn the impact VFX on every burn tick.")]
     [SerializeField] private bool vfxOnEachTick = false;
+    [Tooltip("Radius used to spread the burn to the closest enemy when the burning enemy dies (Wildfire modifier).")]
+    [SerializeField, Min(0f)] private float spreadRadius = 2.5f;
 
     [Header("Impact Sound")]
     [SerializeField] private AudioClip impactClip;
@@ -237,12 +239,21 @@ public class FireTurret : MonoBehaviour, IShootingBehavior
         float dps = Mathf.Max(0f, stats.Damage * damageFractionPerSecond);
         float damageThisTick = Mathf.Min(dps, remaining);
 
-        int damage = Mathf.Max(1, Mathf.RoundToInt(damageThisTick));
+        int damage = TurretDamageCalculator.ComputeInt(damageThisTick, burningTarget);
         float before = burningTarget.Health.GetCurrentHealth();
+        Vector3 burnPosition = burningTarget.transform.position;
+        Enemy burnedEnemy = burningTarget;
         burningTarget.Health.TakeDamage(damage);
-        float after = burningTarget.Health.GetCurrentHealth();
+        float after = burningTarget != null && burningTarget.Health != null ? burningTarget.Health.GetCurrentHealth() : 0f;
 
         totalDamageApplied += Mathf.Max(0f, before - after);
+
+        if (burnedEnemy.Health == null || burnedEnemy.Health.IsDead() || !burnedEnemy.IsSameSpawn(burningSpawnId))
+        {
+            ClearBurn();
+            TrySpreadBurn(burnPosition, burnedEnemy);
+            return;
+        }
 
         if (vfxOnEachTick && impactVfxPrefab)
         {
@@ -250,6 +261,29 @@ public class FireTurret : MonoBehaviour, IShootingBehavior
             Transform follow = parentVfxToHit ? burningTarget.transform : null;
             VfxPool.Spawn(impactVfxPrefab, pos, Quaternion.identity, impactVfxLifetime, follow);
         }
+    }
+
+    private void TrySpreadBurn(Vector3 from, Enemy dead)
+    {
+        int spreads = Mathf.RoundToInt(GameModifiersManager.Stat(ModifierStat.FireSpreadOnDeath));
+        if (spreads <= 0 || spreadRadius <= 0f) return;
+
+        Enemy closest = null;
+        float bestSqr = spreadRadius * spreadRadius;
+        foreach (var enemy in EnemyTracker.Enemies)
+        {
+            if (enemy == null || enemy == dead || !enemy.isActiveAndEnabled) continue;
+            if (enemy.Health == null || enemy.Health.IsDead() || !enemy.IsTargetable()) continue;
+
+            float sqr = (enemy.transform.position - from).sqrMagnitude;
+            if (sqr <= bestSqr)
+            {
+                bestSqr = sqr;
+                closest = enemy;
+            }
+        }
+
+        if (closest != null) StartOrRefreshBurn(closest, closest.SpawnId);
     }
 
     private void SpawnImpactVfx(RaycastHit hit, Vector3 fallbackDir)

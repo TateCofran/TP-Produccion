@@ -87,7 +87,7 @@ public class Projectile : MonoBehaviour
         var damageable = enemyGO.GetComponentInChildren<IDamageable>();
         if (damageable == null) return;
 
-        damageable.TakeDamage(damage);
+        damageable.TakeDamage(TurretDamageCalculator.Compute(damage, enemyGO.GetComponentInParent<Enemy>()));
 
         if (isSlowing && slowAmount > 0f && slowDuration > 0f)
         {

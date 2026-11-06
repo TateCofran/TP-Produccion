@@ -91,6 +91,12 @@ public class ShiftingWorldMechanic : MonoBehaviour
 
             toggleCooldownLeft = Mathf.Max(0.01f, toggleCooldownSeconds);
 
+            if (currentWorld == World.Normal && !normalWaitingChoice)
+            {
+                float charge = GameModifiersManager.Stat(ModifierStat.ShiftChargeTileBar);
+                if (charge > 0f) normalProgress = Mathf.Min(100f, normalProgress + charge);
+            }
+
             Debug.Log($"[ShiftingWorldMechanic] Switched world to {currentWorld}");
 
             TutorialEventHub.RaiseWorldSwitched();
@@ -98,6 +104,8 @@ public class ShiftingWorldMechanic : MonoBehaviour
 
         float dt = Time.deltaTime;
         float activeDelta = speedPerSecond * dt;
+        float normalActiveDelta = activeDelta * Mathf.Max(0f, GameModifiersManager.Multiplier(ModifierStat.TileBarSpeed));
+        float otherActiveDelta = activeDelta * Mathf.Max(0f, GameModifiersManager.Multiplier(ModifierStat.TurretBarSpeed));
         float passiveDelta = speedPerSecond * passiveMultiplier * dt;
 
         float extraEnergyPerSecond = WorldEnergyRegistry.GetTotalChargePerSecond();
@@ -106,14 +114,14 @@ public class ShiftingWorldMechanic : MonoBehaviour
         if (currentWorld == World.Normal)
         {
             if (!normalWaitingChoice)
-                normalProgress = Mathf.Min(100f, normalProgress + activeDelta + extraDelta);
+                normalProgress = Mathf.Min(100f, normalProgress + normalActiveDelta + extraDelta);
             if (!otherWaitingChoice)
                 otherProgress = Mathf.Min(100f, otherProgress + passiveDelta);
         }
         else
         {
             if (!otherWaitingChoice)
-                otherProgress = Mathf.Min(100f, otherProgress + activeDelta + extraDelta);
+                otherProgress = Mathf.Min(100f, otherProgress + otherActiveDelta + extraDelta);
             if (!normalWaitingChoice)
                 normalProgress = Mathf.Min(100f, normalProgress + passiveDelta);
         }

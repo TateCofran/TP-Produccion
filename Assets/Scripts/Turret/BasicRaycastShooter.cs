@@ -26,9 +26,12 @@ public class BasicRaycastShooter : MonoBehaviour, IShootingBehavior
     [SerializeField] private bool ensureAudioSource = true;
 
     private AudioSource audioSource;
+    private TurretDataHolder dataHolder;
+    private int shotCount;
 
     private void Awake()
     {
+        dataHolder = GetComponent<TurretDataHolder>();
         if (!ensureAudioSource) return;
 
         audioSource = GetComponent<AudioSource>();
@@ -54,7 +57,7 @@ public class BasicRaycastShooter : MonoBehaviour, IShootingBehavior
         if (distance <= 0.001f) return;
 
         Vector3 dir = toTarget / distance;
-        int damage = Mathf.Max(1, (int)stats.Damage);
+        float damage = Mathf.Max(1, (int)stats.Damage) * GetNthShotMultiplier();
 
         if (Physics.Raycast(origin, dir, out RaycastHit hit, distance + 0.25f, hittableLayers, QueryTriggerInteraction.Ignore))
         {
@@ -74,7 +77,7 @@ public class BasicRaycastShooter : MonoBehaviour, IShootingBehavior
         if (debugDraw) Debug.DrawLine(origin, origin + dir * Mathf.Min(distance, 5f), Color.red, 0.1f);
     }
 
-    private void OnHit(RaycastHit hit, Vector3 dir, int damage)
+    private void OnHit(RaycastHit hit, Vector3 dir, float damage)
     {
         SpawnImpactVfx(hit, dir);
         TryApplyDamage(hit.collider.transform, damage);
@@ -93,15 +96,33 @@ public class BasicRaycastShooter : MonoBehaviour, IShootingBehavior
         if (audioSource && impactClip) audioSource.PlayOneShot(impactClip, impactVolume);
     }
 
-    private static bool TryApplyDamage(Transform hitTf, int damage)
+    private float GetNthShotMultiplier()
+    {
+        if (dataHolder == null || dataHolder.turretDataSO == null || dataHolder.turretDataSO.turretType != TurretType.Sniper)
+            return 1f;
+
+        int everyN = Mathf.RoundToInt(GameModifiersManager.Stat(ModifierStat.SniperNthShotDouble));
+        if (everyN <= 0) return 1f;
+
+        shotCount++;
+        if (shotCount < everyN) return 1f;
+
+        shotCount = 0;
+        return 2f;
+    }
+
+    private static bool TryApplyDamage(Transform hitTf, float damage)
     {
         if (!hitTf) return false;
 
+        var enemy = hitTf.GetComponentInParent<Enemy>();
+        int finalDamage = TurretDamageCalculator.ComputeInt(damage, enemy);
+
         var enemyHealth = hitTf.GetComponentInParent<EnemyHealth>();
-        if (enemyHealth != null) { enemyHealth.TakeDamage(damage); return true; }
+        if (enemyHealth != null) { enemyHealth.TakeDamage(finalDamage); return true; }
 
         var damageable = hitTf.GetComponentInParent<IDamageable>();
-        if (damageable != null) { damageable.TakeDamage(damage); return true; }
+        if (damageable != null) { damageable.TakeDamage(finalDamage); return true; }
 
         return false;
     }

@@ -63,6 +63,22 @@ public class Core : MonoBehaviour
         }
     }
 
+    public int MaxHealth => maxHealth;
+    public int CurrentHealth => currentHealth;
+
+    public void ModifyMaxHealth(int delta)
+    {
+        if (delta == 0) return;
+
+        int newMax = Mathf.Max(1, maxHealth + delta);
+        int appliedDelta = newMax - maxHealth;
+        maxHealth = newMax;
+        currentHealth = Mathf.Clamp(currentHealth + appliedDelta, 1, maxHealth);
+
+        UIController.Instance?.UpdateCoreHealth(currentHealth, maxHealth);
+        Debug.Log($"[Core] Max health changed by {appliedDelta}. Health: {currentHealth}/{maxHealth}");
+    }
+
     public void SetInfiniteHealth(bool enabled)
     {
         infiniteHealth = enabled;

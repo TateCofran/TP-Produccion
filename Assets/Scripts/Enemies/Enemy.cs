@@ -119,6 +119,9 @@ public class Enemy : MonoBehaviour, IEnemyDeathHandler, IWorldAware
         if (_effects != null)
             speedMultiplier = Mathf.Clamp(_effects.CurrentSpeedMultiplier, 0f, 3f);
 
+        if (GameModifiersManager.Instance != null)
+            speedMultiplier *= GameModifiersManager.Instance.enemySpeedMultiplier;
+
         float step = data.moveSpeed * speedMultiplier * Time.deltaTime;
         transform.position = Vector3.MoveTowards(current, target, step);
 

@@ -3,5 +3,6 @@
     Tesla,
     Basic,
     Fire,
-    Energy
+    Energy,
+    Sniper
 }

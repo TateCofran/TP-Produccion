@@ -8,6 +8,7 @@ public class TurretDataSO : ScriptableObject
 
     [Header("Role / Type")]
     public string type;
+    public TurretType turretType = TurretType.Basic;
 
     [Header("Stats")]
     public string displayName;

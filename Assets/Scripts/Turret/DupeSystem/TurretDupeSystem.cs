@@ -33,6 +33,14 @@ public class TurretDupeSystem : MonoBehaviour, ITurretDupeSystem
         int previousLevel = levelData.currentLevel;
 
         levelData.AddDupe();
+
+        float extraChance = GameModifiersManager.Stat(ModifierStat.TurretExtraDupeChance);
+        if (extraChance > 0f && Random.value < extraChance)
+        {
+            Debug.Log($"[TurretDupeSystem] Extra dupe granted for {turretId}");
+            levelData.AddDupe();
+        }
+
         OnDupeChanged?.Invoke(turret);
 
         if (levelData.currentLevel > previousLevel)

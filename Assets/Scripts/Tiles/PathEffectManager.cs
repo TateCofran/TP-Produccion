@@ -85,6 +85,15 @@ public class PathEffectManager : MonoBehaviour
         else
             outStun = 0;
 
+        if (outDamagePerHit > 0)
+            outDamagePerHit = Mathf.Max(0, Mathf.RoundToInt(outDamagePerHit * Mathf.Max(0f, GameModifiersManager.Multiplier(ModifierStat.TileDamage))));
+
+        if (outSlow > 0f)
+            outSlow *= Mathf.Max(0f, GameModifiersManager.Multiplier(ModifierStat.TileSlow));
+
+        if (outStun > 0f)
+            outStun += Mathf.Max(0f, GameModifiersManager.Stat(ModifierStat.TileStunSeconds));
+
         outSlow = Mathf.Min(outSlow, slowMax);
         outStun = Mathf.Min(outStun, stunMax);
 

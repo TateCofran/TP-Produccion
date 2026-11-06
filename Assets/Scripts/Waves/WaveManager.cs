@@ -13,7 +13,7 @@ public class WaveManager : MonoBehaviour
     [Header("Global Enemy Count Multiplier")]
     [Range(0.5f, 3f)]
     [SerializeField] private float enemyCountMultiplier = 1f;
-    public float EnemyCountMultiplier => enemyCountMultiplier;
+    public float EnemyCountMultiplier => enemyCountMultiplier * (GameModifiersManager.Instance != null ? GameModifiersManager.Instance.enemyCountMultiplier : 1f);
 
     [Header("Settings")]
     [SerializeField] private int maxWaves = 45;
@@ -247,11 +247,12 @@ public class WaveManager : MonoBehaviour
             return 0;
         }
 
+        float multiplier = EnemyCountMultiplier;
         int total = 0;
         foreach (var step in recipe.steps)
-            total += Mathf.CeilToInt(step.count * enemyCountMultiplier);
+            total += Mathf.Max(0, Mathf.CeilToInt(step.count * multiplier));
 
-        Debug.Log($"[WaveManager] Total enemies this wave: {total} (x{enemyCountMultiplier})");
+        Debug.Log($"[WaveManager] Total enemies this wave: {total} (x{multiplier})");
         return total;
     }
 
