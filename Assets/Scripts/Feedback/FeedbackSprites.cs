@@ -11,6 +11,7 @@ public static class FeedbackSprites
     public static Sprite Circle => Get("Circle", CircleMask);
     public static Sprite SoftCircle => Get("SoftCircle", SoftCircleMask);
     public static Sprite White => Get("White", (u, v) => 1f);
+    public static Sprite Vignette => Get("Vignette", VignetteMask);
 
     private static Sprite Get(string key, System.Func<float, float, float> mask)
     {
@@ -51,6 +52,13 @@ public static class FeedbackSprites
     {
         float d = Mathf.Sqrt(u * u + v * v);
         return Mathf.Pow(Mathf.Clamp01(1f - d), 1.5f);
+    }
+
+    private static float VignetteMask(float u, float v)
+    {
+        float d = Mathf.Sqrt(u * u * 0.8f + v * v * 0.8f);
+        float t = Mathf.InverseLerp(0.55f, 1.15f, d);
+        return t * t * (3f - 2f * t);
     }
 
     private static float DropMask(float u, float v)

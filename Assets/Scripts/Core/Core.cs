@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using Unity.Cinemachine;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -83,6 +83,7 @@ public class Core : MonoBehaviour
         currentHealth = Mathf.Clamp(currentHealth + appliedDelta, 1, maxHealth);
 
         UIController.Instance?.UpdateCoreHealth(currentHealth, maxHealth);
+        CoreHitFeedback.NotifyHealth(currentHealth, maxHealth);
         Debug.Log($"[Core] Max health changed by {appliedDelta}. Health: {currentHealth}/{maxHealth}");
     }
 
@@ -106,6 +107,8 @@ public class Core : MonoBehaviour
         }
 
         UIController.Instance?.UpdateCoreHealth(currentHealth, maxHealth);
+        UIController.Instance?.PulseCoreHealth();
+        CoreHitFeedback.NotifyHit(currentHealth, maxHealth);
 
         if (impulseSource != null)
         {
@@ -124,7 +127,7 @@ public class Core : MonoBehaviour
 
         if (!infiniteHealth && currentHealth <= 0)
         {
-            Debug.Log("Core destroyed!");
+            Debug.Log("[Core] Core destroyed");
             if (GameManager.Instance != null)
                 GameManager.Instance.GameOver();
         }

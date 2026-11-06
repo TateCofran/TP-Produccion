@@ -28,6 +28,16 @@ public class UIController : MonoBehaviour
     [SerializeField, Min(0.1f)] private float modifierPulseSpeed = 6f;
     [SerializeField] private Color modifierPulseColor = new Color(1f, 0.85f, 0.2f, 1f);
 
+    [Header("Core Health Pulse")]
+    [SerializeField, Min(1f)] private float coreHealthPulseScale = 1.25f;
+    [SerializeField, Min(0.01f)] private float coreHealthPulseDuration = 0.25f;
+    [SerializeField] private Color coreHealthPulseColor = new Color(1f, 0.25f, 0.2f, 1f);
+
+    private float coreHealthPulseStart = -999f;
+    private Color coreHealthBaseColor = Color.white;
+    private Vector3 coreHealthBaseScale = Vector3.one;
+    private bool coreHealthPulsing;
+
     private bool modifierPulsing;
     private Color modifierBaseColor = Color.white;
     private Vector3 modifierBaseScale = Vector3.one;
@@ -51,6 +61,12 @@ public class UIController : MonoBehaviour
         SetNextWaveButtonVisible(true);
         SetNextWaveButtonInteractable(true);
 
+        if (coreHealthText != null)
+        {
+            coreHealthBaseColor = coreHealthText.color;
+            coreHealthBaseScale = coreHealthText.rectTransform.localScale;
+        }
+
         if (modifierCountdownText != null)
         {
             modifierBaseColor = modifierCountdownText.color;
@@ -59,8 +75,32 @@ public class UIController : MonoBehaviour
         }
     }
 
+    public void PulseCoreHealth()
+    {
+        if (coreHealthText == null) return;
+        coreHealthPulseStart = Time.unscaledTime;
+        coreHealthPulsing = true;
+    }
+
+    private void UpdateCoreHealthPulse()
+    {
+        if (!coreHealthPulsing || coreHealthText == null) return;
+        float k = (Time.unscaledTime - coreHealthPulseStart) / coreHealthPulseDuration;
+        if (k >= 1f)
+        {
+            coreHealthPulsing = false;
+            coreHealthText.rectTransform.localScale = coreHealthBaseScale;
+            coreHealthText.color = coreHealthBaseColor;
+            return;
+        }
+        float s = k < 0.3f ? Mathf.Lerp(1f, coreHealthPulseScale, k / 0.3f) : Mathf.Lerp(coreHealthPulseScale, 1f, (k - 0.3f) / 0.7f);
+        coreHealthText.rectTransform.localScale = coreHealthBaseScale * s;
+        coreHealthText.color = Color.Lerp(coreHealthPulseColor, coreHealthBaseColor, k);
+    }
+
     private void Update()
     {
+        UpdateCoreHealthPulse();
         if (!modifierPulsing || modifierCountdownText == null) return;
         float k = (Mathf.Sin(Time.unscaledTime * modifierPulseSpeed) + 1f) * 0.5f;
         modifierCountdownText.rectTransform.localScale = modifierBaseScale * Mathf.Lerp(1f, modifierPulseScale, k);

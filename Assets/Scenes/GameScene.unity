@@ -5769,6 +5769,7 @@ Transform:
   m_Children:
   - {fileID: 1943884352}
   - {fileID: 706055007}
+  - {fileID: 1813534449}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &929269972
@@ -10522,6 +10523,60 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1813534448
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1813534449}
+  - component: {fileID: 1813534450}
+  m_Layer: 0
+  m_Name: CoreHitFeedback
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1813534449
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1813534448}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 908732469}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1813534450
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1813534448}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 065730d89ed78a14ca61dfcff4210085, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CoreHitFeedback
+  hudCanvas: {fileID: 8916574750150079094}
+  vignette: {fileID: 0}
+  vignetteColor: {r: 0.85, g: 0, b: 0, a: 1}
+  hitAlpha: 0.75
+  hitDuration: 0.3
+  hitTrauma: 0.35
+  lowHealthThreshold: 3
+  lowHealthAlpha: 0.25
+  lowHealthPulseSpeed: 2
+  lowHealthPulseAmount: 0.08
 --- !u!1 &1820216798
 GameObject:
   m_ObjectHideFlags: 0
@@ -15321,6 +15376,9 @@ MonoBehaviour:
   modifierPulseScale: 1.15
   modifierPulseSpeed: 6
   modifierPulseColor: {r: 1, g: 0.85, b: 0.2, a: 1}
+  coreHealthPulseScale: 1.25
+  coreHealthPulseDuration: 0.25
+  coreHealthPulseColor: {r: 1, g: 0.25, b: 0.2, a: 1}
 --- !u!224 &2636498009874786920
 RectTransform:
   m_ObjectHideFlags: 0
