@@ -70,6 +70,7 @@ public class GridGenerator : MonoBehaviour, ITileGenerator
 
     public float TileFootprint => initialLayout != null ? initialLayout.gridWidth * initialLayout.cellSize : 1f;
     public float TileGap => tileGap;
+    public TileLayout InitialLayout => initialLayout;
     public int PlacedTileCount => chain != null ? chain.Count : 0;
     public PlacedTile GetPlacedTile(int index) => chain.Get(index);
 

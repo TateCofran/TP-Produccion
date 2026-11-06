@@ -119,6 +119,71 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &41648269
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 41648271}
+  - component: {fileID: 41648270}
+  m_Layer: 0
+  m_Name: RewardZones
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &41648270
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 41648269}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bdb6a08edb6fb70488c372c0572a7b0f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RewardZoneSystem
+  grid: {fileID: 6620364335412929145}
+  fog: {fileID: 2048374533}
+  cameraController: {fileID: 3362800846911844978}
+  rewardTable: {fileID: 0}
+  zonePrefab: {fileID: 0}
+  zoneRoot: {fileID: 0}
+  initialZones: 3
+  minDistanceTiles: 2
+  maxDistanceTiles: 6
+  respawnEveryNWaves: 5
+  maxActiveZones: 3
+  heightAboveFog: 0.15
+  visibleZoomThreshold: 0.6
+  icons: []
+  claimVfxPrefab: {fileID: 0}
+  claimVfxLifetime: 2
+  claimAudioSource: {fileID: 0}
+  claimClip: {fileID: 0}
+  toastText: {fileID: 0}
+  toastSeconds: 2.5
+  fallbackEssenceAmount: 25
+--- !u!4 &41648271
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 41648269}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &51752160
 GameObject:
   m_ObjectHideFlags: 0
@@ -19574,3 +19639,4 @@ SceneRoots:
   - {fileID: 8679844228824206015}
   - {fileID: 8109323287440268573}
   - {fileID: 2048374534}
+  - {fileID: 41648271}

@@ -25,6 +25,7 @@ public class FogOfWarSystem : MonoBehaviour
     [SerializeField] private string fogLayerName = "Fog";
 
     public event Action<int> OnFogRevealed;
+    public event Action OnGridInitialized;
 
     private readonly Dictionary<Vector2Int, GameObject> activeTiles = new Dictionary<Vector2Int, GameObject>();
     private readonly HashSet<Vector2Int> revealed = new HashSet<Vector2Int>();
@@ -41,6 +42,12 @@ public class FogOfWarSystem : MonoBehaviour
     private WorldSwitchPoints essences;
 
     public int ActiveFogCount => activeTiles.Count;
+    public bool IsInitialized => initialized;
+    public float Footprint => footprint;
+    public float Step => step;
+    public float FogHeight => gridOrigin.y;
+    public bool IsFogged(Vector2Int index) => activeTiles.ContainsKey(index);
+    public IEnumerable<Vector2Int> FoggedIndices => activeTiles.Keys;
 
     private void Awake()
     {
@@ -97,22 +104,23 @@ public class FogOfWarSystem : MonoBehaviour
 
         EnsureRadiusAround(Vector2Int.zero);
         Debug.Log($"[FogOfWarSystem] Fog grid created with {activeTiles.Count} tiles (step {step})");
+        OnGridInitialized?.Invoke();
     }
 
-    private Vector2Int CenterOf(PlacedTile tile)
+    public Vector2Int CenterOf(PlacedTile tile)
     {
         Vector3 c = (tile.aabbMin + tile.aabbMax) * 0.5f;
         return WorldToIndex(c);
     }
 
-    private Vector2Int WorldToIndex(Vector3 world)
+    public Vector2Int WorldToIndex(Vector3 world)
     {
         return new Vector2Int(
             Mathf.RoundToInt((world.x - gridOrigin.x) / step),
             Mathf.RoundToInt((world.z - gridOrigin.z) / step));
     }
 
-    private Vector3 IndexToWorld(Vector2Int index)
+    public Vector3 IndexToWorld(Vector2Int index)
     {
         return new Vector3(gridOrigin.x + index.x * step, gridOrigin.y, gridOrigin.z + index.y * step);
     }
@@ -145,7 +153,7 @@ public class FogOfWarSystem : MonoBehaviour
         return false;
     }
 
-    private void GetFogBounds(Vector2Int index, out Vector3 min, out Vector3 max)
+    public void GetFogBounds(Vector2Int index, out Vector3 min, out Vector3 max)
     {
         Vector3 c = IndexToWorld(index);
         float half = footprint * 0.5f;
@@ -153,7 +161,7 @@ public class FogOfWarSystem : MonoBehaviour
         max = new Vector3(c.x + half, 0f, c.z + half);
     }
 
-    private bool Overlaps(Vector3 aMin, Vector3 aMax, Vector3 bMin, Vector3 bMax)
+    public bool Overlaps(Vector3 aMin, Vector3 aMax, Vector3 bMin, Vector3 bMax)
     {
         return aMin.x + overlapEpsilon < bMax.x && aMax.x - overlapEpsilon > bMin.x
             && aMin.z + overlapEpsilon < bMax.z && aMax.z - overlapEpsilon > bMin.z;
