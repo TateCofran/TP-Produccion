@@ -104,7 +104,7 @@ public class ShiftingWorldMechanic : MonoBehaviour
 
         float dt = Time.deltaTime;
         float activeDelta = speedPerSecond * dt;
-        float normalActiveDelta = activeDelta * Mathf.Max(0f, GameModifiersManager.Multiplier(ModifierStat.TileBarSpeed));
+        float normalActiveDelta = activeDelta * Mathf.Max(0f, GameModifiersManager.Multiplier(ModifierStat.TileBarSpeed) + RunPermanentUpgrades.TileBarSpeedBonus);
         float otherActiveDelta = activeDelta * Mathf.Max(0f, GameModifiersManager.Multiplier(ModifierStat.TurretBarSpeed));
         float passiveDelta = speedPerSecond * passiveMultiplier * dt;
 

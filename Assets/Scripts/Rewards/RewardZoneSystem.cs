@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -267,7 +267,7 @@ public class RewardZoneSystem : MonoBehaviour
 
     public void Grant(RewardType type, int amount)
     {
-        float bonus = GameModifiersManager.Multiplier(ModifierStat.RewardZoneBonus);
+        float bonus = GetRewardBonus();
 
         switch (type)
         {
@@ -287,6 +287,11 @@ public class RewardZoneSystem : MonoBehaviour
                 GrantExtraPick();
                 break;
         }
+    }
+
+    private static float GetRewardBonus()
+    {
+        return GameModifiersManager.Multiplier(ModifierStat.RewardZoneBonus) + RunPermanentUpgrades.RewardZoneBonus;
     }
 
     private int GetEssenceAmount(RewardType type)
@@ -364,7 +369,7 @@ public class RewardZoneSystem : MonoBehaviour
         if (panel == null)
         {
             Debug.LogWarning("[RewardZoneSystem] ModifierPanelSelection not found. Extra pick replaced by essences");
-            GrantEssence(WorldState.Current == ShiftingWorldMechanic.World.Normal, fallbackEssenceAmount, GameModifiersManager.Multiplier(ModifierStat.RewardZoneBonus));
+            GrantEssence(WorldState.Current == ShiftingWorldMechanic.World.Normal, fallbackEssenceAmount, GetRewardBonus());
             return;
         }
 

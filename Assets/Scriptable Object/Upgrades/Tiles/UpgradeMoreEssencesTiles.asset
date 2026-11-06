@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: UpgradeMoreEssencesTiles
   m_EditorClassIdentifier: 
   upgradeId: upgrade_moreEssencePerSwitchTile
-  displayName: More essences
-  description: Gain more essences with each change
+  displayName: More Normal Essences
+  description: Gain 10% more Normal essences per kill per level.
   category: 0
   maxLevel: 5
   costBluePerLevel: 05000000

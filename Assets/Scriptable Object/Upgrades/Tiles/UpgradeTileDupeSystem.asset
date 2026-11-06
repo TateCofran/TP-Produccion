@@ -12,10 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 72bcd703e5f95aa448902fd020ece92a, type: 3}
   m_Name: UpgradeTileDupeSystem
   m_EditorClassIdentifier: 
-  upgradeId: UpgradeTileDupeSystem
-  displayName: Tile Dupe System
-  description: 
+  upgradeId: upgrade_rewardZoneBonus
+  displayName: Treasure Seeker
+  description: Reward zones give 20% more per level.
   category: 0
-  maxLevel: 1
+  maxLevel: 3
   costBluePerLevel: 0a000000
   costRedPerLevel: 

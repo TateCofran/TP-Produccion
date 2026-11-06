@@ -42,6 +42,13 @@ public class Core : MonoBehaviour
 
     private void Start()
     {
+        int bonus = RunPermanentUpgrades.CoreHealthBonus;
+        if (bonus > 0)
+        {
+            maxHealth += bonus;
+            Debug.Log($"[Core] Permanent upgrade adds {bonus} max health");
+        }
+
         currentHealth = maxHealth;
         UIController.Instance?.UpdateCoreHealth(currentHealth, maxHealth);
 

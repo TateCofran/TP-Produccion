@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 72bcd703e5f95aa448902fd020ece92a, type: 3}
   m_Name: UpgradeLvlCapTile
   m_EditorClassIdentifier: 
-  upgradeId: UpgradeLvlCapTile
-  displayName: Upgrade Lvl Cap
-  description: 
+  upgradeId: upgrade_tileBarSpeed
+  displayName: Swift Builder
+  description: The tile bar fills 10% faster per level.
   category: 0
   maxLevel: 3
   costBluePerLevel: 0f000000

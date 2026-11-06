@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public enum UpgradeCategory { Lab, Workshop }
+public enum UpgradeCategory { Lab, Workshop, General }
 
 [CreateAssetMenu(fileName = "Upgrade", menuName = "Upgrades/Upgrade")]
 public class UpgradeSO : ScriptableObject

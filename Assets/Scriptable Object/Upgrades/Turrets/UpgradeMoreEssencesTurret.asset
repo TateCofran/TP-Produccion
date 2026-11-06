@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: UpgradeMoreEssencesTurret
   m_EditorClassIdentifier: 
   upgradeId: upgrade_moreEssencePerSwitchTurret
-  displayName: More essences
-  description: Gain more essences with each change
+  displayName: More Other World Essences
+  description: Gain 10% more Other World essences per kill per level.
   category: 1
   maxLevel: 5
   costBluePerLevel: 
