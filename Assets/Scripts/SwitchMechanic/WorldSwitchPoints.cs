@@ -59,8 +59,9 @@ public class WorldSwitchPoints : MonoBehaviour
 
     private void HandleWorldChanged(ShiftingWorldMechanic.World world)
     {
-        if (essenceUI != null)
-            essenceUI.SetWorld(world == ShiftingWorldMechanic.World.Normal);
+        if (essenceUI == null) return;
+        essenceUI.SetWorld(world == ShiftingWorldMechanic.World.Normal);
+        essenceUI.SetTotals(totalBlueEssences, totalRedEssences);
     }
 
     private void HandleEnemyKilled(Enemy e)
@@ -104,6 +105,7 @@ public class WorldSwitchPoints : MonoBehaviour
         if (amount <= 0) return;
         totalBlueEssences += amount;
         OnBlueEssenceGained?.Invoke(amount, totalBlueEssences);
+        NotifyExternalGain(amount, true);
     }
 
     public void AddRedEssence(int amount)
@@ -111,6 +113,18 @@ public class WorldSwitchPoints : MonoBehaviour
         if (amount <= 0) return;
         totalRedEssences += amount;
         OnRedEssenceGained?.Invoke(amount, totalRedEssences);
+        NotifyExternalGain(amount, false);
+    }
+
+    private void NotifyExternalGain(int amount, bool isBlue)
+    {
+        if (essenceUI == null) return;
+
+        bool showingBlue = WorldState.Current == ShiftingWorldMechanic.World.Normal;
+        if (showingBlue == isBlue)
+            essenceUI.QueueEssence(amount, isBlue ? totalBlueEssences : totalRedEssences);
+        else
+            essenceUI.SetTotals(totalBlueEssences, totalRedEssences);
     }
 
     public void ResetTotals()

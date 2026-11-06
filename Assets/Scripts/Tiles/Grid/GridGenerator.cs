@@ -66,6 +66,13 @@ public class GridGenerator : MonoBehaviour, ITileGenerator
 
     private System.Random rng = new System.Random();
 
+    public event Action<PlacedTile> OnTilePlaced;
+
+    public float TileFootprint => initialLayout != null ? initialLayout.gridWidth * initialLayout.cellSize : 1f;
+    public float TileGap => tileGap;
+    public int PlacedTileCount => chain != null ? chain.Count : 0;
+    public PlacedTile GetPlacedTile(int index) => chain.Get(index);
+
     private void Awake()
     {
         InitializeDependencies();
@@ -186,6 +193,8 @@ public class GridGenerator : MonoBehaviour, ITileGenerator
 
         ResolveBlockedExits();
         exits.Relabel();
+
+        OnTilePlaced?.Invoke(chain.Get(chain.Count - 1));
     }
 
     public void AppendNextUsingSelectedExit()
@@ -367,6 +376,7 @@ public class GridGenerator : MonoBehaviour, ITileGenerator
 
         Debug.Log($"[GridGenerator] Connected via exit {fromExit.label}, new tile #{newIndex} (rot={rot * 90} deg, flip={flip}), instances: {count}");
         TutorialEventHub.RaiseTilePlaced();
+        OnTilePlaced?.Invoke(chain.Get(newIndex));
     }
 
     private void AddTileExitsToPool(int tileIndex, Vector2Int? excludeAssetCell)

@@ -1,5 +1,7 @@
-﻿using System.Collections;
+﻿using System;
+using Unity.Cinemachine;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 [DisallowMultipleComponent]
 public class CameraController : MonoBehaviour
@@ -14,16 +16,34 @@ public class CameraController : MonoBehaviour
     public float minZoom = 5f;
     [Tooltip("Maximum FOV (farthest).")]
     public float maxZoom = 40f;
+    [Tooltip("How fast the FOV reaches the target. Higher is snappier.")]
+    [Min(0.01f)] public float zoomSmoothing = 10f;
+
+    public event Action<float> OnZoomChanged;
+
+    public float ZoomNormalized => Mathf.Approximately(maxZoom, minZoom) ? 0f : Mathf.InverseLerp(minZoom, maxZoom, currentFov);
 
     private Camera cam;
+    private CinemachineCamera cinemachineCamera;
+    private float targetFov;
+    private float currentFov;
+    private float lastNotifiedZoom = -1f;
 
     private void Start()
     {
-        cam = Camera.main;
-        if (cam == null)
+        cam = GetComponent<Camera>();
+        if (cam == null) cam = Camera.main;
+        cinemachineCamera = GetComponent<CinemachineCamera>();
+
+        if (cam == null && cinemachineCamera == null)
         {
-            Debug.LogWarning("[CameraController] Camera.main not found. Assign the main camera");
+            Debug.LogWarning("[CameraController] No Camera or CinemachineCamera found. Assign the main camera");
+            return;
         }
+
+        currentFov = ReadFov();
+        targetFov = Mathf.Clamp(currentFov, minZoom, maxZoom);
+        NotifyZoom();
     }
 
     private void Update()
@@ -34,8 +54,8 @@ public class CameraController : MonoBehaviour
 
     private void HandleMovement()
     {
-        float horizontal = Input.GetAxis("Horizontal"); 
-        float vertical = Input.GetAxis("Vertical");   
+        float horizontal = Input.GetAxis("Horizontal");
+        float vertical = Input.GetAxis("Vertical");
 
         Vector3 direction = new Vector3(horizontal, 0f, vertical);
         Vector3 movement = direction * moveSpeed * Time.deltaTime;
@@ -45,25 +65,59 @@ public class CameraController : MonoBehaviour
 
     private void HandleZoom()
     {
-        if (cam == null)
+        if (cam == null && cinemachineCamera == null)
             return;
 
-        float scroll = Input.GetAxis("Mouse ScrollWheel"); 
-        if (Mathf.Abs(scroll) > 0.0001f)
-        {
-            cam.fieldOfView -= scroll * zoomSpeed * 10f;
-        }
+        float dt = Time.unscaledDeltaTime;
+
+        float scroll = Input.GetAxis("Mouse ScrollWheel");
+        if (Mathf.Abs(scroll) > 0.0001f && !IsPointerOverUI())
+            targetFov -= scroll * zoomSpeed * 10f;
 
         if (Input.GetKey(KeyCode.Q))
-        {
-            cam.fieldOfView -= zoomSpeed * Time.deltaTime;
-        }
+            targetFov -= zoomSpeed * dt;
 
         if (Input.GetKey(KeyCode.R))
+            targetFov += zoomSpeed * dt;
+
+        targetFov = Mathf.Clamp(targetFov, minZoom, maxZoom);
+
+        float t = 1f - Mathf.Exp(-zoomSmoothing * dt);
+        currentFov = Mathf.Lerp(currentFov, targetFov, t);
+        if (Mathf.Abs(currentFov - targetFov) < 0.01f) currentFov = targetFov;
+
+        WriteFov(currentFov);
+        NotifyZoom();
+    }
+
+    private static bool IsPointerOverUI()
+    {
+        return EventSystem.current != null && EventSystem.current.IsPointerOverGameObject();
+    }
+
+    private float ReadFov()
+    {
+        if (cinemachineCamera != null) return cinemachineCamera.Lens.FieldOfView;
+        return cam != null ? cam.fieldOfView : minZoom;
+    }
+
+    private void WriteFov(float fov)
+    {
+        if (cinemachineCamera != null)
         {
-            cam.fieldOfView += zoomSpeed * Time.deltaTime;
+            var lens = cinemachineCamera.Lens;
+            lens.FieldOfView = fov;
+            cinemachineCamera.Lens = lens;
         }
 
-        cam.fieldOfView = Mathf.Clamp(cam.fieldOfView, minZoom, maxZoom);
+        if (cam != null) cam.fieldOfView = fov;
+    }
+
+    private void NotifyZoom()
+    {
+        float z = ZoomNormalized;
+        if (Mathf.Abs(z - lastNotifiedZoom) < 0.0005f) return;
+        lastNotifiedZoom = z;
+        OnZoomChanged?.Invoke(z);
     }
 }

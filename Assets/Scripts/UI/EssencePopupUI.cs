@@ -97,6 +97,13 @@ public class EssencePopupUI : MonoBehaviour
         _pendingTotal = newTotal;
     }
 
+    public void SetTotals(int blue, int red)
+    {
+        totalBlue = blue;
+        totalRed = red;
+        UpdateCounterText();
+    }
+
     public void ResetTotals()
     {
         _hasPending = false;
