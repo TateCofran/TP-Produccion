@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using TMPro;
 using UnityEngine;
 
@@ -43,6 +43,11 @@ public class EssencePopupUI : MonoBehaviour
     private Color _popupVisible;
     private bool showingNormalWorld = true;
 
+    private int inFlightBlue;
+    private int inFlightRed;
+    private Coroutine punchRoutine;
+    private Vector3 counterScale0 = Vector3.one;
+
     private int _pendingDelta;
     private int _pendingTotal;
     private float _pendingFlushAt;
@@ -62,6 +67,7 @@ public class EssencePopupUI : MonoBehaviour
         UpdateCounterText();
         popupLabel.color = _popupHidden;
         transform.localScale = _popupScale0;
+        if (counterLabel != null) counterScale0 = counterLabel.rectTransform.localScale;
     }
 
     private void Update()
@@ -99,8 +105,8 @@ public class EssencePopupUI : MonoBehaviour
 
     public void SetTotals(int blue, int red)
     {
-        totalBlue = blue;
-        totalRed = red;
+        totalBlue = Mathf.Max(0, blue - inFlightBlue);
+        totalRed = Mathf.Max(0, red - inFlightRed);
         UpdateCounterText();
     }
 
@@ -110,7 +116,60 @@ public class EssencePopupUI : MonoBehaviour
         _pendingDelta = 0;
         totalBlue = 0;
         totalRed = 0;
+        inFlightBlue = 0;
+        inFlightRed = 0;
         UpdateCounterText();
+    }
+
+    public void RegisterInFlight(int amount, bool blue)
+    {
+        if (amount <= 0) return;
+        if (blue) inFlightBlue += amount;
+        else inFlightRed += amount;
+    }
+
+    public void AddArrived(int amount, bool blue)
+    {
+        if (amount <= 0) return;
+
+        if (blue)
+        {
+            inFlightBlue = Mathf.Max(0, inFlightBlue - amount);
+            totalBlue += amount;
+        }
+        else
+        {
+            inFlightRed = Mathf.Max(0, inFlightRed - amount);
+            totalRed += amount;
+        }
+
+        UpdateCounterText();
+        if (blue == showingNormalWorld) PunchCounter();
+    }
+
+    private void PunchCounter()
+    {
+        if (counterLabel == null || !isActiveAndEnabled) return;
+        if (punchRoutine != null) StopCoroutine(punchRoutine);
+        punchRoutine = StartCoroutine(PunchRoutine());
+    }
+
+    private IEnumerator PunchRoutine()
+    {
+        var settings = FeedbackSettings.Current;
+        var rt = counterLabel.rectTransform;
+        float duration = settings.counterPunchDuration;
+        float t = 0f;
+        while (t < duration)
+        {
+            t += Time.unscaledDeltaTime;
+            float k = Mathf.Clamp01(t / duration);
+            float s = k < 0.5f ? Mathf.Lerp(1f, settings.counterPunchScale, k * 2f) : Mathf.Lerp(settings.counterPunchScale, 1f, (k - 0.5f) * 2f);
+            rt.localScale = counterScale0 * s;
+            yield return null;
+        }
+        rt.localScale = counterScale0;
+        punchRoutine = null;
     }
 
     private void FlushPending()

@@ -29,6 +29,7 @@ public class ModifierWaveTrigger : MonoBehaviour
         if (subscribedWaveManager != null)
         {
             subscribedWaveManager.OnWaveEnded -= HandleWaveEnded;
+            subscribedWaveManager.OnWaveStarted -= HandleWaveStarted;
             subscribedWaveManager = null;
         }
 
@@ -40,12 +41,38 @@ public class ModifierWaveTrigger : MonoBehaviour
         if (subscribedWaveManager != null || WaveManager.Instance == null) return;
         subscribedWaveManager = WaveManager.Instance;
         subscribedWaveManager.OnWaveEnded += HandleWaveEnded;
+        subscribedWaveManager.OnWaveStarted += HandleWaveStarted;
+        RefreshCountdown();
+    }
+
+    private void HandleWaveStarted(int wave, int enemies)
+    {
+        RefreshCountdown();
+    }
+
+    public int WavesUntilNextOffer()
+    {
+        var waves = subscribedWaveManager != null ? subscribedWaveManager : WaveManager.Instance;
+        if (waves == null || panel == null || GameModifiersManager.Instance == null) return 0;
+        if (GameModifiersManager.Instance.GetAvailable(GameModifiersManager.CategoryForCurrentWorld()).Count == 0) return 0;
+
+        int current = Mathf.Max(0, waves.GetCurrentWave());
+        int completed = waves.WaveInProgress ? current - 1 : current;
+        int nextOffer = (completed / everyNWaves + 1) * everyNWaves;
+        if (nextOffer >= waves.MaxWaves) return 0;
+        return nextOffer - completed;
+    }
+
+    private void RefreshCountdown()
+    {
+        if (UIController.Instance != null) UIController.Instance.UpdateModifierCountdown(WavesUntilNextOffer());
     }
 
     private void HandleWaveEnded()
     {
         var waves = subscribedWaveManager;
         if (waves == null) return;
+        RefreshCountdown();
 
         int wave = waves.GetCurrentWave();
         if (wave <= 0 || wave % everyNWaves != 0 || waves.IsLastWave()) return;

@@ -1,4 +1,4 @@
-﻿using TMPro;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -21,6 +21,17 @@ public class UIController : MonoBehaviour
     [Tooltip("Optional container that shows or hides the whole next wave block.")]
     [SerializeField] private GameObject nextWavePanel;
 
+    [Header("Modifier Countdown")]
+    [Tooltip("Text that shows how many waves are left until the next modifier choice.")]
+    [SerializeField] private TextMeshProUGUI modifierCountdownText;
+    [SerializeField, Min(1f)] private float modifierPulseScale = 1.15f;
+    [SerializeField, Min(0.1f)] private float modifierPulseSpeed = 6f;
+    [SerializeField] private Color modifierPulseColor = new Color(1f, 0.85f, 0.2f, 1f);
+
+    private bool modifierPulsing;
+    private Color modifierBaseColor = Color.white;
+    private Vector3 modifierBaseScale = Vector3.one;
+
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -39,6 +50,42 @@ public class UIController : MonoBehaviour
         SetNextWaveCountdownVisible(false);
         SetNextWaveButtonVisible(true);
         SetNextWaveButtonInteractable(true);
+
+        if (modifierCountdownText != null)
+        {
+            modifierBaseColor = modifierCountdownText.color;
+            modifierBaseScale = modifierCountdownText.rectTransform.localScale;
+            modifierCountdownText.gameObject.SetActive(false);
+        }
+    }
+
+    private void Update()
+    {
+        if (!modifierPulsing || modifierCountdownText == null) return;
+        float k = (Mathf.Sin(Time.unscaledTime * modifierPulseSpeed) + 1f) * 0.5f;
+        modifierCountdownText.rectTransform.localScale = modifierBaseScale * Mathf.Lerp(1f, modifierPulseScale, k);
+        modifierCountdownText.color = Color.Lerp(modifierBaseColor, modifierPulseColor, k);
+    }
+
+    public void UpdateModifierCountdown(int wavesLeft)
+    {
+        if (modifierCountdownText == null) return;
+
+        if (wavesLeft <= 0)
+        {
+            modifierCountdownText.gameObject.SetActive(false);
+            modifierPulsing = false;
+            return;
+        }
+
+        modifierCountdownText.gameObject.SetActive(true);
+        modifierCountdownText.text = wavesLeft == 1 ? "Modifier in 1 wave" : $"Modifier in {wavesLeft} waves";
+        modifierPulsing = wavesLeft == 1;
+        if (!modifierPulsing)
+        {
+            modifierCountdownText.rectTransform.localScale = modifierBaseScale;
+            modifierCountdownText.color = modifierBaseColor;
+        }
     }
     private void Start()
     {

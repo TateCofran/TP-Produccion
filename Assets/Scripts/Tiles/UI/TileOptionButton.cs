@@ -15,6 +15,8 @@ public class TileOptionButton : MonoBehaviour, IPointerEnterHandler, IPointerExi
     [SerializeField] private TMP_Text levelLabel;
     [SerializeField] private TileDupeBarUI dupeBar;
     [SerializeField] private GameObject levelUpBadge;
+    [Tooltip("Optional. Shows how many cells the layout adds to the longest path.")]
+    [SerializeField] private TMP_Text pathLengthLabel;
 
     private TileLayout layout;
     private TileLevelData level;
@@ -56,6 +58,46 @@ public class TileOptionButton : MonoBehaviour, IPointerEnterHandler, IPointerExi
         if (dupeBar != null && layout != null) dupeBar.SetLayout(layout);
         if (levelLabel != null) levelLabel.text = level != null ? $"Lv {level.currentLevel}" : "Lv 1";
         if (levelUpBadge != null) levelUpBadge.SetActive(WillLevelUp(level));
+        if (pathLengthLabel != null) pathLengthLabel.text = layout != null ? $"+{GetAddedPathCells(layout)} cells" : string.Empty;
+    }
+
+    public static int GetAddedPathCells(TileLayout layout)
+    {
+        if (layout == null) return 0;
+        if (!layout.IsInside(layout.entry) || !layout.IsPath(layout.entry)) return CountPathCells(layout);
+
+        bool hasExit = layout.exits != null && layout.exits.Count > 0;
+        var visited = new System.Collections.Generic.HashSet<Vector2Int>();
+        int best = 0;
+        int budget = 20000;
+        LongestPath(layout, layout.entry, 1, hasExit, visited, ref best, ref budget);
+        return best > 0 ? best : CountPathCells(layout);
+    }
+
+    private static void LongestPath(TileLayout layout, Vector2Int cell, int depth, bool hasExit,
+        System.Collections.Generic.HashSet<Vector2Int> visited, ref int best, ref int budget)
+    {
+        if (--budget <= 0) return;
+        visited.Add(cell);
+        if (!hasExit || layout.exits.Contains(cell)) best = Mathf.Max(best, depth);
+
+        foreach (var dir in TileLayout.OrthoDirs)
+        {
+            var next = cell + dir;
+            if (!layout.IsPath(next) || visited.Contains(next)) continue;
+            LongestPath(layout, next, depth + 1, hasExit, visited, ref best, ref budget);
+        }
+
+        visited.Remove(cell);
+    }
+
+    private static int CountPathCells(TileLayout layout)
+    {
+        int count = 0;
+        for (int y = 0; y < layout.gridHeight; y++)
+            for (int x = 0; x < layout.gridWidth; x++)
+                if (layout.IsPath(new Vector2Int(x, y))) count++;
+        return count;
     }
 
     public static bool WillLevelUp(TileLevelData data)

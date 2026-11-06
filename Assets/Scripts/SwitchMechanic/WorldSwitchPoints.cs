@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.Events;
 
 public class WorldSwitchPoints : MonoBehaviour
@@ -76,14 +76,20 @@ public class WorldSwitchPoints : MonoBehaviour
         {
             totalBlueEssences += amount;
             OnBlueEssenceGained?.Invoke(amount, totalBlueEssences);
-            if (essenceUI != null) essenceUI.QueueEssence(amount, totalBlueEssences);
         }
         else
         {
             totalRedEssences += amount;
             OnRedEssenceGained?.Invoke(amount, totalRedEssences);
-            if (essenceUI != null) essenceUI.QueueEssence(amount, totalRedEssences);
         }
+
+        var orbs = EssenceOrbFX.Instance;
+        if (orbs != null && orbs.CanSpawn)
+            orbs.Spawn(e.transform.position, amount, isNormal);
+        else if (essenceUI != null)
+            essenceUI.QueueEssence(amount, isNormal ? totalBlueEssences : totalRedEssences);
+
+        EssenceChime.PlayKill();
     }
 
     private float GetBlueMultiplier()
