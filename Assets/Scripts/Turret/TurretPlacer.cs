@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.EventSystems;
 using static ShiftingWorldMechanic;
 
@@ -9,7 +9,7 @@ public class TurretPlacer : MonoBehaviour
     [SerializeField] private Camera cam;
 
     [Header("Preview")]
-    [SerializeField] private Vector3 ghostOffset = new Vector3(0f, 0.01f, 0f);
+    [SerializeField] private TurretGhostPreview ghostPreview;
 
     [Header("Raycast")]
     [SerializeField] private LayerMask cellLayers = ~0;
@@ -17,14 +17,17 @@ public class TurretPlacer : MonoBehaviour
     [SerializeField] private bool removeWithMiddleClick = true;
 
     private TurretDataSO selectedTurret;
-    private GameObject ghost;
     private bool placing;
+    private ITurretDupeSystem dupeSystem;
 
     public bool IsPlacing => placing;
 
     private void Awake()
     {
         if (ui != null) ui.OnTurretChosen += HandleTurretChosen;
+        if (ghostPreview == null) ghostPreview = GetComponent<TurretGhostPreview>();
+        if (ghostPreview == null) ghostPreview = gameObject.AddComponent<TurretGhostPreview>();
+        ghostPreview.Configure(cam, cellLayers);
     }
 
     private void OnEnable()
@@ -51,7 +54,7 @@ public class TurretPlacer : MonoBehaviour
     private bool HandleEscape()
     {
         if (!placing) return false;
-        ExitPlacementMode();
+        CancelPlacement();
         return true;
     }
 
@@ -59,31 +62,22 @@ public class TurretPlacer : MonoBehaviour
     {
         placing = selectedTurret != null;
 
-        if (ghost != null)
-        {
-            Destroy(ghost);
-            ghost = null;
-        }
-
-        if (placing && selectedTurret.prefab != null)
-        {
-            ghost = Instantiate(selectedTurret.prefab);
-
-            foreach (var col in ghost.GetComponentsInChildren<Collider>())
-                col.enabled = false;
-        }
+        if (dupeSystem == null) dupeSystem = FindFirstObjectByType<TurretDupeSystem>();
+        if (placing && ghostPreview != null)
+            ghostPreview.Begin(selectedTurret, dupeSystem != null ? dupeSystem.GetTurretLevelData(selectedTurret) : null);
     }
 
     private void ExitPlacementMode()
     {
         placing = false;
         selectedTurret = null;
+        if (ghostPreview != null) ghostPreview.End();
+    }
 
-        if (ghost != null)
-        {
-            Destroy(ghost);
-            ghost = null;
-        }
+    private void CancelPlacement()
+    {
+        ExitPlacementMode();
+        if (ui != null) ui.NotifyTurretPlacementCancelled();
     }
 
     private Camera ActiveCamera => cam ? cam : Camera.main;
@@ -101,7 +95,6 @@ public class TurretPlacer : MonoBehaviour
             (Input.GetKey(KeyCode.LeftShift) && Input.GetMouseButtonDown(0)))
         {
             TryRemoveUnderCursor();
-            if (ghost) ghost.SetActive(false);
             return;
         }
 
@@ -112,38 +105,17 @@ public class TurretPlacer : MonoBehaviour
 
         if (Input.GetMouseButtonDown(1))
         {
-            ExitPlacementMode();
+            CancelPlacement();
             return;
         }
 
-        if (PointerOverUI)
-        {
-            if (ghost) ghost.SetActive(false);
-            return;
-        }
+        if (PointerOverUI) return;
 
         Ray ray = cameraToUse.ScreenPointToRay(Input.mousePosition);
-        if (!Physics.Raycast(ray, out var hit, 500f, cellLayers))
-        {
-            if (ghost) ghost.SetActive(false);
-            return;
-        }
+        if (!Physics.Raycast(ray, out var hit, 500f, cellLayers)) return;
 
         var slot = hit.collider.GetComponentInParent<CellSlot>();
-        if (slot == null || !slot.enabled || slot.IsOccupied)
-        {
-            if (ghost) ghost.SetActive(false);
-            return;
-        }
-
-        if (ghost)
-        {
-            ghost.SetActive(true);
-            var slotCol = slot.GetComponent<Collider>();
-            var b = slotCol ? slotCol.bounds : hit.collider.bounds;
-            Vector3 topCenter = new Vector3(b.center.x, b.max.y, b.center.z);
-            ghost.transform.position = topCenter + ghostOffset;
-        }
+        if (slot == null || !slot.enabled || slot.IsOccupied) return;
 
         if (Input.GetMouseButtonDown(0))
             TryPlaceOn(slot);
@@ -167,7 +139,12 @@ public class TurretPlacer : MonoBehaviour
         var prefab = selectedTurret ? selectedTurret.prefab : null;
         if (!prefab) return;
 
-        if (!slot.TryPlace(prefab, selectedTurret, out var instance)) return;
+        if (ghostPreview != null) ghostPreview.End();
+        if (!slot.TryPlace(prefab, selectedTurret, out var instance))
+        {
+            if (ghostPreview != null) ghostPreview.Begin(selectedTurret, dupeSystem != null ? dupeSystem.GetTurretLevelData(selectedTurret) : null);
+            return;
+        }
 
         TutorialEventHub.RaiseTurretPlaced();
 

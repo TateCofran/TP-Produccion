@@ -16,8 +16,12 @@ MonoBehaviour:
   type: 
   turretType: 3
   displayName: Energy Turret
+  icon: {fileID: 21300000, guid: fa0b41ac091afe743a08fae33621e924, type: 3}
   damage: 2
   range: 2
   fireRate: 1
   projectileSpeed: 1
+  affinity: 0
+  affinityBonus: 0.3
+  offWorldPenalty: 0.2
   prefab: {fileID: 7333658948748976991, guid: 9ee152df944c19d4082be453550315c6, type: 3}

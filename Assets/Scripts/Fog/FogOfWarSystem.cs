@@ -167,6 +167,17 @@ public class FogOfWarSystem : MonoBehaviour
             && aMin.z + overlapEpsilon < bMax.z && aMax.z - overlapEpsilon > bMin.z;
     }
 
+    public int CountFogOverlapping(Vector3 min, Vector3 max)
+    {
+        int count = 0;
+        foreach (var index in activeTiles.Keys)
+        {
+            GetFogBounds(index, out var fMin, out var fMax);
+            if (Overlaps(fMin, fMax, min, max)) count++;
+        }
+        return count;
+    }
+
     private void RevealOverlapping(Vector3 min, Vector3 max)
     {
         toReveal.Clear();

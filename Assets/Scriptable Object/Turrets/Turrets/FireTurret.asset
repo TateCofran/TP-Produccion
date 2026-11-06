@@ -16,9 +16,12 @@ MonoBehaviour:
   type: 
   turretType: 2
   displayName: Fire Turret
+  icon: {fileID: 21300000, guid: af2426ad9149f694dbd19927950024b1, type: 3}
   damage: 4
   range: 3
   fireRate: 1
   projectileSpeed: 1
-  prefab: {fileID: 7333658948748976991, guid: 9665098fa95d16949b4d13b5a72e859e, type: 3}
   affinity: 2
+  affinityBonus: 0.3
+  offWorldPenalty: 0.2
+  prefab: {fileID: 7333658948748976991, guid: 9665098fa95d16949b4d13b5a72e859e, type: 3}

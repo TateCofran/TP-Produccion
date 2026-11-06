@@ -30,3 +30,16 @@ public struct OrientedData
     public int w, h;
     public Vector2Int entryOriented;
 }
+
+public struct TilePlacementInfo
+{
+    public TileLayout layout;
+    public int rotSteps;
+    public bool flip;
+    public Vector3 origin;
+    public Vector3 aabbMin;
+    public Vector3 aabbMax;
+    public string exitLabel;
+    public Vector3 exitWorld;
+    public Vector2Int dirOut;
+}

@@ -857,6 +857,46 @@ public class GridGenerator : MonoBehaviour, ITileGenerator
         return runnerYOffset;
     }
 
+    public bool TryGetPlacementForExit(TileLayout layout, string exitLabel, out TilePlacementInfo info)
+    {
+        info = default;
+        if (layout == null || exits == null || string.IsNullOrEmpty(exitLabel)) return false;
+
+        int available = exits.AvailableIndexByLabel(exitLabel);
+        if (available < 0) return false;
+
+        int global = exits.GlobalIndexFromAvailable(available);
+        if (global < 0) return false;
+
+        var rec = exits.Get(global);
+        if (rec.Used || rec.Closed) return false;
+
+        if (!TryFindPlacement(rec, new[] { layout }, false, out var found, out var rot, out var flip, out var origin, out var mn, out var mx))
+            return false;
+
+        TryGetExitFrame(rec, out var dirOut, out var exitWorld);
+
+        info = new TilePlacementInfo
+        {
+            layout = found,
+            rotSteps = rot,
+            flip = flip,
+            origin = origin,
+            aabbMin = mn,
+            aabbMax = mx,
+            exitLabel = rec.label,
+            exitWorld = exitWorld,
+            dirOut = dirOut
+        };
+        return true;
+    }
+
+    public GhostLayoutInstantiator CreateGhostInstantiator()
+    {
+        if (prefabs == null || orient == null) return null;
+        return new GhostLayoutInstantiator(prefabs, orient, grassCellOffset, pathCellOffset);
+    }
+
     public bool AppendNextUsingSelectedExitWithLayout(TileLayout forced)
     {
         if (forced == null) return false;

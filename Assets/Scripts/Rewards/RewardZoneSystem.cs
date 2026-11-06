@@ -230,7 +230,20 @@ public class RewardZoneSystem : MonoBehaviour
         return zone;
     }
 
-    private Sprite GetIcon(RewardType type)
+    public RewardZone FindZoneOverlapping(Vector3 min, Vector3 max)
+    {
+        if (fog == null || !fog.IsInitialized) return null;
+
+        foreach (var zone in activeZones)
+        {
+            if (zone == null || !zone.IsVisible) continue;
+            fog.GetFogBounds(zone.GridIndex, out var zMin, out var zMax);
+            if (fog.Overlaps(zMin, zMax, min, max)) return zone;
+        }
+        return null;
+    }
+
+    public Sprite GetIcon(RewardType type)
     {
         foreach (var icon in icons)
             if (icon != null && icon.type == type) return icon.sprite;

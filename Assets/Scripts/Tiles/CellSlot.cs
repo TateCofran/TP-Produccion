@@ -63,6 +63,25 @@ public sealed class CellSlot : MonoBehaviour
         return 0.5f;
     }
 
+    public Pose GetPlacementPose(GameObject turret)
+    {
+        Vector3 top = GetTopCenter();
+        if (turret == null) return new Pose(top, Quaternion.identity);
+
+        var t = turret.transform;
+        t.SetPositionAndRotation(top, Quaternion.identity);
+
+        Transform baseAnchor = t.Find("BaseAnchor");
+        if (baseAnchor != null)
+        {
+            float deltaY = (top.y + extraYOffset) - baseAnchor.position.y;
+            return new Pose(new Vector3(top.x, t.position.y + deltaY, top.z), Quaternion.identity);
+        }
+
+        float halfH = GetVisualHalfHeight(turret);
+        return new Pose(new Vector3(top.x, top.y + halfH + extraYOffset, top.z), Quaternion.identity);
+    }
+
     public bool TryPlace(GameObject turretPrefab, TurretDataSO turretData = null)
     {
         return TryPlace(turretPrefab, turretData, out _);
@@ -79,19 +98,8 @@ public sealed class CellSlot : MonoBehaviour
         Transform parent = parentForTurrets ? parentForTurrets : null;
         GameObject turret = Instantiate(turretPrefab, top, Quaternion.identity, parent);
 
-        Transform baseAnchor = turret.transform.Find("BaseAnchor");
-        if (baseAnchor != null)
-        {
-            float deltaY = (top.y + extraYOffset) - baseAnchor.position.y;
-            Vector3 p = turret.transform.position;
-            turret.transform.position = new Vector3(top.x, p.y + deltaY, top.z);
-        }
-        else
-        {
-            float halfH = GetVisualHalfHeight(turret);
-            float targetY = top.y + halfH + extraYOffset;
-            turret.transform.position = new Vector3(top.x, targetY, top.z);
-        }
+        var pose = GetPlacementPose(turret);
+        turret.transform.SetPositionAndRotation(pose.position, pose.rotation);
 
         if (turretData != null && turret.TryGetComponent<TurretDataHolder>(out var dataHolder))
         {

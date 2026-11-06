@@ -74,7 +74,7 @@ public class TileDupeBarUI : MonoBehaviour
 
         if (tileLevelText != null)
         {
-            tileLevelText.text = data.level.ToString();
+            tileLevelText.text = $"Lv {data.level}";
         }
     }
 }

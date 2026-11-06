@@ -16,9 +16,12 @@ MonoBehaviour:
   type: 
   turretType: 0
   displayName: Turret Tesla
+  icon: {fileID: 21300000, guid: 7a6c81c92ab92754c8ccf55d625901fd, type: 3}
   damage: 4
   range: 5
   fireRate: 1
   projectileSpeed: 1
-  prefab: {fileID: 7333658948748976991, guid: f4ec192a3a35b5f42a0059935148bbe8, type: 3}
   affinity: 2
+  affinityBonus: 0.3
+  offWorldPenalty: 0.2
+  prefab: {fileID: 7333658948748976991, guid: f4ec192a3a35b5f42a0059935148bbe8, type: 3}

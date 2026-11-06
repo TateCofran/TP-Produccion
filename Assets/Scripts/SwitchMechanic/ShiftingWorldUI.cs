@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -31,7 +31,17 @@ public class ShiftingWorldUI : MonoBehaviour
     [Header("Exit Buttons (para tiles)")]
     [SerializeField] private GameObject exitButtonPrefab;
     [SerializeField] private Canvas exitButtonsCanvas;
+    [SerializeField, Min(8f)] private float exitArrowSize = 36f;
+    [SerializeField, Min(8f)] private float exitIconSize = 40f;
+    [SerializeField] private Color exitArrowColor = Color.white;
+    [SerializeField, Min(1f)] private float exitSelectedScale = 1.2f;
     private readonly List<Button> exitButtons = new();
+    private int keyboardExitIndex = -1;
+
+    [Header("Previews")]
+    [SerializeField] private TileIconPalette tileIconPalette;
+    [SerializeField] private TileGhostPreview tileGhost;
+    [SerializeField] private TurretGhostPreview turretGhost;
 
     [Header("Turrets (source)")]
     [SerializeField] private TurretDatabaseSO turretDatabase;
@@ -137,6 +147,10 @@ public class ShiftingWorldUI : MonoBehaviour
         public string label;
         public Vector3 worldPos;
         public RectTransform rect;
+        public RectTransform arrow;
+        public Vector2Int dirOut;
+        public bool hasPlacement;
+        public TilePlacementInfo placement;
     }
 
     private readonly List<ExitBtn> exitBtnInfo = new();
@@ -149,7 +163,23 @@ public class ShiftingWorldUI : MonoBehaviour
 
     void Awake()
     {
+        if (tileIconPalette != null) TileIconGenerator.SetPalette(tileIconPalette);
         HideAll();
+    }
+
+    private TileGhostPreview TileGhost
+    {
+        get
+        {
+            if (tileGhost != null) return tileGhost;
+            tileGhost = TileGhostPreview.Instance != null ? TileGhostPreview.Instance : FindFirstObjectByType<TileGhostPreview>();
+            if (tileGhost == null)
+            {
+                var go = new GameObject("TileGhostPreview");
+                tileGhost = go.AddComponent<TileGhostPreview>();
+            }
+            return tileGhost;
+        }
     }
 
     private void OnEnable()
@@ -195,6 +225,9 @@ public class ShiftingWorldUI : MonoBehaviour
         if (tilePlacingMode && !GameTime.IsPaused && Input.GetMouseButtonDown(1))
             CancelTilePlacement();
 
+        if (tilePlacingMode && !GameTime.IsPaused)
+            HandleExitKeyboard();
+
         if (tilePlacingMode && exitButtonsCanvas && (cam || Camera.main))
         {
             var camToUse = cam ? cam : Camera.main;
@@ -216,6 +249,7 @@ public class ShiftingWorldUI : MonoBehaviour
                     canvasRect,
                     camToUse
                 );
+                UpdateExitArrow(e, camToUse);
             }
         }
     }
@@ -283,6 +317,13 @@ public class ShiftingWorldUI : MonoBehaviour
             }
 
             int idx = i;
+            var optionButton = tileButtons[i] ? tileButtons[i].GetComponent<TileOptionButton>() : null;
+            if (optionButton != null)
+            {
+                optionButton.Bind(layout, GetTileLevel(layout), () => OnChooseTile(idx));
+                continue;
+            }
+
             BindButton(tileButtons, tileLabels, i, GetTileOptionLabel(layout), () => OnChooseTile(idx));
             UpdateTileDupeBar(i, layout);
         }
@@ -314,6 +355,12 @@ public class ShiftingWorldUI : MonoBehaviour
         tileRerollButton.onClick.AddListener(RerollTileOptions);
         tileRerollButton.interactable = available;
         if (tileRerollLabel) tileRerollLabel.text = $"Reroll ({tileRerollsLeft})";
+    }
+
+    private TileLevelData GetTileLevel(TileLayout layout)
+    {
+        if (tileDupeSystem == null) tileDupeSystem = FindFirstObjectByType<TileDupeSystem>();
+        return tileDupeSystem != null ? tileDupeSystem.GetTileLevelData(layout) : null;
     }
 
     private string GetTileOptionLabel(TileLayout layout)
@@ -385,13 +432,16 @@ public class ShiftingWorldUI : MonoBehaviour
         Camera camToUse = cam ? cam : Camera.main;
         var canvasRect = exitButtonsCanvas.transform as RectTransform;
 
+        keyboardExitIndex = -1;
+        var tileIcon = TileIconGenerator.GetIcon(selectedTileLayout);
+
         foreach (var (label, worldPos) in exits)
         {
             var go = Instantiate(exitButtonPrefab, exitButtonsCanvas.transform);
             var btn = go.GetComponent<Button>();
             var rect = go.GetComponent<RectTransform>();
             var txt = go.GetComponentInChildren<TMPro.TMP_Text>();
-            if (txt) txt.text = label;
+            if (txt) txt.text = string.Empty;
 
             if (buttonPivotBottom)
             {
@@ -399,7 +449,20 @@ public class ShiftingWorldUI : MonoBehaviour
                 rect.anchorMin = rect.anchorMax = new Vector2(0.5f, 0.5f);
             }
 
-            exitBtnInfo.Add(new ExitBtn { label = label, worldPos = worldPos, rect = rect });
+            var info = new ExitBtn { label = label, worldPos = worldPos, rect = rect };
+            if (grid.TryGetPlacementForExit(selectedTileLayout, label, out var placement))
+            {
+                info.hasPlacement = true;
+                info.placement = placement;
+                info.dirOut = placement.dirOut;
+            }
+            info.arrow = BuildExitVisuals(rect, tileIcon);
+            exitBtnInfo.Add(info);
+
+            var hover = go.GetComponent<ExitButtonHover>();
+            if (hover == null) hover = go.AddComponent<ExitButtonHover>();
+            int exitIndex = exitBtnInfo.Count - 1;
+            hover.Bind(() => SelectExit(exitIndex), () => DeselectExit(exitIndex));
 
             SetExitButtonPosition(
                 rect,
@@ -409,11 +472,97 @@ public class ShiftingWorldUI : MonoBehaviour
                 camToUse
             );
 
+            UpdateExitArrow(info, camToUse);
+
             string captured = label;
             btn.onClick.AddListener(() => OnExitButtonClicked(captured));
         }
 
         exitButtonsCanvas.gameObject.SetActive(true);
+    }
+
+    private RectTransform BuildExitVisuals(RectTransform button, Texture2D tileIcon)
+    {
+        var arrowGo = new GameObject("ExitArrow", typeof(RectTransform), typeof(Image));
+        var arrow = (RectTransform)arrowGo.transform;
+        arrow.SetParent(button, false);
+        arrow.anchorMin = arrow.anchorMax = new Vector2(0.5f, 0.5f);
+        arrow.sizeDelta = new Vector2(exitArrowSize, exitArrowSize);
+        arrow.anchoredPosition = new Vector2(exitIconSize * 0.5f + 2f, 0f);
+        var arrowImg = arrowGo.GetComponent<Image>();
+        arrowImg.sprite = ExitArrowSprite.Get();
+        arrowImg.color = exitArrowColor;
+        arrowImg.raycastTarget = false;
+
+        if (tileIcon != null)
+        {
+            var iconGo = new GameObject("ExitTileIcon", typeof(RectTransform), typeof(RawImage));
+            var icon = (RectTransform)iconGo.transform;
+            icon.SetParent(button, false);
+            icon.anchorMin = icon.anchorMax = new Vector2(0.5f, 0.5f);
+            float aspect = selectedTileLayout != null ? (float)selectedTileLayout.gridWidth / Mathf.Max(1, selectedTileLayout.gridHeight) : 1f;
+            icon.sizeDelta = new Vector2(exitIconSize * aspect, exitIconSize);
+            icon.anchoredPosition = new Vector2(-exitArrowSize * 0.5f - 2f, 0f);
+            var raw = iconGo.GetComponent<RawImage>();
+            raw.texture = tileIcon;
+            raw.raycastTarget = false;
+        }
+
+        return arrow;
+    }
+
+    private void UpdateExitArrow(ExitBtn e, Camera camToUse)
+    {
+        if (e.arrow == null || camToUse == null || e.dirOut == Vector2Int.zero) return;
+
+        Vector3 dirWorld = new Vector3(e.dirOut.x, 0f, e.dirOut.y);
+        Vector3 a = camToUse.WorldToScreenPoint(e.worldPos);
+        Vector3 b = camToUse.WorldToScreenPoint(e.worldPos + dirWorld);
+        Vector2 screenDir = new Vector2(b.x - a.x, b.y - a.y);
+        if (screenDir.sqrMagnitude < 0.0001f) return;
+
+        float angle = Mathf.Atan2(screenDir.y, screenDir.x) * Mathf.Rad2Deg - 90f;
+        e.arrow.localRotation = Quaternion.Euler(0f, 0f, angle);
+    }
+
+    private void SelectExit(int index)
+    {
+        if (!tilePlacingMode || index < 0 || index >= exitBtnInfo.Count) return;
+
+        keyboardExitIndex = index;
+        for (int i = 0; i < exitBtnInfo.Count; i++)
+            if (exitBtnInfo[i].rect) exitBtnInfo[i].rect.localScale = Vector3.one * (i == index ? exitSelectedScale : 1f);
+
+        var e = exitBtnInfo[index];
+        if (e.hasPlacement) TileGhost.Show(e.placement);
+        else TileGhost.Hide();
+    }
+
+    private void DeselectExit(int index)
+    {
+        if (index != keyboardExitIndex) return;
+        if (index >= 0 && index < exitBtnInfo.Count && exitBtnInfo[index].rect)
+            exitBtnInfo[index].rect.localScale = Vector3.one;
+        keyboardExitIndex = -1;
+        if (tileGhost != null) tileGhost.Hide();
+    }
+
+    private void HandleExitKeyboard()
+    {
+        if (exitBtnInfo.Count == 0) return;
+
+        if (Input.GetKeyDown(KeyCode.Tab))
+        {
+            int step = (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)) ? -1 : 1;
+            int next = keyboardExitIndex < 0 ? (step > 0 ? 0 : exitBtnInfo.Count - 1)
+                : (keyboardExitIndex + step + exitBtnInfo.Count) % exitBtnInfo.Count;
+            SelectExit(next);
+        }
+        else if ((Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter))
+                 && keyboardExitIndex >= 0 && keyboardExitIndex < exitBtnInfo.Count)
+        {
+            OnExitButtonClicked(exitBtnInfo[keyboardExitIndex].label);
+        }
     }
 
     private void SetExitButtonPosition(
@@ -462,6 +611,8 @@ public class ShiftingWorldUI : MonoBehaviour
     private void OnExitButtonClicked(string exitLabel)
     {
         if (!selectedTileLayout) return;
+
+        if (tileGhost != null) tileGhost.Hide();
 
         grid.UI_SetExitByLabel(exitLabel);
         bool ok = grid.AppendNextUsingSelectedExitWithLayout(selectedTileLayout);
@@ -547,8 +698,15 @@ public class ShiftingWorldUI : MonoBehaviour
             var so = pool[i % pool.Count];
             currentTurretOptions.Add(so);
 
-            string label = GetTurretDisplayName(so);
             int idx = i;
+            var optionButton = turretButtons[i] ? turretButtons[i].GetComponent<TurretOptionButton>() : null;
+            if (optionButton != null)
+            {
+                optionButton.Bind(so, GetTurretLevel(so), () => OnChooseTurret(idx));
+                continue;
+            }
+
+            string label = GetTurretDisplayName(so);
             BindButton(turretButtons, turretLabels, i, label, () => OnChooseTurret(idx));
         }
     }
@@ -562,35 +720,32 @@ public class ShiftingWorldUI : MonoBehaviour
             return;
         }
 
-        HandleDupeSystem(so);
         selectedTurret = so;
+
+        if (turretPanelRoot) turretPanelRoot.SetActive(false);
+        OptionTooltip.HideTooltip();
 
         if (placeWithUI)
         {
-            StartCoroutine(DelayedTurretSelectFlow(selectedTurret));
+            turretPlacingMode = true;
+            if (turretGhost == null) turretGhost = GetComponent<TurretGhostPreview>();
+            if (turretGhost == null) turretGhost = gameObject.AddComponent<TurretGhostPreview>();
+            turretGhost.Configure(cam, cellLayers);
+            turretGhost.Begin(so, GetTurretLevel(so));
         }
         else
         {
             turretPlacingMode = false;
             OnTurretChosen?.Invoke(so);
-
-            StartCoroutine(DelayedTurretSelectFlow(selectedTurret));
-
-            Debug.Log($"[ShiftingWorldUI] Turret selected: {so.displayName}. " +
-                      "The turret panel closes once placement is confirmed (NotifyTurretPlaced)");
         }
+
+        Debug.Log($"[ShiftingWorldUI] Turret selected: {so.displayName}. Select a cell");
     }
 
-    private IEnumerator DelayedTurretSelectFlow(TurretDataSO selectedTurret)
+    private TurretLevelData GetTurretLevel(TurretDataSO turret)
     {
-        turretPlacingMode = true;
-
-        yield return new WaitForSeconds(1.5f);
-
-        if (turretPanelRoot)
-            turretPanelRoot.SetActive(false);
-
-        Debug.Log($"[ShiftingWorldUI] Turret selected: {selectedTurret.displayName}. Select a cell");
+        if (!enableDupesSystem || dupeSystem == null || turret == null) return null;
+        return dupeSystem.GetTurretLevelData(turret);
     }
 
     private void HandleTurretPlacementMode()
@@ -621,33 +776,29 @@ public class ShiftingWorldUI : MonoBehaviour
                     return;
                 }
 
+                if (turretGhost != null) turretGhost.End();
                 if (slot.TryPlace(selectedTurret.prefab, selectedTurret))
                 {
                     Debug.Log("[ShiftingWorldUI] Turret placed");
+                    HandleDupeSystem(selectedTurret);
                     OnTurretPlacedSuccessfully?.Invoke(World.Other);
 
-                    EndTurretPlacement();
-                    StartCoroutine(CloseTurretPanelDelayed());
+                    CloseTurretPanelOnly();
                 }
                 else
                 {
+                    if (turretGhost != null) turretGhost.Begin(selectedTurret, GetTurretLevel(selectedTurret));
                     Debug.Log("[ShiftingWorldUI] Cell is occupied. Try another one");
                 }
             }
         }
     }
 
-    private IEnumerator CloseTurretPanelDelayed(float delay = 1.5f)
-    {
-        yield return new WaitForSeconds(delay);
-
-        CloseTurretPanelOnly();
-    }
-
     private void EndTurretPlacement()
     {
         turretPlacingMode = false;
         selectedTurret = null;
+        if (turretGhost != null) turretGhost.End();
     }
 
     private void CancelTurretPlacement()
@@ -670,8 +821,17 @@ public class ShiftingWorldUI : MonoBehaviour
 
     public void NotifyTurretPlaced(World world)
     {
+        if (selectedTurret != null) HandleDupeSystem(selectedTurret);
         OnTurretPlacedSuccessfully?.Invoke(world);
         CloseTurretPanelOnly();
+    }
+
+    public void NotifyTurretPlacementCancelled()
+    {
+        Debug.Log("[ShiftingWorldUI] Turret placement cancelled");
+        selectedTurret = null;
+        turretPlacingMode = false;
+        if (turretPanelRoot && currentTurretOptions.Count > 0) turretPanelRoot.SetActive(true);
     }
 
     private void BindButton(Button[] buttons, TMP_Text[] labels, int index, string label, Action onClick)
@@ -709,6 +869,8 @@ public class ShiftingWorldUI : MonoBehaviour
 
     private void HideExitButtons()
     {
+        if (tileGhost != null) tileGhost.Hide();
+        keyboardExitIndex = -1;
         if (exitButtonsCanvas) exitButtonsCanvas.gameObject.SetActive(false);
         ClearExitButtons();
     }

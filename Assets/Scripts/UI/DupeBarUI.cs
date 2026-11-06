@@ -59,7 +59,7 @@ public class DupeBarUI : MonoBehaviour
 
         if (turretLevelText != null)
         {
-            turretLevelText.text = data.level.ToString();
+            turretLevelText.text = $"Lv {data.level}";
         }
 
         Debug.Log($"[DupeBarUI] Dupes UI built for {typeName}: {data.currentDupes}/{data.maxDupes} (width {width})");

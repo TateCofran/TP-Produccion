@@ -12,6 +12,7 @@ public class TurretDataSO : ScriptableObject
 
     [Header("Stats")]
     public string displayName;
+    public Sprite icon;
 
     public float damage;
     public float range;

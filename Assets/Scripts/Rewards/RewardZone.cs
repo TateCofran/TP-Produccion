@@ -15,6 +15,12 @@ public class RewardZone : MonoBehaviour
     [SerializeField, Min(0f)] private float pulseSpeed = 2f;
     [SerializeField, Range(0f, 1f)] private float pulseMinAlpha = 0.45f;
 
+    [Header("Highlight")]
+    [SerializeField] private Color highlightColor = new Color(1f, 1f, 0.6f, 1f);
+    [SerializeField, Min(1f)] private float highlightWidthMultiplier = 1.8f;
+
+    private bool highlighted;
+
     [Header("Icon")]
     [SerializeField] private SpriteRenderer icon;
     [SerializeField] private float iconHeight = 0.6f;
@@ -45,8 +51,8 @@ public class RewardZone : MonoBehaviour
     {
         if (!IsVisible || !pulse || border == null) return;
 
-        float t = (Mathf.Sin(Time.unscaledTime * pulseSpeed) + 1f) * 0.5f;
-        var c = borderColor;
+        float t = highlighted ? 1f : (Mathf.Sin(Time.unscaledTime * pulseSpeed) + 1f) * 0.5f;
+        var c = highlighted ? highlightColor : borderColor;
         c.a = Mathf.Lerp(pulseMinAlpha, 1f, t);
         border.startColor = c;
         border.endColor = c;
@@ -80,6 +86,22 @@ public class RewardZone : MonoBehaviour
         {
             icon.sprite = iconSprite;
             icon.transform.localPosition = new Vector3(0f, iconHeight, 0f);
+        }
+    }
+
+    public void SetHighlighted(bool value)
+    {
+        if (highlighted == value) return;
+        highlighted = value;
+        if (border == null) return;
+
+        float width = highlighted ? borderWidth * highlightWidthMultiplier : borderWidth;
+        border.startWidth = width;
+        border.endWidth = width;
+        if (!highlighted)
+        {
+            border.startColor = borderColor;
+            border.endColor = borderColor;
         }
     }
 
