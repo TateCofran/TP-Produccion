@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 [RequireComponent(typeof(TurretDataHolder))]
 public class BasicRaycastShooter : MonoBehaviour, IShootingBehavior
@@ -59,6 +59,10 @@ public class BasicRaycastShooter : MonoBehaviour, IShootingBehavior
         Vector3 dir = toTarget / distance;
         float damage = Mathf.Max(1, (int)stats.Damage) * GetNthShotMultiplier();
 
+        var feedback = TurretShotFeedback.For(this);
+        feedback?.OnShot(origin);
+        if (feedback != null && IsSniper) feedback.Tracer(origin, origin + dir * distance);
+
         if (Physics.Raycast(origin, dir, out RaycastHit hit, distance + 0.25f, hittableLayers, QueryTriggerInteraction.Ignore))
         {
             OnHit(hit, dir, damage);
@@ -95,6 +99,8 @@ public class BasicRaycastShooter : MonoBehaviour, IShootingBehavior
 
         if (audioSource && impactClip) audioSource.PlayOneShot(impactClip, impactVolume);
     }
+
+    private bool IsSniper => dataHolder != null && dataHolder.turretDataSO != null && dataHolder.turretDataSO.turretType == TurretType.Sniper;
 
     private float GetNthShotMultiplier()
     {

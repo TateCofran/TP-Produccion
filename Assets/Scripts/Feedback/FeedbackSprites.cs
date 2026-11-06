@@ -10,6 +10,7 @@ public static class FeedbackSprites
     public static Sprite Flame => Get("Flame", FlameMask);
     public static Sprite Circle => Get("Circle", CircleMask);
     public static Sprite SoftCircle => Get("SoftCircle", SoftCircleMask);
+    public static Sprite White => Get("White", (u, v) => 1f);
 
     private static Sprite Get(string key, System.Func<float, float, float> mask)
     {

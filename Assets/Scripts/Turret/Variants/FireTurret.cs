@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -124,6 +124,7 @@ public class FireTurret : MonoBehaviour, IShootingBehavior
         }
 
         float maxRayDist = Mathf.Min(dist + 0.25f, maxRange);
+        TurretShotFeedback.For(this)?.OnShot(origin);
 
         if (Physics.Raycast(origin, ndir, out RaycastHit hit, maxRayDist, hittableLayers, QueryTriggerInteraction.Ignore))
         {

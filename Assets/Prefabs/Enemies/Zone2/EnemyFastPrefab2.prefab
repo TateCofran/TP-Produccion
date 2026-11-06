@@ -299,6 +299,8 @@ GameObject:
   - component: {fileID: -1278923693195927251}
   - component: {fileID: 3302882643515747830}
   - component: {fileID: 801532303672617201}
+  - component: {fileID: 8278550797018484115}
+  - component: {fileID: 9145910795544406540}
   m_Layer: 6
   m_Name: EnemyFastPrefab2
   m_TagString: Enemy
@@ -535,6 +537,40 @@ MonoBehaviour:
   phasedMaterial: {fileID: 0}
   renderers: []
   hideWhilePhased: []
+--- !u!114 &8278550797018484115
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5019013483156572802}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d4208c0882f40cf46aa4997b5a892bf1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HitFlash
+  health: {fileID: 0}
+  punchTarget: {fileID: 0}
+  flashColor: {r: 1, g: 1, b: 1, a: 1}
+  flashIntensity: 1.5
+--- !u!114 &9145910795544406540
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5019013483156572802}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6d71b65635d1b91419a034d5211ff2eb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyDeathFeedback
+  health: {fileID: 0}
+  deathVfxPrefab: {fileID: 4525816242606111009, guid: 483deef297f958b42b6db26c23ca459b, type: 3}
+  offset: {x: 0, y: 0.6, z: 0}
+  lifetime: 1.5
+  scale: 1
+  deathTrauma: 0
 --- !u!1 &6820776368412569129
 GameObject:
   m_ObjectHideFlags: 0

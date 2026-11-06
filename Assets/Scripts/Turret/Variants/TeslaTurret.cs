@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -88,6 +88,7 @@ public class TeslaTurret : MonoBehaviour, IShootingBehavior
 
         if (debugDraw) Debug.DrawLine(firePoint.position, first.transform.position + targetOffset, Color.cyan, 0.1f);
 
+        TurretShotFeedback.For(this)?.OnShot(firePoint.position);
         StartCoroutine(ChainLightning(first));
     }
 
@@ -149,6 +150,7 @@ public class TeslaTurret : MonoBehaviour, IShootingBehavior
                 break;
             }
 
+            TurretShotFeedback.For(this)?.Lightning(segmentOrigin, hit.point);
             yield return BoltTravelAndImpact(segmentOrigin, hit, current, currentSpawnId, shotDir);
 
             chainVisited.Add(current);

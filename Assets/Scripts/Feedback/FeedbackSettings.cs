@@ -48,6 +48,10 @@ public class FeedbackSettings : ScriptableObject
     [Min(0f)] public float hitPunchDuration = 0.08f;
     [Min(0f)] public float hitMinInterval = 0.05f;
 
+    [Header("Build")]
+    [Tooltip("Materials that keep shader variants enabled at runtime (for example URP Lit with _EMISSION for the hit flash) included in builds.")]
+    public Material[] shaderVariantMaterials;
+
     private static FeedbackSettings current;
     private static FeedbackSettings fallback;
 

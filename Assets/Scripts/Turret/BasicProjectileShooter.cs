@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 [RequireComponent(typeof(TurretDataHolder))]
 public class BasicProjectileShooter : MonoBehaviour, IShootingBehavior
@@ -20,5 +20,7 @@ public class BasicProjectileShooter : MonoBehaviour, IShootingBehavior
 
         if (projectile.TryGetComponent<Projectile>(out var p))
             p.Initialize(target, stats.Damage);
+
+        TurretShotFeedback.For(this)?.OnShot(firePoint.position);
     }
 }

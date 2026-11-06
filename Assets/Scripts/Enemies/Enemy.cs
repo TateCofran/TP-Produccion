@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
@@ -21,6 +21,7 @@ public class Enemy : MonoBehaviour, IEnemyDeathHandler, IWorldAware
     public bool IsSameSpawn(int spawnId) => isActiveAndEnabled && !_removedFromWave && SpawnId == spawnId;
 
     public static event System.Action<Enemy> OnAnyEnemyKilled;
+    public static event System.Action<Enemy> OnAnyEnemySpawned;
 
     public bool IsTargetable() => data == null || WorldState.Matches(data.vulnerableIn);
 
@@ -90,7 +91,11 @@ public class Enemy : MonoBehaviour, IEnemyDeathHandler, IWorldAware
             ab.ResetRuntime();
             ab.Initialize(ctx);
         }
+
+        OnAnyEnemySpawned?.Invoke(this);
     }
+
+    public bool IsBoss => data != null && (data.type == EnemyType.Boss || data.type == EnemyType.Boss2 || data.type == EnemyType.Boss3);
 
     private void Update()
     {

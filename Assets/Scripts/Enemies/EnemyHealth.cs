@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 public class EnemyHealth : MonoBehaviour, IDamageable
 {
@@ -21,6 +21,7 @@ public class EnemyHealth : MonoBehaviour, IDamageable
 
     public event System.Action<float, float> OnDamaged;
     public event System.Action OnDied;
+    public event System.Action OnHealthReset;
 
     public event System.Func<bool> OnPreDeath;
 
@@ -73,6 +74,7 @@ public class EnemyHealth : MonoBehaviour, IDamageable
 
         CacheDependenciesIfMissing();
         healthBarDisplay?.UpdateHealthBar(currentHealth, this.maxHealth);
+        OnHealthReset?.Invoke();
     }
 
     public void InitializeFromData(EnemyData data)
@@ -97,6 +99,7 @@ public class EnemyHealth : MonoBehaviour, IDamageable
         currentHealth = Mathf.Clamp(value, 0f, maxHealth);
         isDead = (currentHealth <= 0f);
         healthBarDisplay?.UpdateHealthBar(currentHealth, maxHealth);
+        OnHealthReset?.Invoke();
     }
 
     public void SetDefense(float value) => defense = Mathf.Max(0f, value);

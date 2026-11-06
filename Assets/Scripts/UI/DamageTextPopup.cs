@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using TMPro;
 
 [DisallowMultipleComponent]
@@ -11,22 +12,45 @@ public class DamageTextPopup : MonoBehaviour
     [SerializeField] private float fadeStart = 0.5f;
     [SerializeField] private AnimationCurve fadeCurve = AnimationCurve.Linear(0, 1, 1, 0);
 
+    public event Action<DamageTextPopup> Finished;
+
     private float _t;
-    private TextMeshProUGUI _tmp;
+    private TMP_Text _tmp;
     private Color _base;
     private Vector3 _start;
+    private bool _baseCaptured;
 
-    public void Play() { _t = 0f; }
+    public void Play()
+    {
+        _t = 0f;
+        _start = transform.localPosition;
+        if (_tmp != null) _tmp.color = _base;
+    }
+
+    public void ConfigureWorldSpace(float worldRiseDistance)
+    {
+        riseDistance = worldRiseDistance;
+    }
 
     private void Awake()
     {
-        _tmp = GetComponentInChildren<TextMeshProUGUI>();
-        if (_tmp == null) _tmp = GetComponent<TextMeshProUGUI>();
-        if (_tmp != null) _base = _tmp.color;
+        CacheText();
+    }
+
+    private void CacheText()
+    {
+        if (_tmp != null) return;
+        _tmp = GetComponentInChildren<TMP_Text>();
+        if (_tmp != null && !_baseCaptured)
+        {
+            _base = _tmp.color;
+            _baseCaptured = true;
+        }
     }
 
     private void OnEnable()
     {
+        CacheText();
         _t = 0f;
         _start = transform.localPosition;
         if (_tmp != null) _tmp.color = _base;
@@ -44,23 +68,31 @@ public class DamageTextPopup : MonoBehaviour
         {
             float fadeT = (k <= fadeStart) ? 0f : Mathf.InverseLerp(fadeStart, 1f, k);
             float a = Mathf.Clamp01(fadeCurve.Evaluate(fadeT));
-            var c = _tmp.color; c.a = a; _tmp.color = c;
+            var c = _tmp.color; c.a = a * _base.a; _tmp.color = c;
         }
 
-        if (_t >= lifetime)
-        {
-            gameObject.SetActive(false);
-            transform.localPosition = _start;
-        }
+        if (_t >= lifetime) Finish();
+    }
+
+    public void Finish()
+    {
+        if (!gameObject.activeSelf) return;
+        transform.localPosition = _start;
+        gameObject.SetActive(false);
+        Finished?.Invoke(this);
     }
 
     public void SetText(string value)
     {
+        CacheText();
         if (_tmp) _tmp.text = value;
     }
 
     public void SetStyle(Color color, float scale = 1f)
     {
+        CacheText();
+        _base = color;
+        _baseCaptured = true;
         if (_tmp) _tmp.color = color;
         transform.localScale = Vector3.one * scale;
     }

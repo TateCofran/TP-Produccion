@@ -466,6 +466,8 @@ GameObject:
   - component: {fileID: 1848116458589269432}
   - component: {fileID: -1349126979923562057}
   - component: {fileID: 1561191918513432868}
+  - component: {fileID: 5150305100308858527}
+  - component: {fileID: 4517231741250637832}
   m_Layer: 6
   m_Name: EnemyMiniBossPrefab
   m_TagString: Enemy
@@ -517,6 +519,8 @@ MeshRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -538,9 +542,11 @@ MeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!65 &3073536757813414801
 BoxCollider:
@@ -570,10 +576,10 @@ Rigidbody:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5019013483156572802}
-  serializedVersion: 4
+  serializedVersion: 5
   m_Mass: 1
-  m_Drag: 0
-  m_AngularDrag: 0.05
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
   m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
@@ -640,8 +646,8 @@ MonoBehaviour:
   damageTextYOffset: 2
   damageTextXOffset: -30
   reduceSpeed: 6
-  usarAlturaDesdeCollider: 1
-  extraAltura: 1.2
+  useColliderHeight: 1
+  extraHeight: 1.2
 --- !u!114 &1848116458589269432
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -684,6 +690,40 @@ MonoBehaviour:
   onlyOnce: 1
   shieldVfxPrefab: {fileID: 7545125283789541297, guid: 6e731817035973c4580f6dcc716d645e, type: 3}
   vfxLifetime: 3
+--- !u!114 &5150305100308858527
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5019013483156572802}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d4208c0882f40cf46aa4997b5a892bf1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HitFlash
+  health: {fileID: 0}
+  punchTarget: {fileID: 0}
+  flashColor: {r: 1, g: 1, b: 1, a: 1}
+  flashIntensity: 1.5
+--- !u!114 &4517231741250637832
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5019013483156572802}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6d71b65635d1b91419a034d5211ff2eb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyDeathFeedback
+  health: {fileID: 0}
+  deathVfxPrefab: {fileID: 2593726995631578769, guid: 6ccd18dd61f80524b91fe15191e9136b, type: 3}
+  offset: {x: 0, y: 0.6, z: 0}
+  lifetime: 1.5
+  scale: 1.6
+  deathTrauma: 0.25
 --- !u!1 &5523276896673312851
 GameObject:
   m_ObjectHideFlags: 0
@@ -770,6 +810,8 @@ SkinnedMeshRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -795,9 +837,11 @@ SkinnedMeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   serializedVersion: 2
   m_Quality: 0
   m_UpdateWhenOffscreen: 0
