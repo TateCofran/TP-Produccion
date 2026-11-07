@@ -70,6 +70,7 @@ public class WorldSwitchPoints : MonoBehaviour
 
         bool isNormal = WorldState.Current == ShiftingWorldMechanic.World.Normal;
         float multiplier = isNormal ? GetBlueMultiplier() : GetRedMultiplier();
+        if (e.LastHitSource is ReaperTurret reaper && reaper != null) multiplier *= reaper.EssenceMultiplier;
         int amount = Mathf.Max(1, Mathf.RoundToInt(e.Data.essenceReward * multiplier));
 
         if (isNormal)

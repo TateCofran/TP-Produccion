@@ -1,4 +1,4 @@
-﻿using TMPro;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -25,7 +25,16 @@ public class TurretInfoPanel : MonoBehaviour
     [Tooltip("If empty, it is searched in the scene.")]
     [SerializeField] private TurretDupeSystem dupeSystem;
 
+    [Header("Extra Info")]
+    [Tooltip("Optional. Buffs, charge and special effects. When empty, the lines are added under the damage text.")]
+    [SerializeField] private TMP_Text extraInfoText;
+    [SerializeField, Min(0.05f)] private float refreshInterval = 0.25f;
+
+    private float nextRefresh;
+    private readonly System.Text.StringBuilder infoBuilder = new System.Text.StringBuilder();
+
     private Turret _current;
+    public Turret Current => _current;
     private TurretStats _stats;
     private TurretDataHolder _holder;
     private TurretTargeting _targeting;
@@ -102,6 +111,11 @@ public class TurretInfoPanel : MonoBehaviour
     public void Hide()
     {
         if (panelRoot) panelRoot.SetActive(false);
+        if (extraInfoText)
+        {
+            var holderGo = extraInfoText.transform.parent != null ? extraInfoText.transform.parent.gameObject : null;
+            if (holderGo != null && holderGo != panelRoot) holderGo.SetActive(false);
+        }
 
         _current = null;
         _stats = null;
@@ -133,9 +147,43 @@ public class TurretInfoPanel : MonoBehaviour
         float dps = dmg * rate;
         float rng = _stats.Range;
 
-        if (damageText) damageText.text = $"Damage: {dmg:0}";
+        string extra = BuildExtraInfo();
+        if (extraInfoText)
+        {
+            extraInfoText.text = extra;
+            var holderGo = extraInfoText.transform.parent != null ? extraInfoText.transform.parent.gameObject : null;
+            if (holderGo != null && holderGo != panelRoot && holderGo.activeSelf != extra.Length > 0) holderGo.SetActive(extra.Length > 0);
+        }
+        if (damageText) damageText.text = !extraInfoText && extra.Length > 0 ? $"Damage: {dmg:0.#}\n<size=75%>{extra}</size>" : $"Damage: {dmg:0.#}";
 
         if (rangeText) rangeText.text = $"Range: {rng:0.##}";
+    }
+
+    public string BuildExtraInfo()
+    {
+        infoBuilder.Clear();
+        if (_current == null) return string.Empty;
+
+        if (_stats != null && _stats.HasExternalBuff)
+            infoBuilder.Append($"Banner: +{(_stats.ExternalDamageMultiplier - 1f) * 100f:0}% damage, +{(_stats.ExternalFireRateMultiplier - 1f) * 100f:0}% fire rate\n");
+
+        if (WardenRegistry.IsProtected(_current))
+            infoBuilder.Append("Protected by a Warden\n");
+
+        foreach (var provider in _current.GetComponents<ITurretInfoProvider>())
+        {
+            string line = provider.GetInfoLine();
+            if (!string.IsNullOrEmpty(line)) infoBuilder.Append(line).Append('\n');
+        }
+
+        return infoBuilder.ToString().TrimEnd();
+    }
+
+    private void Update()
+    {
+        if (_current == null || Time.unscaledTime < nextRefresh) return;
+        nextRefresh = Time.unscaledTime + refreshInterval;
+        RefreshNumbers();
     }
 
     private void PutNumbersNA()

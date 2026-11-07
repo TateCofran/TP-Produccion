@@ -115,6 +115,6 @@ public class TurretDupeUI : MonoBehaviour
         if (turretData.TryGetValue(turretType, out var data))
             return data;
 
-        return (0, 0, 0);
+        return (1, 0, DupeProgression.InitialDupesRequired);
     }
 }

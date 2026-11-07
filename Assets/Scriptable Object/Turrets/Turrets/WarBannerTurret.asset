@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 661c8973de2a86f43b198472e907ca0d, type: 3}
+  m_Name: WarBannerTurret
+  m_EditorClassIdentifier: Assembly-CSharp::TurretDataSO
+  id: turret_war_banner
+  type: support
+  turretType: 8
+  displayName: War Banner
+  icon: {fileID: 21300000, guid: a3e6b18c4394e234c94f6caabde98d07, type: 3}
+  damage: 0
+  range: 2.5
+  fireRate: 0
+  projectileSpeed: 1
+  affinity: 0
+  affinityBonus: 0.3
+  offWorldPenalty: 0.2
+  prefab: {fileID: 7712829878464478215, guid: b48ff9e7cfd05c845adc96103cae564a, type: 3}

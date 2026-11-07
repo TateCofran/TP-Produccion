@@ -27,11 +27,13 @@ public class BasicRaycastShooter : MonoBehaviour, IShootingBehavior
 
     private AudioSource audioSource;
     private TurretDataHolder dataHolder;
+    private IDamageMultiplierProvider damageMultiplier;
     private int shotCount;
 
     private void Awake()
     {
         dataHolder = GetComponent<TurretDataHolder>();
+        damageMultiplier = GetComponent<IDamageMultiplierProvider>();
         if (!ensureAudioSource) return;
 
         audioSource = GetComponent<AudioSource>();
@@ -58,6 +60,7 @@ public class BasicRaycastShooter : MonoBehaviour, IShootingBehavior
 
         Vector3 dir = toTarget / distance;
         float damage = Mathf.Max(1, (int)stats.Damage) * GetNthShotMultiplier();
+        if (damageMultiplier != null) damage *= damageMultiplier.GetDamageMultiplier(target.GetComponentInParent<Enemy>());
 
         var feedback = TurretShotFeedback.For(this);
         feedback?.OnShot(origin);

@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 public class TurretTargeting : MonoBehaviour, ITargetingBehavior
 {
@@ -26,6 +26,16 @@ public class TurretTargeting : MonoBehaviour, ITargetingBehavior
         mode = (TargetingMode)(((int)mode + 1) % System.Enum.GetValues(typeof(TargetingMode)).Length);
     }
 
+    protected virtual bool IsValidTarget(Enemy enemy, float sqrDistance)
+    {
+        return true;
+    }
+
+    protected virtual float PriorityScore(Enemy enemy)
+    {
+        return 0f;
+    }
+
     public Transform GetTarget(Vector3 turretPosition, float range)
     {
         float r2 = range * range;
@@ -39,7 +49,7 @@ public class TurretTargeting : MonoBehaviour, ITargetingBehavior
             if (e == null || e.Health == null || e.Health.IsDead() || !e.IsTargetable()) continue;
 
             float d2 = (e.transform.position - turretPosition).sqrMagnitude;
-            if (d2 > r2) continue;
+            if (d2 > r2 || !IsValidTarget(e, d2)) continue;
 
             float score = mode switch
             {
@@ -49,6 +59,7 @@ public class TurretTargeting : MonoBehaviour, ITargetingBehavior
                 TargetingMode.LowestHealth => -e.Health.GetCurrentHealth(),
                 _ => 0f
             };
+            score += PriorityScore(e) * 1000000f;
 
             if (best == null || score > bestScore)
             {

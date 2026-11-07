@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 public class TurretStats : MonoBehaviour, ITurretStats
 {
@@ -49,6 +49,45 @@ public class TurretStats : MonoBehaviour, ITurretStats
     private TurretDataHolder dataHolder;
 
     public event System.Action OnStatsChanged;
+
+    private readonly System.Collections.Generic.Dictionary<object, (float damage, float fireRate)> externalBuffs = new();
+    private float externalDamageMult = 1f;
+    private float externalFireRateMult = 1f;
+
+    public float ExternalDamageMultiplier => externalDamageMult;
+    public float ExternalFireRateMultiplier => externalFireRateMult;
+    public bool HasExternalBuff => externalBuffs.Count > 0;
+
+    public void AddExternalBuff(object source, float damageMult, float fireRateMult)
+    {
+        if (source == null) return;
+        if (externalBuffs.TryGetValue(source, out var existing) && Mathf.Approximately(existing.damage, damageMult) && Mathf.Approximately(existing.fireRate, fireRateMult)) return;
+        externalBuffs[source] = (damageMult, fireRateMult);
+        RefreshExternalBuffs();
+    }
+
+    public void RemoveExternalBuff(object source)
+    {
+        if (source == null || !externalBuffs.Remove(source)) return;
+        RefreshExternalBuffs();
+    }
+
+    private void RefreshExternalBuffs()
+    {
+        float bestDamage = 1f;
+        float bestFireRate = 1f;
+        foreach (var buff in externalBuffs.Values)
+        {
+            if (buff.damage > bestDamage || (Mathf.Approximately(buff.damage, bestDamage) && buff.fireRate > bestFireRate))
+            {
+                bestDamage = buff.damage;
+                bestFireRate = buff.fireRate;
+            }
+        }
+        externalDamageMult = bestDamage;
+        externalFireRateMult = bestFireRate;
+        RecalculateStats();
+    }
 
     private void Awake()
     {
@@ -121,14 +160,15 @@ public class TurretStats : MonoBehaviour, ITurretStats
             damageMod *= GameModifiersManager.Instance.turretDamageMultiplier;
         }
 
-        currentDamage = Round1(baseDamage * levelDamageMult * damageMod * AffinityMultiplier);
+        currentDamage = Round1(baseDamage * levelDamageMult * damageMod * AffinityMultiplier * externalDamageMult);
         currentRange = Round1(baseRange * levelRangeMult * rangeMod);
-        currentFireRate = Round1(baseFireRate * levelFireRateMult * fireRateMod);
+        currentFireRate = Round2(baseFireRate * levelFireRateMult * fireRateMod * externalFireRateMult);
 
         OnStatsChanged?.Invoke();
     }
 
     private static float Round1(float v) => Mathf.Round(v * 10f) / 10f;
+    private static float Round2(float v) => Mathf.Round(v * 100f) / 100f;
 
     private void UpdateRangeVisualizer()
     {

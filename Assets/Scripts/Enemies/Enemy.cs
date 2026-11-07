@@ -23,6 +23,18 @@ public class Enemy : MonoBehaviour, IEnemyDeathHandler, IWorldAware
     public static event System.Action<Enemy> OnAnyEnemyKilled;
     public static event System.Action<Enemy> OnAnyEnemySpawned;
 
+    public Component LastHitSource { get; set; }
+
+    public float RouteProgress
+    {
+        get
+        {
+            if (_route.Count == 0) return 0f;
+            if (_idx >= _route.Count) return _route.Count * 1000f;
+            return _idx * 1000f - Vector3.Distance(transform.position, _route[_idx]);
+        }
+    }
+
     public bool IsTargetable() => data == null || WorldState.Matches(data.vulnerableIn);
 
     private float _knockbackImmuneUntil;
@@ -68,6 +80,7 @@ public class Enemy : MonoBehaviour, IEnemyDeathHandler, IWorldAware
         _removedFromWave = false;
         hasHitCore = false;
         IsSummoned = false;
+        LastHitSource = null;
         _knockbackImmuneUntil = 0f;
         _knockbackCount = 0;
 

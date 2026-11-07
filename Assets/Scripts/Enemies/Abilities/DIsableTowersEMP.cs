@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 public class Ability_DisableTowersEMP : MonoBehaviour, IEnemyAbility
 {
@@ -46,6 +46,12 @@ public class Ability_DisableTowersEMP : MonoBehaviour, IEnemyAbility
             Turret turret = hits[i].GetComponentInParent<Turret>();
             if (turret == null)
                 continue;
+
+            if (WardenRegistry.IsProtected(turret))
+            {
+                WardenRegistry.ShowBlocked(turret);
+                continue;
+            }
 
             turret.DisableFor(disableDuration);
         }

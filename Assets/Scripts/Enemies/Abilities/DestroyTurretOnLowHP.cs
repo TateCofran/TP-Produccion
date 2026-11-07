@@ -74,6 +74,7 @@ public class Ability_DestroyRandomTurretOnLowHP : MonoBehaviour, IEnemyAbility
             return false;
 
         List<Turret> candidates = new List<Turret>();
+        Turret firstProtected = null;
 
         for (int i = 0; i < hits.Length; i++)
         {
@@ -86,12 +87,25 @@ public class Ability_DestroyRandomTurretOnLowHP : MonoBehaviour, IEnemyAbility
             GameObject go = turret.gameObject;
             if (!go.activeInHierarchy) continue;
 
+            if (WardenRegistry.IsProtected(turret))
+            {
+                if (firstProtected == null) firstProtected = turret;
+                continue;
+            }
+
             if (!candidates.Contains(turret))
                 candidates.Add(turret);
         }
 
         if (candidates.Count == 0)
+        {
+            if (firstProtected != null)
+            {
+                WardenRegistry.ShowBlocked(firstProtected);
+                return true;
+            }
             return false;
+        }
 
         int index = Random.Range(0, candidates.Count);
         Turret target = candidates[index];

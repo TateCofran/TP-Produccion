@@ -1,5 +1,12 @@
 using UnityEngine;
 
+[System.Flags]
+public enum DamageFlags
+{
+    None = 0,
+    IgnoreInvulnerable = 1
+}
+
 public class EnemyHealth : MonoBehaviour, IDamageable
 {
     [Header("Stats")]
@@ -12,6 +19,11 @@ public class EnemyHealth : MonoBehaviour, IDamageable
     [SerializeField] private bool invulnerable = false;
 
     private bool isDead = false;
+    private float shieldExtra;
+
+    public bool HasShield => invulnerable || shieldExtra > 0f;
+    public bool HasHealthShield => shieldExtra > 0f;
+    public float ShieldExtra => shieldExtra;
 
     private Enemy enemyReference;
     private IHealthDisplay healthBarDisplay;
@@ -71,6 +83,7 @@ public class EnemyHealth : MonoBehaviour, IDamageable
 
         shieldAuraApplied = false;
         invulnerable = false;
+        shieldExtra = 0f;
 
         CacheDependenciesIfMissing();
         healthBarDisplay?.UpdateHealthBar(currentHealth, this.maxHealth);
@@ -110,15 +123,21 @@ public class EnemyHealth : MonoBehaviour, IDamageable
         currentHealth = Mathf.Max(1f, maxHealth);
 
         shieldAuraApplied = false;
+        shieldExtra = 0f;
 
         healthBarDisplay?.UpdateHealthBar(currentHealth, maxHealth);
     }
 
     public void TakeDamage(float amount)
     {
+        TakeDamage(amount, DamageFlags.None);
+    }
+
+    public void TakeDamage(float amount, DamageFlags flags)
+    {
         if (isDead) return;
 
-        if (invulnerable)
+        if (invulnerable && (flags & DamageFlags.IgnoreInvulnerable) == 0)
         {
             OnDamaged?.Invoke(currentHealth, maxHealth);
             return;
@@ -135,6 +154,7 @@ public class EnemyHealth : MonoBehaviour, IDamageable
 
         currentHealth -= realDamage;
         if (currentHealth < 0f) currentHealth = 0f;
+        if (shieldExtra > 0f) shieldExtra = Mathf.Max(0f, shieldExtra - realDamage);
 
         healthBarDisplay?.UpdateHealthBar(currentHealth, maxHealth);
 
@@ -159,6 +179,7 @@ public class EnemyHealth : MonoBehaviour, IDamageable
 
         maxHealth = newMax;
         currentHealth = Mathf.Min(maxHealth, currentHealth + extra);
+        shieldExtra = Mathf.Max(0f, extra);
 
         healthBarDisplay?.UpdateHealthBar(currentHealth, maxHealth);
         return true;

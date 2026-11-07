@@ -1,8 +1,16 @@
-﻿public enum TurretType
+public enum TurretType
 {
     Tesla,
     Basic,
     Fire,
     Energy,
-    Sniper
+    Sniper,
+    Mortar,
+    Ballista,
+    RiftCannon,
+    WarBanner,
+    Purifier,
+    Guillotine,
+    Reaper,
+    Warden
 }
