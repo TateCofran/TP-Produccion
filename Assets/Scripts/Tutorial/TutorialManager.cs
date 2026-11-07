@@ -217,7 +217,7 @@ public class TutorialManager : MonoBehaviour
                 "Every enemy you kill gives essences.\n" +
                 "In the Normal World you earn <color=#4FA3FF>blue</color> essences, " +
                 "in the Other World <color=#FF5A4F>red</color> essences.\n" +
-                "Spend them on permanent upgrades in the Lab and the Workshop.",
+                "They are your XP: blue fills the Normal bar (tiles), red fills the Other World bar (turrets).",
                 TutorialEventType.Manual,
                 allowTiles:true, allowTurrets:true, allowWave:true, allowWorld:true
             ),
