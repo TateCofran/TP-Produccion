@@ -106,7 +106,10 @@ public class TurretOptionButton : MonoBehaviour, IPointerEnterHandler, IPointerE
         };
 
         string levelText = data != null ? $"Lv {data.currentLevel} ({data.currentDupes}/{data.dupesRequiredForNextLevel})" : "Lv 1";
-        return $"{GetDisplayName(so)}  {levelText}\nDamage {damage:0.#}\nRange {range:0.#}\nFire rate {fireRate:0.##}\n{affinity}";
+        string text = $"{GetDisplayName(so)}  {levelText}\nDamage {damage:0.#}\nRange {range:0.#}\nFire rate {fireRate:0.##}\n{affinity}";
+        var table = SynergyService.Instance != null ? SynergyService.Instance.Table : null;
+        string synergy = table != null ? table.DescribeFor(so.turretType) : string.Empty;
+        return string.IsNullOrEmpty(synergy) ? text : text + "\n" + synergy;
     }
 
     public void OnPointerEnter(PointerEventData eventData)

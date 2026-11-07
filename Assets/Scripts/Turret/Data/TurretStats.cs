@@ -153,6 +153,13 @@ public class TurretStats : MonoBehaviour, ITurretStats
         float fireRateMod = 1f;
         float damageMod = 1f;
 
+        var synergy = GetComponent<TurretSynergy>();
+        if (synergy != null)
+        {
+            damageMod *= 1f + synergy.Get(SynergyStat.Damage);
+            fireRateMod *= 1f + synergy.Get(SynergyStat.FireRate);
+        }
+
         if (GameModifiersManager.Instance != null)
         {
             rangeMod *= GameModifiersManager.Instance.turretRangeMultiplier;

@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 [DisallowMultipleComponent]
 public sealed class CellSlot : MonoBehaviour
@@ -87,6 +87,8 @@ public sealed class CellSlot : MonoBehaviour
         return TryPlace(turretPrefab, turretData, out _);
     }
 
+    public static event System.Action<CellSlot, GameObject> OnTurretPlaced;
+
     public bool TryPlace(GameObject turretPrefab, TurretDataSO turretData, out GameObject instance)
     {
         instance = null;
@@ -119,6 +121,7 @@ public sealed class CellSlot : MonoBehaviour
         currentTurret = turret;
         occupied = true;
         instance = turret;
+        OnTurretPlaced?.Invoke(this, turret);
 
         return true;
     }

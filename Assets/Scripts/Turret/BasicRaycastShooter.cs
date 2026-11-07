@@ -120,12 +120,12 @@ public class BasicRaycastShooter : MonoBehaviour, IShootingBehavior
         return 2f;
     }
 
-    private static bool TryApplyDamage(Transform hitTf, float damage)
+    private bool TryApplyDamage(Transform hitTf, float damage)
     {
         if (!hitTf) return false;
 
         var enemy = hitTf.GetComponentInParent<Enemy>();
-        int finalDamage = TurretDamageCalculator.ComputeInt(damage, enemy);
+        int finalDamage = TurretDamageCalculator.ComputeInt(damage, enemy, GetComponent<TurretSynergy>());
 
         var enemyHealth = hitTf.GetComponentInParent<EnemyHealth>();
         if (enemyHealth != null) { enemyHealth.TakeDamage(finalDamage); return true; }

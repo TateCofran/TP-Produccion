@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 [DisallowMultipleComponent]
 [RequireComponent(typeof(Turret))]
@@ -81,6 +81,8 @@ public sealed class TurretEnergy : MonoBehaviour, IWorldEnergySource
         int level = Mathf.Max(1, stats.UpgradeLevel);
 
         float factor = 1f + perLevelMultiplier * (level - 1);
-        return baseEnergyPerSecond * factor * GameModifiersManager.Multiplier(ModifierStat.EnergyOutput);
+        var synergy = GetComponent<TurretSynergy>();
+        float synergyMult = 1f + (synergy != null ? synergy.Get(SynergyStat.EnergyOutput) : 0f);
+        return baseEnergyPerSecond * factor * GameModifiersManager.Multiplier(ModifierStat.EnergyOutput) * synergyMult;
     }
 }

@@ -29,7 +29,9 @@ public class MortarTurret : MonoBehaviour, IShootingBehavior
         flat.y = 0f;
         float flight = Mathf.Clamp(flat.magnitude / shellSpeed, minFlightTime, maxFlightTime);
 
-        MortarProjectile.Launch(firePoint.position, ground, flight, arcHeight, stats.Damage, explosionRadius);
+        var synergy = GetComponent<TurretSynergy>();
+        float radius = explosionRadius * (1f + (synergy != null ? synergy.Get(SynergyStat.AoeRadius) : 0f));
+        MortarProjectile.Launch(firePoint.position, ground, flight, arcHeight, stats.Damage, radius);
         TurretShotFeedback.For(this)?.OnShot(firePoint.position);
     }
 }

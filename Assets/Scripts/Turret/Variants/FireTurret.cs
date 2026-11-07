@@ -230,13 +230,15 @@ public class FireTurret : MonoBehaviour, IShootingBehavior
             return;
         }
 
-        if (totalDamageApplied >= stats.Damage)
+        var synergy = GetComponent<TurretSynergy>();
+        float burnCap = stats.Damage * (1f + (synergy != null ? synergy.Get(SynergyStat.BurnDuration) : 0f));
+        if (totalDamageApplied >= burnCap)
         {
             ClearBurn();
             return;
         }
 
-        float remaining = stats.Damage - totalDamageApplied;
+        float remaining = burnCap - totalDamageApplied;
         float dps = Mathf.Max(0f, stats.Damage * damageFractionPerSecond);
         float damageThisTick = Mathf.Min(dps, remaining);
 

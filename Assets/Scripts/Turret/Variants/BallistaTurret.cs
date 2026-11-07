@@ -48,7 +48,7 @@ public class BallistaTurret : MonoBehaviour, IShootingBehavior
             float factor = Mathf.Max(minDamageFactor, 1f - falloffPerEnemy * i);
             var e = hits[i].enemy;
             if (e == null || e.Health == null || e.Health.IsDead()) continue;
-            e.Health.TakeDamage(TurretDamageCalculator.Compute(stats.Damage * factor, e));
+            e.Health.TakeDamage(TurretDamageCalculator.Compute(stats.Damage * factor, e, GetComponent<TurretSynergy>()));
         }
         LastHitCount = hits.Count;
 

@@ -241,7 +241,7 @@ public class TeslaTurret : MonoBehaviour, IShootingBehavior
         SpawnImpactVfx(hit, fallbackDir);
 
         if (enemyAtShot != null && enemyAtShot.IsSameSpawn(spawnIdAtShot) && !enemyAtShot.Health.IsDead())
-            enemyAtShot.Health.TakeDamage(TurretDamageCalculator.ComputeInt(stats.Damage, enemyAtShot));
+            enemyAtShot.Health.TakeDamage(TurretDamageCalculator.ComputeInt(stats.Damage, enemyAtShot, GetComponent<TurretSynergy>()));
 
         if (audioSource && impactClip) audioSource.PlayOneShot(impactClip, impactVolume);
     }

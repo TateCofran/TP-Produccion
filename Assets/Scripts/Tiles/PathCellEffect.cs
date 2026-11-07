@@ -31,6 +31,10 @@ public class PathCellEffect : MonoBehaviour
     private bool subscribedWorld;
     private bool shownInactive;
 
+    private TileEffectKind[] kinds = new TileEffectKind[0];
+    public TileEffectKind[] Kinds => kinds;
+    public WorldAffinity ActiveIn => activeIn;
+
     public bool IsWorldLocked => activeIn != WorldAffinity.Neutral;
     public bool IsActiveNow => !IsWorldLocked || WorldState.Matches(activeIn);
     private float WorldStrength => IsWorldLocked ? (WorldState.Matches(activeIn) ? lockedStrengthMultiplier : 0f) : 1f;
@@ -66,7 +70,20 @@ public class PathCellEffect : MonoBehaviour
         _slowMultiplier = 1f;
         _stunMultiplier = 1f;
         RecalculateEffective();
+        RebuildKinds();
         RefreshWorldVisual();
+    }
+
+    private void RebuildKinds()
+    {
+        var list = new System.Collections.Generic.List<TileEffectKind>(4);
+        if (_baseDamage > 0f) list.Add(TileEffectKind.Dps);
+        if (_baseSlow > 0f) list.Add(TileEffectKind.Slow);
+        if (_baseStun > 0f) list.Add(TileEffectKind.Stun);
+        if (exposure) list.Add(TileEffectKind.Exposure);
+        if (antiHeal) list.Add(TileEffectKind.AntiHeal);
+        if (activeIn != WorldAffinity.Neutral) list.Add(TileEffectKind.WorldLockedSameWorld);
+        kinds = list.ToArray();
     }
 
     private void OnEnable()
