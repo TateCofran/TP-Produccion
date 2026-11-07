@@ -15,6 +15,10 @@ public class GridGenerator : MonoBehaviour, ITileGenerator
     [SerializeField] private List<TileLayout> candidateLayouts = new();
 
     [Header("Prefabs")][SerializeField] private GameObject grassPrefab, pathBasicPrefab, pathDamagePrefab, pathSlowPrefab, pathStunPrefab;
+    [Tooltip("Path cell for Exposure tiles. Falls back to the slow prefab.")]
+    [SerializeField] private GameObject pathExposurePrefab;
+    [Tooltip("Path cell for Anti-heal tiles. Falls back to the damage prefab.")]
+    [SerializeField] private GameObject pathAntiHealPrefab;
 
     [Header("Core")][SerializeField] private GameObject corePrefab; [SerializeField] private Vector3 coreOffset = Vector3.zero;
 
@@ -99,9 +103,11 @@ public class GridGenerator : MonoBehaviour, ITileGenerator
             tilePoolManager.InitializePool(pathDamagePrefab, 32);
             tilePoolManager.InitializePool(pathSlowPrefab, 32);
             tilePoolManager.InitializePool(pathStunPrefab, 32);
+            if (pathExposurePrefab != null) tilePoolManager.InitializePool(pathExposurePrefab, 16);
+            if (pathAntiHealPrefab != null) tilePoolManager.InitializePool(pathAntiHealPrefab, 16);
         }
 
-        prefabs = new PrefabSelector(grassPrefab, pathBasicPrefab, pathDamagePrefab, pathSlowPrefab, pathStunPrefab);
+        prefabs = new PrefabSelector(grassPrefab, pathBasicPrefab, pathDamagePrefab, pathSlowPrefab, pathStunPrefab, pathExposurePrefab, pathAntiHealPrefab);
         instantiator = new LayoutInstantiator(prefabs, orient, tilePoolManager, grassCellOffset, pathCellOffset);
 
         placement = new PlacementCalculator(tileGap, extraTileOffset);
@@ -313,6 +319,7 @@ public class GridGenerator : MonoBehaviour, ITileGenerator
         int attempts = 0;
         foreach (var (candidate, r, f) in options)
         {
+            if (WouldCloseLastLane(candidate)) continue;
             var o = orient.GetOrientedData(candidate, r, f);
             var newOrigin = placement.ComputeNewOrigin(candidate, r, o.entryOriented, dirOut, prevTile.aabbMin, prevTile.aabbMax, exitWorld);
             placement.ComputeAABB(newOrigin, o.w, o.h, candidate.cellSize, out var mn, out var mx);
@@ -375,6 +382,7 @@ public class GridGenerator : MonoBehaviour, ITileGenerator
         exits.Relabel();
 
         AttachAndApplyDupe(parent, layout);
+        GrantPlacementReward(layout, nMin, nMax);
 
         Log.Info("GridGenerator", $"Connected via exit {fromExit.label}, new tile #{newIndex} (rot={rot * 90} deg, flip={flip}), instances: {count}");
         TutorialEventHub.RaiseTilePlaced();
@@ -679,9 +687,35 @@ public class GridGenerator : MonoBehaviour, ITileGenerator
         return pool;
     }
 
+    public int OpenExitCount
+    {
+        get
+        {
+            if (exits == null) return 0;
+            int count = 0;
+            foreach (var _ in exits.AvailableIndices()) count++;
+            return count;
+        }
+    }
+
+    public bool WouldCloseLastLane(TileLayout layout)
+    {
+        return layout != null && layout.IsDeadEnd && OpenExitCount <= 1;
+    }
+
+    private void GrantPlacementReward(TileLayout layout, Vector3 min, Vector3 max)
+    {
+        if (layout == null || layout.onPlaceEssenceReward <= 0) return;
+        var points = FindFirstObjectByType<WorldSwitchPoints>();
+        if (points == null) return;
+        bool blue = WorldState.Current == ShiftingWorldMechanic.World.Normal;
+        points.GrantWithOrb(layout.onPlaceEssenceReward, blue, (min + max) * 0.5f);
+    }
+
     public bool LayoutFitsAnyExit(TileLayout layout)
     {
         if (layout == null || exits == null) return false;
+        if (WouldCloseLastLane(layout)) return false;
 
         var single = new[] { layout };
         foreach (int i in exits.AvailableIndices())
@@ -696,6 +730,7 @@ public class GridGenerator : MonoBehaviour, ITileGenerator
     {
         var result = new List<(string label, Vector3 worldPos)>();
         if (layout == null || exits == null) return result;
+        if (WouldCloseLastLane(layout)) return result;
 
         var single = new[] { layout };
         foreach (int i in exits.AvailableIndices())
@@ -901,6 +936,11 @@ public class GridGenerator : MonoBehaviour, ITileGenerator
     public bool AppendNextUsingSelectedExitWithLayout(TileLayout forced)
     {
         if (forced == null) return false;
+        if (WouldCloseLastLane(forced))
+        {
+            Debug.LogWarning($"[GridGenerator] {forced.name} would close the last open lane");
+            return false;
+        }
 
         int global = exits.GlobalIndexFromAvailable(selectedExitIndex);
         if (global < 0 || exits.Count == 0) return false;

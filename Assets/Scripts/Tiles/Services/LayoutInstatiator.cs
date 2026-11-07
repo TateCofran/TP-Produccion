@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
 
 public sealed class LayoutInstantiator : ILayoutInstantiator
@@ -48,7 +48,7 @@ public sealed class LayoutInstantiator : ILayoutInstantiator
                 if (layout.hasCore && coreSkip.HasValue && orientedCell == coreSkip.Value) continue;
 
                 GameObject prefab = (type == TileLayout.TileType.Path)
-                    ? _prefabs.ChooseForMods(layout.GetPathModifiers(cell).dps, layout.GetPathModifiers(cell).slow, layout.GetPathModifiers(cell).stun)
+                    ? _prefabs.ChooseForMods(layout.GetPathModifiers(cell))
                     : _prefabs.Grass;
                 if (!prefab) continue;
 
@@ -83,6 +83,6 @@ public sealed class LayoutInstantiator : ILayoutInstantiator
     private static void SetupPathCell(GameObject go, TileLayout layout, Vector2Int cell)
     {
         var mods = layout.GetPathModifiers(cell);
-        if (go.TryGetComponent<PathCellEffect>(out var eff)) eff.Setup(mods.dps, mods.slow, mods.stun);
+        if (go.TryGetComponent<PathCellEffect>(out var eff)) eff.Setup(mods, layout.activeIn, layout.lockedStrengthMultiplier);
     }
 }

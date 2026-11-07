@@ -9,6 +9,15 @@ public class TileIconPalette : ScriptableObject
     public Color pathDamage = new Color(0.85f, 0.2f, 0.2f, 1f);
     public Color pathSlow = new Color(0.45f, 0.8f, 1f, 1f);
     public Color pathStun = new Color(1f, 0.85f, 0.2f, 1f);
+    public Color pathExposure = new Color(0.65f, 0.35f, 0.95f, 1f);
+    public Color pathAntiHeal = new Color(0.12f, 0.38f, 0.16f, 1f);
+
+    [Header("World Lock Marks")]
+    public Color normalWorldMark = new Color(0.3f, 0.6f, 1f, 1f);
+    public Color otherWorldMark = new Color(1f, 0.3f, 0.3f, 1f);
+
+    [Header("Dead End")]
+    public Color deadEndMark = new Color(1f, 0.25f, 0.25f, 1f);
 
     [Header("Markers")]
     public Color marker = Color.white;
@@ -19,6 +28,8 @@ public class TileIconPalette : ScriptableObject
 
     public Color GetPathColor(TileLayout.PathModifiers mods)
     {
+        if (mods.exposure) return pathExposure;
+        if (mods.antiHeal) return pathAntiHeal;
         if (mods.stun > 0f) return pathStun;
         if (mods.slow > 0f) return pathSlow;
         if (mods.dps > 0f) return pathDamage;
@@ -28,7 +39,7 @@ public class TileIconPalette : ScriptableObject
     public Color GetGhostTint(bool isPath, TileLayout.PathModifiers mods)
     {
         if (!isPath) return ghostGrass;
-        if (mods.stun > 0f || mods.slow > 0f || mods.dps > 0f) return GetPathColor(mods);
+        if (mods.HasAnyEffect) return GetPathColor(mods);
         return ghostBasic;
     }
 }

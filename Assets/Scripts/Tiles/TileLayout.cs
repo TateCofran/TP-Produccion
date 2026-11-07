@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
 
 [CreateAssetMenu(menuName = "Grid/Tile Layout 5x5", fileName = "NewTileLayout")]
@@ -36,6 +36,31 @@ public class TileLayout : ScriptableObject
         [Min(0)] public float dps;
         [Range(0f, 1f)] public float slow;
         [Min(0)] public float stun;
+        public bool exposure;
+        public bool antiHeal;
+
+        public bool HasAnyEffect => dps > 0f || slow > 0f || stun > 0f || exposure || antiHeal;
+    }
+
+    [Header("Variants")]
+    [Tooltip("If this layout is a mirrored copy of another one, assign the original. Mirrors are hidden from the loadout and share its dupes.")]
+    [SerializeField] private TileLayout mirrorOf;
+    [Tooltip("Essences of the active world granted when this layout is placed (Dead End).")]
+    [Min(0)] public int onPlaceEssenceReward;
+    [Tooltip("World where the effects of this layout work. Neutral works in both.")]
+    public WorldAffinity activeIn = WorldAffinity.Neutral;
+    [Tooltip("Effect multiplier in its own world when the layout is world-locked.")]
+    [Min(0f)] public float lockedStrengthMultiplier = 2f;
+
+    public TileLayout MirrorOf => mirrorOf;
+    public bool IsMirror => mirrorOf != null;
+    public TileLayout DupeKey => mirrorOf != null ? mirrorOf : this;
+    public bool IsDeadEnd => exits == null || exits.Count == 0;
+    public int ExtraLanes => exits != null ? Mathf.Max(0, exits.Count - 1) : 0;
+
+    public void SetMirrorOf(TileLayout original)
+    {
+        mirrorOf = original == this ? null : original;
     }
 
     [Header("Path Modifiers (Defaults for the whole tile)")]

@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
 
 [DisallowMultipleComponent]
@@ -58,6 +58,11 @@ public class EnemyPhaseVisual : MonoBehaviour
     }
 
     private void HandleWorldChanged(ShiftingWorldMechanic.World world) => Refresh();
+
+    private void Update()
+    {
+        if (enemy != null && phased == enemy.IsTargetable()) Refresh();
+    }
 
     public void Refresh()
     {

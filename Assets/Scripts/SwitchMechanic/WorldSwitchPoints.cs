@@ -107,6 +107,25 @@ public class WorldSwitchPoints : MonoBehaviour
         return (1f + redBonusPerLevel * level) * modifier;
     }
 
+    public void GrantWithOrb(int amount, bool blue, Vector3 worldPosition)
+    {
+        if (amount <= 0) return;
+        if (blue)
+        {
+            totalBlueEssences += amount;
+            OnBlueEssenceGained?.Invoke(amount, totalBlueEssences);
+        }
+        else
+        {
+            totalRedEssences += amount;
+            OnRedEssenceGained?.Invoke(amount, totalRedEssences);
+        }
+
+        var orbs = EssenceOrbFX.Instance;
+        if (orbs != null && orbs.CanSpawn) orbs.Spawn(worldPosition, amount, blue);
+        else NotifyExternalGain(amount, blue);
+    }
+
     public void AddBlueEssence(int amount)
     {
         if (amount <= 0) return;

@@ -19,6 +19,7 @@ public class EnemyHealth : MonoBehaviour, IDamageable
     [SerializeField] private bool invulnerable = false;
 
     private bool isDead = false;
+    private EnemyEffects statusEffects;
     private float shieldExtra;
 
     public bool HasShield => invulnerable || shieldExtra > 0f;
@@ -188,6 +189,8 @@ public class EnemyHealth : MonoBehaviour, IDamageable
     public void Heal(float amount)
     {
         if (isDead || amount <= 0f) return;
+        if (statusEffects == null) statusEffects = GetComponent<EnemyEffects>();
+        if (statusEffects != null && statusEffects.IsHealBlocked) return;
         currentHealth = Mathf.Min(maxHealth, currentHealth + amount);
         healthBarDisplay?.UpdateHealthBar(currentHealth, maxHealth);
         OnDamaged?.Invoke(currentHealth, maxHealth);

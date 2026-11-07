@@ -110,6 +110,7 @@ public class TileOptionButton : MonoBehaviour, IPointerEnterHandler, IPointerExi
         if (layout == null) return string.Empty;
 
         float dps = 0f, slow = 0f, stun = 0f;
+        bool exposure = false, antiHeal = false;
         for (int y = 0; y < layout.gridHeight; y++)
             for (int x = 0; x < layout.gridWidth; x++)
             {
@@ -119,7 +120,14 @@ public class TileOptionButton : MonoBehaviour, IPointerEnterHandler, IPointerExi
                 dps = Mathf.Max(dps, mods.dps);
                 slow = Mathf.Max(slow, mods.slow);
                 stun = Mathf.Max(stun, mods.stun);
+                exposure |= mods.exposure;
+                antiHeal |= mods.antiHeal;
             }
+
+        float lockMult = layout.activeIn != WorldAffinity.Neutral ? layout.lockedStrengthMultiplier : 1f;
+        dps *= lockMult;
+        slow *= lockMult;
+        stun *= lockMult;
 
         float dmgMult = data != null ? data.damageMultiplier : 1f;
         float slowMult = data != null ? data.slowMultiplier : 1f;
@@ -129,7 +137,13 @@ public class TileOptionButton : MonoBehaviour, IPointerEnterHandler, IPointerExi
         if (dps > 0f) sb.Append($"Damage {dps * dmgMult:0.#}/s\n");
         if (slow > 0f) sb.Append($"Slow {Mathf.Min(slow * slowMult, 0.95f) * 100f:0}%\n");
         if (stun > 0f) sb.Append($"Stun {stun * stunMult:0.##}s\n");
+        if (exposure) sb.Append("Exposure: enemies can be hit in any world\n");
+        if (antiHeal) sb.Append("Anti-heal: blocks healing for 4s\n");
         if (sb.Length == 0) sb.Append("Basic path\n");
+        if (layout.activeIn != WorldAffinity.Neutral)
+            sb.Append($"Only in {(layout.activeIn == WorldAffinity.Normal ? "Normal" : "Other")} World (x{layout.lockedStrengthMultiplier:0.#})\n");
+        if (layout.ExtraLanes > 0) sb.Append($"+{layout.ExtraLanes} enemy lane{(layout.ExtraLanes > 1 ? "s" : "")}\n");
+        if (layout.IsDeadEnd) sb.Append($"Closes this lane, +{layout.onPlaceEssenceReward} essences\n");
         if (data != null) sb.Append($"Lv {data.currentLevel} ({data.currentDupes}/{data.dupesRequiredForNextLevel})");
         return sb.ToString().TrimEnd();
     }

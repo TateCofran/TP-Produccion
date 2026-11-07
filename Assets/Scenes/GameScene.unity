@@ -19591,11 +19591,23 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 5e94e4ea8dd8af74582dbc5896f1db7a, type: 2}
   - {fileID: 11400000, guid: 68a83c233eb7f1a4dab84fa98825a6d2, type: 2}
   - {fileID: 11400000, guid: d6e6fda150c4a9242b7e8b9a3284728f, type: 2}
+  - {fileID: 11400000, guid: e35188b90f74a2b499a8b8e959c4c896, type: 2}
+  - {fileID: 11400000, guid: 6dfbac8f7dfea844391d8e4463de77df, type: 2}
+  - {fileID: 11400000, guid: 2d9faa88385bac542ba33785489584be, type: 2}
+  - {fileID: 11400000, guid: e1e3e38f87bf22745bb2bbc15e9b423c, type: 2}
+  - {fileID: 11400000, guid: e11eb89372923964fb0413343b1bb1af, type: 2}
+  - {fileID: 11400000, guid: 1b624d5641ecb8e478610ff13be873bb, type: 2}
+  - {fileID: 11400000, guid: 8d8e3aa3dd9a78842a02a91861d7341f, type: 2}
+  - {fileID: 11400000, guid: 6782213f1904816499689505c9205b59, type: 2}
+  - {fileID: 11400000, guid: 844c577995ecf4140ab6bcfa1eccd78c, type: 2}
+  - {fileID: 11400000, guid: 0d6010ca7bf3a8e4894a88893a315f23, type: 2}
   grassPrefab: {fileID: 2388724251714943427, guid: 7010977546ae63a43be3fb16197a80bb, type: 3}
   pathBasicPrefab: {fileID: 2388724251714943427, guid: 364f6d1e263687147a05b50d2089178f, type: 3}
   pathDamagePrefab: {fileID: 249658324801834281, guid: f791e870d3f843e4d9d5a98843ea51c4, type: 3}
   pathSlowPrefab: {fileID: 4166436541929648006, guid: 4e4ff53c1f77c0c44a6055e1a8e7af30, type: 3}
   pathStunPrefab: {fileID: 3081537824206170494, guid: 5c343e35cd3127847baeecb3cb302490, type: 3}
+  pathExposurePrefab: {fileID: 5172388066855472120, guid: 5145460dd5e9374489471f27c3754b0f, type: 3}
+  pathAntiHealPrefab: {fileID: 6144720049060858947, guid: 97dbf0b85a2535744b9f97a9bdd6dcec, type: 3}
   corePrefab: {fileID: 4187024404077585579, guid: 41ab7a6a18b8d714992bf9986a60bbd5, type: 3}
   coreOffset: {x: 0, y: 0, z: 0}
   tilesRoot: {fileID: 0}

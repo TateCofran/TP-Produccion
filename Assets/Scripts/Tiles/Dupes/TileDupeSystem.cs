@@ -27,6 +27,8 @@ public sealed class TileDupeSystem : MonoBehaviour, ITileDupeSystem
             return new TileLevelData();
         }
 
+        layout = KeyOf(layout);
+
         if (!tileLevels.TryGetValue(layout, out var data))
         {
             data = new TileLevelData();
@@ -44,6 +46,7 @@ public sealed class TileDupeSystem : MonoBehaviour, ITileDupeSystem
             return;
         }
 
+        layout = KeyOf(layout);
         var data = GetTileLevelData(layout);
         bool leveledUp = data.AddDupe();
 
@@ -63,5 +66,10 @@ public sealed class TileDupeSystem : MonoBehaviour, ITileDupeSystem
     public void ResetAllLevels()
     {
         tileLevels.Clear();
+    }
+
+    public static TileLayout KeyOf(TileLayout layout)
+    {
+        return layout != null ? layout.DupeKey : null;
     }
 }

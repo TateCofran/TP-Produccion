@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
 
 public interface ITileGenerator
@@ -82,7 +82,10 @@ public interface IPrefabSelector
     GameObject PathDamage { get; }
     GameObject PathSlow { get; }
     GameObject PathStun { get; }
+    GameObject PathExposure { get; }
+    GameObject PathAntiHeal { get; }
     GameObject ChooseForMods(float damage, float slow, float stun);
+    GameObject ChooseForMods(TileLayout.PathModifiers mods);
 }
 
 public interface ILayoutInstantiator

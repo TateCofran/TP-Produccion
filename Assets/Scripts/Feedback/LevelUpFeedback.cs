@@ -114,7 +114,7 @@ public class LevelUpFeedback : MonoBehaviour
         int level = data != null ? data.currentLevel : 2;
         foreach (var applier in FindObjectsByType<TileLevelApplier>(FindObjectsSortMode.None))
         {
-            if (applier == null || applier.Layout != layout) continue;
+            if (applier == null || applier.Layout == null || applier.Layout.DupeKey != layout.DupeKey) continue;
             Flash(applier.gameObject, tileFlashColor);
             ShowLabel(CenterOf(applier.transform), level);
         }

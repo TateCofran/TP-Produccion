@@ -35,7 +35,7 @@ public class Enemy : MonoBehaviour, IEnemyDeathHandler, IWorldAware
         }
     }
 
-    public bool IsTargetable() => data == null || WorldState.Matches(data.vulnerableIn);
+    public bool IsTargetable() => data == null || WorldState.Matches(data.vulnerableIn) || (_effects != null && _effects.IsExposed);
 
     private float _knockbackImmuneUntil;
     private int _knockbackCount;
@@ -81,6 +81,7 @@ public class Enemy : MonoBehaviour, IEnemyDeathHandler, IWorldAware
         hasHitCore = false;
         IsSummoned = false;
         LastHitSource = null;
+        if (_effects != null) _effects.ClearStatus();
         _knockbackImmuneUntil = 0f;
         _knockbackCount = 0;
 

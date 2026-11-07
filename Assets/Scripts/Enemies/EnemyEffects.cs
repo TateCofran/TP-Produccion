@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -8,6 +8,67 @@ public class EnemyEffects : MonoBehaviour, IPathAffectable, ISlowable
     [SerializeField] private EnemyHealth health;
 
     public bool IsStunned => _stunUntil > Time.time;
+    public bool IsExposed => _exposedUntil > Time.time;
+    public bool IsHealBlocked => _healBlockedUntil > Time.time;
+
+    private float _exposedUntil;
+    private float _healBlockedUntil;
+    private ParticleSystem _healBlockFx;
+    private static Material _healBlockMaterial;
+
+    public void ApplyExposure(float duration)
+    {
+        if (duration <= 0f) return;
+        _exposedUntil = Mathf.Max(_exposedUntil, Time.time + duration);
+    }
+
+    public void ApplyHealBlock(float duration)
+    {
+        if (duration <= 0f) return;
+        _healBlockedUntil = Mathf.Max(_healBlockedUntil, Time.time + duration);
+        EnsureHealBlockFx();
+        if (_healBlockFx != null && !_healBlockFx.isPlaying) _healBlockFx.Play();
+    }
+
+    public void ClearStatus()
+    {
+        _exposedUntil = 0f;
+        _healBlockedUntil = 0f;
+        _stunUntil = 0f;
+        _slowUntil = 0f;
+        _currentSlow = 0f;
+        if (_healBlockFx != null) _healBlockFx.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+    }
+
+    private void EnsureHealBlockFx()
+    {
+        if (_healBlockFx != null) return;
+        var go = new GameObject("HealBlockFx");
+        go.transform.SetParent(transform, false);
+        go.transform.localPosition = new Vector3(0f, 1.2f, 0f);
+        _healBlockFx = go.AddComponent<ParticleSystem>();
+        _healBlockFx.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+        var main = _healBlockFx.main;
+        main.loop = true;
+        main.startLifetime = 0.8f;
+        main.startSpeed = 0.4f;
+        main.startSize = new ParticleSystem.MinMaxCurve(0.12f, 0.22f);
+        main.startColor = new Color(0.12f, 0.3f, 0.12f, 0.85f);
+        main.simulationSpace = ParticleSystemSimulationSpace.World;
+        main.maxParticles = 24;
+        var emission = _healBlockFx.emission;
+        emission.rateOverTime = 10f;
+        var shape = _healBlockFx.shape;
+        shape.shapeType = ParticleSystemShapeType.Sphere;
+        shape.radius = 0.3f;
+        var r = go.GetComponent<ParticleSystemRenderer>();
+        if (_healBlockMaterial == null)
+        {
+            var shader = Shader.Find("Universal Render Pipeline/Particles/Unlit");
+            _healBlockMaterial = new Material(shader != null ? shader : Shader.Find("Sprites/Default")) { hideFlags = HideFlags.DontSave };
+        }
+        r.sharedMaterial = _healBlockMaterial;
+    }
     public float CurrentSpeedMultiplier
     {
         get
@@ -42,6 +103,7 @@ public class EnemyEffects : MonoBehaviour, IPathAffectable, ISlowable
     private void Update()
     {
         if (Time.time > _slowUntil) _currentSlow = 0f;
+        if (_healBlockFx != null && _healBlockFx.isPlaying && !IsHealBlocked) _healBlockFx.Stop(true, ParticleSystemStopBehavior.StopEmitting);
     }
 
     public void AddSpeedMultiplier(object key, float multiplier)

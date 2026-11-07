@@ -72,3 +72,14 @@ MonoBehaviour:
   entry: {x: 2, y: 0}
   exits:
   - {x: 4, y: 2}
+  mirrorOf: {fileID: 11400000, guid: a90150de0d4f5484098b53709c915b8a, type: 2}
+  onPlaceEssenceReward: 0
+  activeIn: 0
+  lockedStrengthMultiplier: 2
+  defaultPathMods:
+    dps: 0
+    slow: 0
+    stun: 0
+    exposure: 0
+    antiHeal: 0
+  perCellOverrides: []

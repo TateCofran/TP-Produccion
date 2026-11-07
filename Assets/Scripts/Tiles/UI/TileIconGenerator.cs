@@ -92,6 +92,21 @@ public static class TileIconGenerator
             }
         }
 
+        if (layout.IsDeadEnd)
+        {
+            var end = FarthestPathCell(layout);
+            DrawCross(pixels, w, end.x * CellPixels, end.y * CellPixels, CellPixels, pal.deadEndMark);
+        }
+
+        if (layout.activeIn != WorldAffinity.Neutral)
+        {
+            var mark = layout.activeIn == WorldAffinity.Normal ? pal.normalWorldMark : pal.otherWorldMark;
+            int size = CellPixels;
+            for (int y = 0; y < size; y++)
+                for (int x = 0; x < size - y; x++)
+                    pixels[(h - 1 - y) * w + (w - size + x + y)] = mark;
+        }
+
         tex.SetPixels32(pixels);
         tex.Apply(false, false);
         return tex;
@@ -108,6 +123,37 @@ public static class TileIconGenerator
             {
                 if (x < 0 || x >= texWidth) continue;
                 pixels[y * texWidth + x] = c;
+            }
+        }
+    }
+
+    private static Vector2Int FarthestPathCell(TileLayout layout)
+    {
+        Vector2Int best = layout.entry;
+        int bestDist = -1;
+        for (int y = 0; y < layout.gridHeight; y++)
+            for (int x = 0; x < layout.gridWidth; x++)
+            {
+                var c = new Vector2Int(x, y);
+                if (!layout.IsPath(c)) continue;
+                int d = Mathf.Abs(c.x - layout.entry.x) + Mathf.Abs(c.y - layout.entry.y);
+                if (d > bestDist) { bestDist = d; best = c; }
+            }
+        return best;
+    }
+
+    private static void DrawCross(Color32[] pixels, int texWidth, int x0, int y0, int size, Color color)
+    {
+        Color32 c = color;
+        int texHeight = pixels.Length / texWidth;
+        for (int i = 2; i < size - 2; i++)
+        {
+            for (int t = -1; t <= 1; t++)
+            {
+                int ax = x0 + i + t, ay = y0 + i;
+                int bx = x0 + size - 1 - i + t, by = y0 + i;
+                if (ax >= 0 && ax < texWidth && ay >= 0 && ay < texHeight) pixels[ay * texWidth + ax] = c;
+                if (bx >= 0 && bx < texWidth && by >= 0 && by < texHeight) pixels[by * texWidth + bx] = c;
             }
         }
     }

@@ -47,7 +47,7 @@ public sealed class GhostLayoutInstantiator : ILayoutInstantiator
                 if (coreSkip.HasValue && orientedCell == coreSkip.Value) continue;
 
                 var mods = isPath ? layout.GetPathModifiers(cell) : default;
-                GameObject prefab = isPath ? prefabs.ChooseForMods(mods.dps, mods.slow, mods.stun) : prefabs.Grass;
+                GameObject prefab = isPath ? prefabs.ChooseForMods(mods) : prefabs.Grass;
                 if (!prefab) continue;
 
                 Vector3 local = orientation.CellToWorldLocal(cell, layout, rotSteps, flip);
