@@ -99,6 +99,7 @@ public class GameModifiersManager : MonoBehaviour
         {
             if (mod == null) continue;
             if (appliedModifiers.Contains(mod)) continue;
+            if (!ProgressionStore.IsUnlocked(mod)) continue;
             if (result.Contains(mod)) continue;
             result.Add(mod);
         }

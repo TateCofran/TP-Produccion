@@ -1,0 +1,207 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 56b9d0298cb31df438ca919c449e1c86, type: 3}
+  m_Name: UnlockTable
+  m_EditorClassIdentifier: Assembly-CSharp::UnlockTableSO
+  startingTiles:
+  - {fileID: 11400000, guid: c61d5635d1d30b24490139bea635675a, type: 2}
+  - {fileID: 11400000, guid: a90150de0d4f5484098b53709c915b8a, type: 2}
+  - {fileID: 11400000, guid: 2a25e41b42e19a84b945716f236cb3cf, type: 2}
+  startingTurrets:
+  - {fileID: 11400000, guid: 094b4a67ef6d5dc498c98d6534972009, type: 2}
+  - {fileID: 11400000, guid: db240cbb92b3aa94c8ba282896c415c0, type: 2}
+  - {fileID: 11400000, guid: 3e7d866707d33b2408001077a8fcf7df, type: 2}
+  startingNormalModifiers:
+  - {fileID: 11400000, guid: b0a9a4b6794c75342b91e2364e199ae6, type: 2}
+  - {fileID: 11400000, guid: d583c6756034e5b418c3f54530bea980, type: 2}
+  - {fileID: 11400000, guid: 9d0d9cb91be97744b819b65238a5d652, type: 2}
+  - {fileID: 11400000, guid: 6fb6566bf54055f4bbb948ab041dd319, type: 2}
+  - {fileID: 11400000, guid: 2fea19d9c3674334da87bb5a22ba856d, type: 2}
+  startingOtherModifiers:
+  - {fileID: 11400000, guid: 1264d23db86a67e4fa3e6e9e22e12810, type: 2}
+  - {fileID: 11400000, guid: ad4df57f04ced124480328d75c07451d, type: 2}
+  - {fileID: 11400000, guid: 69a34bb07a72edb408f4efe73c19ce16, type: 2}
+  - {fileID: 11400000, guid: ea03a6b46031def49b2760ba86c2426a, type: 2}
+  - {fileID: 11400000, guid: a6c0fcb2dc44b2d47bad7a25adf847f3, type: 2}
+  normalLevels:
+  - level: 2
+    tiles:
+    - {fileID: 11400000, guid: 51a16c75a254c72489fa6487a56c036d, type: 2}
+    turrets: []
+    modifiers:
+    - {fileID: 11400000, guid: 4e6b51a57e383a44a8eef81da77628a7, type: 2}
+  - level: 3
+    tiles:
+    - {fileID: 11400000, guid: cb2772025a736704c9e4876ca23cf1bc, type: 2}
+    - {fileID: 11400000, guid: 7f292781b6cbf664fad9c1211e49e167, type: 2}
+    turrets: []
+    modifiers: []
+  - level: 4
+    tiles:
+    - {fileID: 11400000, guid: d6e6fda150c4a9242b7e8b9a3284728f, type: 2}
+    turrets: []
+    modifiers:
+    - {fileID: 11400000, guid: 4d75dafcc2f90dc46b9eb4748ea80bc1, type: 2}
+  - level: 5
+    tiles:
+    - {fileID: 11400000, guid: 8d8e3aa3dd9a78842a02a91861d7341f, type: 2}
+    turrets: []
+    modifiers:
+    - {fileID: 11400000, guid: f940f2e2971de7c48816a72dd0fe70e3, type: 2}
+  - level: 6
+    tiles:
+    - {fileID: 11400000, guid: 437728d596b185e4d8c147263fdecaaf, type: 2}
+    - {fileID: 11400000, guid: eb2f6d256f133be4284aed4d6b6150d6, type: 2}
+    turrets: []
+    modifiers: []
+  - level: 7
+    tiles:
+    - {fileID: 11400000, guid: 1b624d5641ecb8e478610ff13be873bb, type: 2}
+    turrets: []
+    modifiers:
+    - {fileID: 11400000, guid: b75846e0c9806a645b354aee630f2b1f, type: 2}
+  - level: 8
+    tiles:
+    - {fileID: 11400000, guid: e35188b90f74a2b499a8b8e959c4c896, type: 2}
+    turrets: []
+    modifiers:
+    - {fileID: 11400000, guid: 363e25188eb8ebf4590860908dc1eab0, type: 2}
+  - level: 9
+    tiles:
+    - {fileID: 11400000, guid: 2d9faa88385bac542ba33785489584be, type: 2}
+    - {fileID: 11400000, guid: 6dfbac8f7dfea844391d8e4463de77df, type: 2}
+    turrets: []
+    modifiers:
+    - {fileID: 11400000, guid: 5a894119ad9bbca409c906996cbf5c49, type: 2}
+  - level: 10
+    tiles: []
+    turrets: []
+    modifiers:
+    - {fileID: 11400000, guid: 064e347645f825b44a4ee36baa34bd0d, type: 2}
+  - level: 11
+    tiles:
+    - {fileID: 11400000, guid: 6782213f1904816499689505c9205b59, type: 2}
+    - {fileID: 11400000, guid: a0aeda22ae29d794194f7f9a7413c5c5, type: 2}
+    turrets: []
+    modifiers:
+    - {fileID: 11400000, guid: bcd31cafbbf4ca5468a4666544cc5c7c, type: 2}
+  - level: 12
+    tiles:
+    - {fileID: 11400000, guid: 844c577995ecf4140ab6bcfa1eccd78c, type: 2}
+    - {fileID: 11400000, guid: f1288d5393b7c1f4fbd3fd81ffc8f21c, type: 2}
+    turrets: []
+    modifiers:
+    - {fileID: 11400000, guid: 804b772c4000c9c4d8f8b170cc3fae07, type: 2}
+  - level: 13
+    tiles:
+    - {fileID: 11400000, guid: e1e3e38f87bf22745bb2bbc15e9b423c, type: 2}
+    - {fileID: 11400000, guid: 5e94e4ea8dd8af74582dbc5896f1db7a, type: 2}
+    turrets: []
+    modifiers:
+    - {fileID: 11400000, guid: 2f305fd6decae79458bace815b6c1650, type: 2}
+  - level: 14
+    tiles:
+    - {fileID: 11400000, guid: e11eb89372923964fb0413343b1bb1af, type: 2}
+    - {fileID: 11400000, guid: b6a2c2e70dcc78346bfdf5f0d350172d, type: 2}
+    turrets: []
+    modifiers:
+    - {fileID: 11400000, guid: 3250a9768d37bd54aa65f7b1b0a15307, type: 2}
+  - level: 15
+    tiles:
+    - {fileID: 11400000, guid: 9ecdbed1bc6ab3b48905137c97f81b0f, type: 2}
+    - {fileID: 11400000, guid: d80751cc7b4a377498ccd319a39995f6, type: 2}
+    turrets: []
+    modifiers:
+    - {fileID: 11400000, guid: 3576b5373e059524ea88f76d6c6f7cb9, type: 2}
+  - level: 16
+    tiles:
+    - {fileID: 11400000, guid: 0d6010ca7bf3a8e4894a88893a315f23, type: 2}
+    - {fileID: 11400000, guid: 0ea3789402429e04cabc650854f6974c, type: 2}
+    turrets: []
+    modifiers:
+    - {fileID: 11400000, guid: e61b9ede70147c940b53ab84b4128af4, type: 2}
+  otherLevels:
+  - level: 2
+    tiles: []
+    turrets:
+    - {fileID: 11400000, guid: 6ce12d9cfb398a5438821d574fad1156, type: 2}
+    modifiers:
+    - {fileID: 11400000, guid: 2dabd8f426172f74f9ebf12b44cbfc9b, type: 2}
+  - level: 3
+    tiles: []
+    turrets:
+    - {fileID: 11400000, guid: 0bb34dbf67cfdfa40be164bb8bc22d7d, type: 2}
+    modifiers: []
+  - level: 4
+    tiles: []
+    turrets:
+    - {fileID: 11400000, guid: 6728b888f3db3e8479d34ae4ff88ab27, type: 2}
+    modifiers:
+    - {fileID: 11400000, guid: b570f78ea2653a047b9be510ea18966e, type: 2}
+  - level: 5
+    tiles: []
+    turrets:
+    - {fileID: 11400000, guid: a8afa376b504d5549bda5ac182a0c6a9, type: 2}
+    modifiers:
+    - {fileID: 11400000, guid: 67ffe11b9f0790049aa38adc694df06f, type: 2}
+  - level: 6
+    tiles: []
+    turrets:
+    - {fileID: 11400000, guid: 3bf258b243e33b443bbba4ad85681dc8, type: 2}
+    modifiers:
+    - {fileID: 11400000, guid: c7bcf26a7975c0442ad7877323862e33, type: 2}
+  - level: 7
+    tiles: []
+    turrets:
+    - {fileID: 11400000, guid: 43cd20ba959887f4f9497b9cc186d613, type: 2}
+    modifiers:
+    - {fileID: 11400000, guid: 643f72f9cc71f8346ac1a2df12d529d5, type: 2}
+  - level: 8
+    tiles: []
+    turrets:
+    - {fileID: 11400000, guid: f0b36df9fdd32dd49a9c2d02c7700318, type: 2}
+    modifiers:
+    - {fileID: 11400000, guid: 1978232dadee3a74bac1b6bb2fddb529, type: 2}
+  - level: 9
+    tiles: []
+    turrets:
+    - {fileID: 11400000, guid: b6557c96aafea1542bf3ff075f97f3f6, type: 2}
+    modifiers:
+    - {fileID: 11400000, guid: d31f9100533a5c046b4e99bbfed6f96e, type: 2}
+  - level: 10
+    tiles: []
+    turrets: []
+    modifiers:
+    - {fileID: 11400000, guid: 59b58f8ba91045149afba7a7071f1502, type: 2}
+  - level: 11
+    tiles: []
+    turrets:
+    - {fileID: 11400000, guid: 1e79a84fa4f308f49bdea08bc95dfddc, type: 2}
+    modifiers:
+    - {fileID: 11400000, guid: 720fda019bdcd68479ac821343870030, type: 2}
+  - level: 12
+    tiles: []
+    turrets:
+    - {fileID: 11400000, guid: 678aa885a02836f4c8d56d3f5b594b38, type: 2}
+    modifiers:
+    - {fileID: 11400000, guid: 37c0b020efa7d7b418189b969b740caf, type: 2}
+  - level: 13
+    tiles: []
+    turrets: []
+    modifiers:
+    - {fileID: 11400000, guid: 00e05eece938ac540ba5728052755b0c, type: 2}
+    - {fileID: 11400000, guid: 63b66b738cb1fbb42ad978986f48b3fb, type: 2}
+  - level: 14
+    tiles: []
+    turrets: []
+    modifiers:
+    - {fileID: 11400000, guid: d440ae08dd73db04cb022f3501e85c53, type: 2}

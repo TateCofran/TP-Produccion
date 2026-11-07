@@ -75,7 +75,6 @@ public class TurretOptionButton : MonoBehaviour, IPointerEnterHandler, IPointerE
         damage = so.damage;
         range = so.range;
         fireRate = so.fireRate;
-        TurretPermanentUpgrades.ApplyPermanentUpgrades(ref damage, ref range, ref fireRate);
 
         if (data != null)
         {
@@ -108,6 +107,7 @@ public class TurretOptionButton : MonoBehaviour, IPointerEnterHandler, IPointerE
         string levelText = data != null ? $"Lv {data.currentLevel} ({data.currentDupes}/{data.dupesRequiredForNextLevel})" : "Lv 1";
         string text = $"{GetDisplayName(so)}  {levelText}\nDamage {damage:0.#}\nRange {range:0.#}\nFire rate {fireRate:0.##}\n{affinity}";
         var table = SynergyService.Instance != null ? SynergyService.Instance.Table : null;
+        if (table == null && ProgressionSettingsSO.Instance != null) table = ProgressionSettingsSO.Instance.synergyTable;
         string synergy = table != null ? table.DescribeFor(so.turretType) : string.Empty;
         return string.IsNullOrEmpty(synergy) ? text : text + "\n" + synergy;
     }

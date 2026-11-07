@@ -378,7 +378,7 @@ public class RewardZoneSystem : MonoBehaviour
 
     private static float GetRewardBonus()
     {
-        return GameModifiersManager.Multiplier(ModifierStat.RewardZoneBonus) + RunPermanentUpgrades.RewardZoneBonus;
+        return GameModifiersManager.Multiplier(ModifierStat.RewardZoneBonus);
     }
 
     private int GetEssenceAmount(RewardType type)
@@ -414,7 +414,7 @@ public class RewardZoneSystem : MonoBehaviour
         {
             if (turret == null || !turret.IsPlaced) continue;
             var holder = turret.GetComponent<TurretDataHolder>();
-            if (holder != null && holder.turretDataSO != null && !types.Contains(holder.turretDataSO))
+            if (holder != null && holder.turretDataSO != null && !types.Contains(holder.turretDataSO) && RunLoadout.ContainsTurret(holder.turretDataSO))
                 types.Add(holder.turretDataSO);
         }
 
@@ -426,6 +426,14 @@ public class RewardZoneSystem : MonoBehaviour
         return true;
     }
 
+    public static bool InLoadout(TileLayout layout)
+    {
+        if (layout == null) return false;
+        var key = layout.DupeKey;
+        foreach (var t in RunLoadout.Tiles) if (t != null && t.DupeKey == key) return true;
+        return false;
+    }
+
     private bool TryGrantTileDupe()
     {
         var dupeSystem = FindFirstObjectByType<TileDupeSystem>();
@@ -435,7 +443,7 @@ public class RewardZoneSystem : MonoBehaviour
         for (int i = 0; i < grid.PlacedTileCount; i++)
         {
             var layout = grid.GetPlacedTile(i).layout;
-            if (layout == null || layout == grid.InitialLayout || layouts.Contains(layout)) continue;
+            if (layout == null || layout == grid.InitialLayout || layouts.Contains(layout) || !InLoadout(layout)) continue;
             layouts.Add(layout);
         }
 

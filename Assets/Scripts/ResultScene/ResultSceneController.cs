@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -41,6 +41,7 @@ public class ResultSceneController : MonoBehaviour
 
     private IEnumerator Start()
     {
+        if (FindFirstObjectByType<ResultProgressionUI>() == null) new GameObject("ResultProgression").AddComponent<ResultProgressionUI>();
         yield return null;
         UpdateUI();
     }
@@ -65,10 +66,10 @@ public class ResultSceneController : MonoBehaviour
         if (totalEnemiesKilledText) totalEnemiesKilledText.text = "Enemies Killed: " + gm.totalEnemiesKilled;
 
         if (blueEssencesText)
-            blueEssencesText.text = $"Normal Essences: {gm.totalBlueEssences} Total: {EssenceBank.TotalBlue}";
+            blueEssencesText.text = $"Normal Essences: {gm.totalBlueEssences}";
 
         if (redEssencesText)
-            redEssencesText.text = $"OW Essences: {gm.totalRedEssences} Total: {EssenceBank.TotalRed}";
+            redEssencesText.text = $"OW Essences: {gm.totalRedEssences}";
     }
 
     private void WireButtons()

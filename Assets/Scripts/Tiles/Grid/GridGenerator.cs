@@ -129,8 +129,25 @@ public class GridGenerator : MonoBehaviour, ITileGenerator
 
     private void Start()
     {
+        if (Application.isPlaying && RunLoadout.Tiles.Count > 0) SetCandidateLayouts(RunLoadout.Tiles);
         if (generateOnStart) GenerateFirst();
     }
+
+    public void SetCandidateLayouts(IEnumerable<TileLayout> layouts)
+    {
+        var result = new List<TileLayout>();
+        foreach (var l in layouts)
+        {
+            if (l == null) continue;
+            if (!result.Contains(l)) result.Add(l);
+            foreach (var c in candidateLayouts)
+                if (c != null && c.MirrorOf == l && !result.Contains(c)) result.Add(c);
+        }
+        if (result.Count == 0) return;
+        candidateLayouts = result;
+        Log.Info(nameof(GridGenerator), $"Candidate layouts set from loadout: {result.Count}");
+    }
+
 
     private float GetGlobalCellSize() => (initialLayout ? initialLayout.cellSize : 1f);
 
@@ -674,6 +691,15 @@ public class GridGenerator : MonoBehaviour, ITileGenerator
         var pool = new List<TileLayout>();
         foreach (var c in candidateLayouts)
             if (c != null && !pool.Contains(c) && LayoutFitsAnyExit(c)) pool.Add(c);
+
+        if (pool.Count == 0)
+        {
+            var settings = ProgressionSettingsSO.Instance;
+            if (settings != null && settings.fallbackTiles != null)
+                foreach (var f in settings.fallbackTiles)
+                    if (f != null && !pool.Contains(f) && LayoutFitsAnyExit(f)) pool.Add(f);
+            Debug.LogWarning($"[GridGenerator] No loadout tile fits any exit. Using {pool.Count} fallback tiles");
+        }
 
         for (int i = 0; i < pool.Count; i++)
         {

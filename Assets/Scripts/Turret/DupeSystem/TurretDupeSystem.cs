@@ -23,6 +23,11 @@ public class TurretDupeSystem : MonoBehaviour, ITurretDupeSystem
     public void AddDupe(TurretDataSO turret)
     {
         AddDupeInternal(turret);
+    }
+
+    public void AddPlacementDupe(TurretDataSO turret)
+    {
+        AddDupeInternal(turret);
 
         if (GameModifiersManager.Stat(ModifierStat.Arsenal) <= 0f || turret == null) return;
         string sourceId = GetTurretId(turret);

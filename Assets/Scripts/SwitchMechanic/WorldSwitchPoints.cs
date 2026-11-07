@@ -8,16 +8,6 @@ public class WorldSwitchPoints : MonoBehaviour
     [SerializeField] private ShiftingWorldMechanic mechanic;
     [SerializeField] private EssencePopupUI essenceUI;
 
-    [Header("Permanent Upgrade Bonuses")]
-    [Tooltip("ID of the Lab upgrade that increases blue essences per kill.")]
-    [SerializeField] private string labBlueUpgradeId = "upgrade_moreEssencePerSwitchTile";
-    [Tooltip("Bonus per level (0.1 = +10% per level).")]
-    [Range(0f, 5f)][SerializeField] private float blueBonusPerLevel = 0.1f;
-
-    [Tooltip("ID of the Workshop upgrade that increases red essences per kill.")]
-    [SerializeField] private string workshopRedUpgradeId = "upgrade_moreEssencePerSwitchTurret";
-    [Range(0f, 5f)][SerializeField] private float redBonusPerLevel = 0.1f;
-
     [Header("Totals")]
     [SerializeField] private int totalBlueEssences = 0;
     [SerializeField] private int totalRedEssences = 0;
@@ -96,16 +86,12 @@ public class WorldSwitchPoints : MonoBehaviour
 
     private float GetBlueMultiplier()
     {
-        int level = UpgradeLevels.Get(labBlueUpgradeId);
-        float modifier = GameModifiersManager.Instance != null ? GameModifiersManager.Instance.blueEssenceMultiplier : 1f;
-        return (1f + blueBonusPerLevel * level) * modifier;
+        return GameModifiersManager.Instance != null ? GameModifiersManager.Instance.blueEssenceMultiplier : 1f;
     }
 
     private float GetRedMultiplier()
     {
-        int level = UpgradeLevels.Get(workshopRedUpgradeId);
-        float modifier = GameModifiersManager.Instance != null ? GameModifiersManager.Instance.redEssenceMultiplier : 1f;
-        return (1f + redBonusPerLevel * level) * modifier;
+        return GameModifiersManager.Instance != null ? GameModifiersManager.Instance.redEssenceMultiplier : 1f;
     }
 
     public void GrantWithOrb(int amount, bool blue, Vector3 worldPosition)

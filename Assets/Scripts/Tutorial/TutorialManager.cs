@@ -407,7 +407,7 @@ public class TutorialManager : MonoBehaviour
                     "You earned <b>10 Normal World essences</b>.\n" +
                     "Returning to the menu...";
 
-            EssenceBank.Add(10, 0);
+            ProgressionStore.AddXp(ShiftingWorldMechanic.World.Normal, 10);
         }
         else
         {

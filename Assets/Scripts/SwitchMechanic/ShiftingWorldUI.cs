@@ -686,10 +686,15 @@ public class ShiftingWorldUI : MonoBehaviour
         currentTurretOptions.Clear();
 
         var pool = new List<TurretDataSO>();
-        if (turretDatabase && turretDatabase.allTurrets != null)
-            foreach (var t in turretDatabase.allTurrets) if (t) pool.Add(t);
-        if (turretPool != null)
-            foreach (var t in turretPool) if (t) pool.Add(t);
+        foreach (var t in RunLoadout.Turrets) if (t && t.prefab && !pool.Contains(t)) pool.Add(t);
+        if (pool.Count == 0)
+        {
+            if (turretDatabase && turretDatabase.allTurrets != null)
+                foreach (var t in turretDatabase.allTurrets) if (t && !pool.Contains(t)) pool.Add(t);
+            if (turretPool != null)
+                foreach (var t in turretPool) if (t && !pool.Contains(t)) pool.Add(t);
+            Debug.LogWarning("[ShiftingWorldUI] Loadout has no turrets. Using the turret database");
+        }
 
         if (pool.Count == 0)
         {
@@ -703,13 +708,13 @@ public class ShiftingWorldUI : MonoBehaviour
         int buttonCount = turretButtons != null ? turretButtons.Length : 0;
         for (int i = 0; i < buttonCount; i++)
         {
-            if (i >= optionsCount)
+            if (i >= optionsCount || i >= pool.Count)
             {
                 if (turretButtons[i]) turretButtons[i].gameObject.SetActive(false);
                 continue;
             }
 
-            var so = pool[i % pool.Count];
+            var so = pool[i];
             currentTurretOptions.Add(so);
 
             int idx = i;
@@ -905,7 +910,8 @@ public class ShiftingWorldUI : MonoBehaviour
         var prev = dupeSystem.GetTurretLevelData(turret);
         int prevLevel = prev.currentLevel;
 
-        dupeSystem.AddDupe(turret);
+        if (dupeSystem is TurretDupeSystem concrete) concrete.AddPlacementDupe(turret);
+        else dupeSystem.AddDupe(turret);
 
         var cur = dupeSystem.GetTurretLevelData(turret);
         if (cur.currentLevel > prevLevel)

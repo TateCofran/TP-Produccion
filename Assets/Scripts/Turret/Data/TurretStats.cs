@@ -129,12 +129,6 @@ public class TurretStats : MonoBehaviour, ITurretStats
         affinityBonus = so.affinityBonus;
         offWorldPenalty = so.offWorldPenalty;
 
-        TurretPermanentUpgrades.ApplyPermanentUpgrades(
-            ref baseDamage,
-            ref baseRange,
-            ref baseFireRate
-        );
-
         RecalculateStats();
         UpdateRangeVisualizer();
     }
