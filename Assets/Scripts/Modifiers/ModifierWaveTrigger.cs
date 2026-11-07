@@ -75,6 +75,7 @@ public class ModifierWaveTrigger : MonoBehaviour
         RefreshCountdown();
 
         int wave = waves.GetCurrentWave();
+        LegendaryTrigger.Instance?.OfferIfDue(wave);
         if (wave <= 0 || wave % everyNWaves != 0 || waves.IsLastWave()) return;
 
         if (panel == null)

@@ -7,6 +7,7 @@ public static class ModifierAssetCreator
 {
     private const string NormalFolder = "Assets/Scriptable Object/Modifiers/Normal";
     private const string OtherFolder = "Assets/Scriptable Object/Modifiers/Other";
+    private const string LegendaryFolder = "Assets/Scriptable Object/Modifiers/Legendary";
 
     private struct Definition
     {
@@ -22,13 +23,14 @@ public static class ModifierAssetCreator
     {
         EnsureFolder(NormalFolder);
         EnsureFolder(OtherFolder);
+        EnsureFolder(LegendaryFolder);
 
         int created = 0;
         int skipped = 0;
 
         foreach (var def in GetDefinitions())
         {
-            string folder = def.category == ModifierCategory.OtherWorld ? OtherFolder : NormalFolder;
+            string folder = GameModifiersManager.IsLegendary(def.category) ? LegendaryFolder : def.category == ModifierCategory.OtherWorld ? OtherFolder : NormalFolder;
             string fileName = $"{def.id}_{def.name.Replace(" ", string.Empty)}.asset";
             string path = $"{folder}/{fileName}";
 
@@ -76,8 +78,25 @@ public static class ModifierAssetCreator
         return new Definition { id = id, name = name, description = description, category = ModifierCategory.OtherWorld, entries = entries };
     }
 
+    private static Definition LN(string id, string name, string description, params (ModifierStat, float)[] entries)
+    {
+        return new Definition { id = id, name = name, description = description, category = ModifierCategory.LegendaryNormal, entries = entries };
+    }
+
+    private static Definition LO(string id, string name, string description, params (ModifierStat, float)[] entries)
+    {
+        return new Definition { id = id, name = name, description = description, category = ModifierCategory.LegendaryOther, entries = entries };
+    }
+
     private static IEnumerable<Definition> GetDefinitions()
     {
+        yield return LN("LN1", "Unified Ground", "Tiles with the same effect count as duplicates of each other.", (ModifierStat.UnifiedGround, 1f));
+        yield return LN("LN2", "Cartographer", "Fog is revealed 2 tiles around the whole path. Reward zones are always visible and their rewards are doubled.", (ModifierStat.Cartographer, 1f), (ModifierStat.RewardZoneAlwaysVisible, 1f), (ModifierStat.RewardZoneBonus, 1f));
+        yield return LN("LN3", "Primal Ground", "Tiles apply their normal and their flipped effect in both worlds.", (ModifierStat.PrimalGround, 1f));
+        yield return LO("LO1", "Worldless", "Turrets always get their affinity bonus and never their off-world penalty.", (ModifierStat.Worldless, 1f));
+        yield return LO("LO2", "Rift Walker", "The world switch cooldown is 80% shorter.", (ModifierStat.ShiftCooldownReduction, 0.8f));
+        yield return LO("LO3", "Arsenal", "Every turret you place adds 1 copy to every placed turret type.", (ModifierStat.Arsenal, 1f));
+
         yield return N("N01", "Fast Builder", "The tile bar fills 20% faster.", (ModifierStat.TileBarSpeed, 0.2f));
         yield return N("N02", "Wide Choice", "One more tile option every time the tile bar fills.", (ModifierStat.TileOptionsCount, 1f));
         yield return N("N03", "Reroll", "Reroll the tile options once per selection.", (ModifierStat.TileRerolls, 1f));

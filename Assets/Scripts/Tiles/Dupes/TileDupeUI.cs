@@ -114,7 +114,7 @@ public class TileDupeUI : MonoBehaviour
 
     public static string GetTileTypeName(TileLayout layout)
     {
-        return layout != null ? layout.DupeKey.name : string.Empty;
+        return layout != null ? TileDupeSystem.KeyOf(layout).name : string.Empty;
     }
 
     public (int level, int currentDupes, int maxDupes) GetTileData(string tileType)

@@ -83,10 +83,18 @@ public class ModifierCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExitH
             iconImage.enabled = iconImage.sprite != null;
         }
 
+        bool legendary = mod != null && GameModifiersManager.IsLegendary(mod.Category);
         if (glow != null)
         {
             bool other = mod != null && (mod.Category == ModifierCategory.OtherWorld || mod.Category == ModifierCategory.LegendaryOther);
-            glow.effectColor = other ? otherGlow : normalGlow;
+            glow.effectColor = legendary ? LegendaryCardFX.Gold : other ? otherGlow : normalGlow;
+        }
+        if (legendary)
+        {
+            var fx = GetComponent<LegendaryCardFX>();
+            if (fx == null) fx = gameObject.AddComponent<LegendaryCardFX>();
+            fx.Build();
+            if (nameText) nameText.text = "<color=#FFC733>LEGENDARY</color>\n" + mod.displayName;
         }
 
         if (button)

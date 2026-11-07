@@ -50,7 +50,7 @@ public class TileLevelApplier : MonoBehaviour
 
     private void HandleTileLevelUp(TileLayout leveledLayout, TileLevelData data)
     {
-        if (leveledLayout == null || layout == null || leveledLayout != layout.DupeKey) return;
+        if (leveledLayout == null || layout == null || leveledLayout != TileDupeSystem.KeyOf(layout)) return;
         levelData = data;
         ApplyLevel();
     }

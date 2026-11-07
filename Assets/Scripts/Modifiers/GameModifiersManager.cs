@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
@@ -9,6 +9,8 @@ public class GameModifiersManager : MonoBehaviour
     [Header("Pools")]
     [SerializeField] private List<ModifierSO> normalPool = new List<ModifierSO>();
     [SerializeField] private List<ModifierSO> otherPool = new List<ModifierSO>();
+    [SerializeField] private List<ModifierSO> legendaryNormalPool = new List<ModifierSO>();
+    [SerializeField] private List<ModifierSO> legendaryOtherPool = new List<ModifierSO>();
 
     private readonly Dictionary<ModifierStat, float> stats = new Dictionary<ModifierStat, float>();
     private readonly List<IGameModifier> appliedModifiers = new List<IGameModifier>();
@@ -31,6 +33,8 @@ public class GameModifiersManager : MonoBehaviour
 
     public IReadOnlyList<ModifierSO> NormalPool => normalPool;
     public IReadOnlyList<ModifierSO> OtherPool => otherPool;
+    public IReadOnlyList<ModifierSO> LegendaryNormalPool => legendaryNormalPool;
+    public IReadOnlyList<ModifierSO> LegendaryOtherPool => legendaryOtherPool;
 
     public void InjectModifierPanelSelection(ModifierPanelSelection panel)
     {
@@ -87,7 +91,7 @@ public class GameModifiersManager : MonoBehaviour
 
     public List<ModifierSO> GetAvailable(ModifierCategory category)
     {
-        var pool = category == ModifierCategory.OtherWorld ? otherPool : normalPool;
+        var pool = PoolFor(category);
         var result = new List<ModifierSO>();
         if (pool == null) return result;
 
@@ -99,6 +103,22 @@ public class GameModifiersManager : MonoBehaviour
             result.Add(mod);
         }
         return result;
+    }
+
+    private List<ModifierSO> PoolFor(ModifierCategory category)
+    {
+        switch (category)
+        {
+            case ModifierCategory.OtherWorld: return otherPool;
+            case ModifierCategory.LegendaryNormal: return legendaryNormalPool;
+            case ModifierCategory.LegendaryOther: return legendaryOtherPool;
+            default: return normalPool;
+        }
+    }
+
+    public static bool IsLegendary(ModifierCategory category)
+    {
+        return category == ModifierCategory.LegendaryNormal || category == ModifierCategory.LegendaryOther;
     }
 
     public List<ModifierSO> GetRandomAvailable(ModifierCategory category, int count)
@@ -116,9 +136,14 @@ public class GameModifiersManager : MonoBehaviour
 
     public static ModifierCategory CategoryForCurrentWorld()
     {
-        return WorldState.Current == ShiftingWorldMechanic.World.Other
-            ? ModifierCategory.OtherWorld
-            : ModifierCategory.NormalWorld;
+        return CategoryForCurrentWorld(false);
+    }
+
+    public static ModifierCategory CategoryForCurrentWorld(bool legendary)
+    {
+        bool other = WorldState.Current == ShiftingWorldMechanic.World.Other;
+        if (legendary) return other ? ModifierCategory.LegendaryOther : ModifierCategory.LegendaryNormal;
+        return other ? ModifierCategory.OtherWorld : ModifierCategory.NormalWorld;
     }
 
     public void ApplyModifier(IGameModifier modifier)
@@ -137,8 +162,14 @@ public class GameModifiersManager : MonoBehaviour
         {
             Debug.Log($"[GameModifiersManager] Applied modifier {so.id} {so.displayName}");
 
-            if (so.Affects(ModifierStat.TurretDamage) || so.Affects(ModifierStat.TurretFireRate) || so.Affects(ModifierStat.TurretRange))
+            if (so.Affects(ModifierStat.TurretDamage) || so.Affects(ModifierStat.TurretFireRate) || so.Affects(ModifierStat.TurretRange) || so.Affects(ModifierStat.Worldless))
                 RecalculateAllTurrets();
+
+            if (so.Affects(ModifierStat.UnifiedGround))
+            {
+                var tileDupes = FindFirstObjectByType<TileDupeSystem>();
+                if (tileDupes != null) tileDupes.MergeByEffect();
+            }
 
             if (so.Affects(ModifierStat.CoreMaxHealth) && Core.Active != null)
                 Core.Active.ModifyMaxHealth(Mathf.RoundToInt(so.entries.Where(e => e != null && e.stat == ModifierStat.CoreMaxHealth).Sum(e => e.value)));

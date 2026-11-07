@@ -35,12 +35,14 @@ public class TurretStats : MonoBehaviour, ITurretStats
     public float FireRate => currentFireRate;
     public int UpgradeLevel => upgradeLevel;
     public WorldAffinity Affinity => affinity;
+    public TurretDataSO Source { get; private set; }
     public bool IsInAffinityWorld => affinity != WorldAffinity.Neutral && WorldState.Matches(affinity);
     public float AffinityMultiplier
     {
         get
         {
             if (affinity == WorldAffinity.Neutral) return 1f;
+            if (GameModifiersManager.Stat(ModifierStat.Worldless) > 0f) return 1f + affinityBonus;
             return WorldState.Matches(affinity) ? 1f + affinityBonus : 1f - offWorldPenalty;
         }
     }
@@ -117,6 +119,7 @@ public class TurretStats : MonoBehaviour, ITurretStats
     public void InitializeFromSO(TurretDataSO so)
     {
         if (so == null) return;
+        Source = so;
 
         baseDamage = so.damage;
         baseRange = so.range;

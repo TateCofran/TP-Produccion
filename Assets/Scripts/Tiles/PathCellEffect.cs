@@ -43,6 +43,7 @@ public class PathCellEffect : MonoBehaviour
     private readonly Dictionary<int, float> _nextStunAllowed = new Dictionary<int, float>();
 
     private readonly Dictionary<int, float> _nextSlowRefresh = new Dictionary<int, float>();
+    private readonly Dictionary<int, float> _nextFlipSlow = new Dictionary<int, float>();
 
     private float _baseDamage;
     private float _baseSlow;
@@ -234,17 +235,20 @@ public class PathCellEffect : MonoBehaviour
         else { effSlow = Mathf.Clamp01(slow * strength); effStun = stun * strength; stunCd = 0.5f; }
 
         bool flipped = man != null && man.IsWorldFlipped;
+        bool primal = man != null && man.enableAll && man.enableWorldFlip && GameModifiersManager.Stat(ModifierStat.PrimalGround) > 0f;
+        bool doFlip = flipped || primal;
+        bool doNormal = !flipped || primal;
         float now = Time.time;
 
-        if (effSlow > 0f && (!_nextSlowRefresh.TryGetValue(id, out var tNextSlow) || now >= tNextSlow))
+        if (effSlow > 0f)
         {
-            if (flipped)
+            if (doFlip && (!_nextFlipSlow.TryGetValue(id, out var tNextFlip) || now >= tNextFlip))
             {
                 int dmg = Mathf.Max(1, Mathf.CeilToInt(effSlow * man.otherWorldSlowDamage));
                 aff.ApplyInstantDamage(dmg);
-                _nextSlowRefresh[id] = now + man.otherWorldSlowDamageInterval;
+                _nextFlipSlow[id] = now + man.otherWorldSlowDamageInterval;
             }
-            else
+            if (doNormal && (!_nextSlowRefresh.TryGetValue(id, out var tNextSlow) || now >= tNextSlow))
             {
                 float dt = GetStatusInterval();
                 aff.ApplySlow(effSlow, dt + 0.05f + GetLingerSeconds());
@@ -254,7 +258,7 @@ public class PathCellEffect : MonoBehaviour
 
         if (effStun > 0f && (!_nextStunAllowed.TryGetValue(id, out var tNextStun) || now >= tNextStun))
         {
-            if (flipped)
+            if (doFlip)
             {
                 var enemy = ((Component)aff).GetComponentInParent<Enemy>();
                 if (enemy != null)
@@ -263,7 +267,7 @@ public class PathCellEffect : MonoBehaviour
                     enemy.TryKnockBack(distance, man.knockbackImmunity, man.maxKnockbacksPerEnemy);
                 }
             }
-            else
+            if (doNormal)
             {
                 aff.ApplyStun(effStun + GetLingerSeconds());
             }
@@ -299,5 +303,6 @@ public class PathCellEffect : MonoBehaviour
         _nextDamageAllowed.Remove(id);
         _nextStunAllowed.Remove(id);
         _nextSlowRefresh.Remove(id);
+        _nextFlipSlow.Remove(id);
     }
 }

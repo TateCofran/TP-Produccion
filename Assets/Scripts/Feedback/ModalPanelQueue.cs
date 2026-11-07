@@ -6,7 +6,8 @@ public enum ModalPriority
 {
     TileOrTurret = 0,
     ExtraPick = 1,
-    Modifier = 2
+    Modifier = 2,
+    Legendary = 3
 }
 
 [DefaultExecutionOrder(-50)]
@@ -46,7 +47,7 @@ public class ModalPanelQueue : MonoBehaviour
     public bool HasOpenPanel => current != null;
     public int PendingCount => pending.Count;
     public ModalPriority? CurrentPriority => current?.priority;
-    public bool IsModifierOpen => current != null && current.priority == ModalPriority.Modifier;
+    public bool IsModifierOpen => current != null && (current.priority == ModalPriority.Modifier || current.priority == ModalPriority.Legendary);
 
     public static bool ModifierPanelActive => instance != null && instance.IsModifierOpen;
 

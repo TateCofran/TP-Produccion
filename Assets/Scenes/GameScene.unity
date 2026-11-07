@@ -14196,6 +14196,7 @@ GameObject:
   - component: {fileID: 2818205942294807717}
   - component: {fileID: 6813770304182493643}
   - component: {fileID: 6813770304182493644}
+  - component: {fileID: 6813770304182493645}
   m_Layer: 0
   m_Name: Game Modifier
   m_TagString: Untagged
@@ -20026,6 +20027,14 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 37c0b020efa7d7b418189b969b740caf, type: 2}
   - {fileID: 11400000, guid: 00e05eece938ac540ba5728052755b0c, type: 2}
   - {fileID: 11400000, guid: 720fda019bdcd68479ac821343870030, type: 2}
+  legendaryNormalPool:
+  - {fileID: 11400000, guid: 064e347645f825b44a4ee36baa34bd0d, type: 2}
+  - {fileID: 11400000, guid: 3576b5373e059524ea88f76d6c6f7cb9, type: 2}
+  - {fileID: 11400000, guid: e61b9ede70147c940b53ab84b4128af4, type: 2}
+  legendaryOtherPool:
+  - {fileID: 11400000, guid: 59b58f8ba91045149afba7a7071f1502, type: 2}
+  - {fileID: 11400000, guid: 63b66b738cb1fbb42ad978986f48b3fb, type: 2}
+  - {fileID: 11400000, guid: d440ae08dd73db04cb022f3501e85c53, type: 2}
 --- !u!114 &6813770304182493644
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -20041,6 +20050,24 @@ MonoBehaviour:
   panel: {fileID: 0}
   everyNWaves: 3
   optionsCount: 3
+--- !u!114 &6813770304182493645
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 451036088832461784}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6e2e4e214bcc9c049bf143113bf46743, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LegendaryTrigger
+  panel: {fileID: 0}
+  grid: {fileID: 0}
+  fog: {fileID: 0}
+  legendaryWaves: 0f0000001e000000
+  optionsCount: 2
+  cartographerRadiusTiles: 2
 --- !u!114 &6829792564838995626
 MonoBehaviour:
   m_ObjectHideFlags: 0

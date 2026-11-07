@@ -30,5 +30,11 @@ public enum ModifierStat
     RedEssence,
     CoreMaxHealth,
     EnemyCount,
-    EnemyDamageTaken
+    EnemyDamageTaken,
+    UnifiedGround,
+    Cartographer,
+    PrimalGround,
+    Worldless,
+    ShiftCooldownReduction,
+    Arsenal
 }

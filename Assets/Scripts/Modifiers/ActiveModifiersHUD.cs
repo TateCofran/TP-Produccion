@@ -15,6 +15,7 @@ public class ActiveModifiersHUD : MonoBehaviour
     [SerializeField] private TMP_Text tooltipDescription;
 
     private readonly List<GameObject> spawnedIcons = new List<GameObject>();
+    private int legendaryIconCount;
     private GameModifiersManager subscribedManager;
 
     private void Start()
@@ -55,6 +56,7 @@ public class ActiveModifiersHUD : MonoBehaviour
         foreach (var icon in spawnedIcons)
             if (icon != null) Destroy(icon);
         spawnedIcons.Clear();
+        legendaryIconCount = 0;
 
         if (GameModifiersManager.Instance == null) return;
         foreach (var mod in GameModifiersManager.Instance.GetModifiers())
@@ -73,13 +75,23 @@ public class ActiveModifiersHUD : MonoBehaviour
         if (hover == null) hover = image.gameObject.AddComponent<ModifierIconHover>();
         hover.Bind(this, mod);
 
+        if (GameModifiersManager.IsLegendary(mod.category))
+        {
+            var frame = image.GetComponent<Outline>();
+            if (frame == null) frame = image.gameObject.AddComponent<Outline>();
+            frame.effectColor = LegendaryCardFX.Gold;
+            frame.effectDistance = new Vector2(3f, 3f);
+            image.transform.SetSiblingIndex(legendaryIconCount);
+            legendaryIconCount++;
+        }
+
         spawnedIcons.Add(image.gameObject);
     }
 
     public void ShowTooltip(ModifierSO mod)
     {
         if (mod == null || tooltipRoot == null) return;
-        if (tooltipTitle) tooltipTitle.text = mod.displayName;
+        if (tooltipTitle) tooltipTitle.text = GameModifiersManager.IsLegendary(mod.category) ? "<color=#FFC733>" + mod.displayName + "</color>" : mod.displayName;
         if (tooltipDescription) tooltipDescription.text = mod.description;
         tooltipRoot.SetActive(true);
     }

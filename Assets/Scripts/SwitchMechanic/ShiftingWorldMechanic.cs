@@ -27,6 +27,8 @@ public class ShiftingWorldMechanic : MonoBehaviour
     private float toggleCooldownSeconds = 5f;
     private float toggleCooldownLeft = 0f;
 
+    public float EffectiveCooldownSeconds => toggleCooldownSeconds * (1f - Mathf.Clamp01(GameModifiersManager.Stat(ModifierStat.ShiftCooldownReduction)));
+
     private bool normalPanelOpen = false;
     private bool otherPanelOpen = false;
     private bool normalWaitingChoice = false;
@@ -66,9 +68,10 @@ public class ShiftingWorldMechanic : MonoBehaviour
 
         if (ui != null)
         {
-            float cooldownNormalized = (toggleCooldownSeconds <= 0f)
+            float effectiveCooldown = EffectiveCooldownSeconds;
+            float cooldownNormalized = (effectiveCooldown <= 0f)
                 ? 1f
-                : 1f - (toggleCooldownLeft / toggleCooldownSeconds);
+                : Mathf.Clamp01(1f - (toggleCooldownLeft / effectiveCooldown));
             ui.SetWorldToggleCooldown(cooldownNormalized);
         }
         if (!GameTime.IsPaused && Input.GetKeyDown(toggleKey) && toggleCooldownLeft > 0f)
@@ -94,7 +97,7 @@ public class ShiftingWorldMechanic : MonoBehaviour
             if (ui != null)
                 ui.SetWorldIcon(currentWorld);
 
-            toggleCooldownLeft = Mathf.Max(0.01f, toggleCooldownSeconds);
+            toggleCooldownLeft = Mathf.Max(0.01f, EffectiveCooldownSeconds);
 
             if (currentWorld == World.Normal && !normalWaitingChoice)
             {

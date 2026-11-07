@@ -22,6 +22,23 @@ public class TurretDupeSystem : MonoBehaviour, ITurretDupeSystem
 
     public void AddDupe(TurretDataSO turret)
     {
+        AddDupeInternal(turret);
+
+        if (GameModifiersManager.Stat(ModifierStat.Arsenal) <= 0f || turret == null) return;
+        string sourceId = GetTurretId(turret);
+        var done = new HashSet<string> { sourceId };
+        foreach (var stats in FindObjectsByType<TurretStats>(FindObjectsSortMode.None))
+        {
+            if (stats == null || stats.Source == null) continue;
+            string id = GetTurretId(stats.Source);
+            if (!done.Add(id)) continue;
+            Log.Info(nameof(TurretDupeSystem), $"Arsenal: +1 dupe for {id}");
+            AddDupeInternal(stats.Source);
+        }
+    }
+
+    private void AddDupeInternal(TurretDataSO turret)
+    {
         string turretId = GetTurretId(turret);
 
         if (!turretLevels.ContainsKey(turretId))

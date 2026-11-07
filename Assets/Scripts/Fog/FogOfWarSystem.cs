@@ -193,6 +193,13 @@ public class FogOfWarSystem : MonoBehaviour
             && aMin.z + overlapEpsilon < bMax.z && aMax.z - overlapEpsilon > bMin.z;
     }
 
+    public void RevealRadius(Vector3 center, float radius)
+    {
+        if (!initialized) return;
+        var r = new Vector3(radius, 1000f, radius);
+        RevealOverlapping(center - r, center + r);
+    }
+
     public int CountFogOverlapping(Vector3 min, Vector3 max)
     {
         int count = 0;
