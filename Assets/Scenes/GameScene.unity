@@ -1410,6 +1410,59 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 202029312}
   m_CullTransparentMesh: 1
+--- !u!1 &223653497
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 223653498}
+  - component: {fileID: 223653499}
+  m_Layer: 0
+  m_Name: BountySpawner
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &223653498
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 223653497}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 8109323287440268573}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &223653499
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 223653497}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4c1f9eda112419548a08b82f18663c3d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BountySpawner
+  grid: {fileID: 6620364335412929145}
+  rewards: {fileID: 41648270}
+  firstWave: 4
+  bossWaves: 0f0000001e0000002d000000
+  chancePerWave: 0.15
+  spawnDelay: 8
+  wavesPerZone: 15
+  spottedClip: {fileID: 0}
+  volume: 0.6
 --- !u!1 &244065469
 GameObject:
   m_ObjectHideFlags: 0
@@ -5966,6 +6019,7 @@ Transform:
   - {fileID: 1813534449}
   - {fileID: 1153675365}
   - {fileID: 894951506}
+  - {fileID: 1620775489}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &929269972
@@ -10091,6 +10145,55 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!1 &1620775488
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1620775489}
+  - component: {fileID: 1620775490}
+  m_Layer: 0
+  m_Name: OffscreenIndicator
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1620775489
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1620775488}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 908732469}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1620775490
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1620775488}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 81d455380f95e3b4f8a1f6bce1d0ee64, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::OffscreenIndicator
+  canvas: {fileID: 8916574750150079094}
+  worldCamera: {fileID: 1988510278026477433}
+  color: {r: 1, g: 0.82, b: 0.2, a: 1}
+  size: 48
+  edgePadding: 40
 --- !u!1 &1622219061
 GameObject:
   m_ObjectHideFlags: 0
@@ -18128,6 +18231,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 64b6841e37ef9a04299479fcf8e30726, type: 2}
   - {fileID: 11400000, guid: 1b5bea8ed0a6e294da3da5a0be691591, type: 2}
   - {fileID: 11400000, guid: f4b74532d8a24f1428efe583eb8ad9fc, type: 2}
+  eliteRules: {fileID: 11400000, guid: 4436d1b055708074eb246c6e65d67bd6, type: 2}
 --- !u!223 &5471611011502223294
 Canvas:
   m_ObjectHideFlags: 0
@@ -21669,6 +21773,7 @@ Transform:
   - {fileID: 1180469937}
   - {fileID: 748021084}
   - {fileID: 1808254540}
+  - {fileID: 223653498}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &8142460973705143952

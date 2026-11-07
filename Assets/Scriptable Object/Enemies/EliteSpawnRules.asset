@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4c42611568fc57848910735d04569100, type: 3}
+  m_Name: EliteSpawnRules
+  m_EditorClassIdentifier: Assembly-CSharp::EliteSpawnRules
+  chancePerZone:
+  - 0
+  - 0.06
+  - 0.12
+  affixWeights:
+  - affix: 0
+    weight: 1
+  - affix: 1
+    weight: 1
+  - affix: 2
+    weight: 1
+  - affix: 3
+    weight: 1
+  - affix: 4
+    weight: 1
+  excludedTypes: 03000000080000000d00000004000000090000000e000000
+  wavesPerZone: 15

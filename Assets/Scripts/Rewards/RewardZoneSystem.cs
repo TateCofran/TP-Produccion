@@ -332,6 +332,26 @@ public class RewardZoneSystem : MonoBehaviour
         claimAudioSource.PlayOneShot(clip, claimVolume);
     }
 
+    private string toastPrefix;
+
+    public void Grant(RewardType type, int amount, string prefix)
+    {
+        toastPrefix = prefix;
+        try
+        {
+            Grant(type, amount);
+        }
+        finally
+        {
+            toastPrefix = null;
+        }
+    }
+
+    public void Toast(string message)
+    {
+        ShowToast(message);
+    }
+
     public void Grant(RewardType type, int amount)
     {
         float bonus = GetRewardBonus();
@@ -446,6 +466,7 @@ public class RewardZoneSystem : MonoBehaviour
 
     private void ShowToast(string message)
     {
+        if (!string.IsNullOrEmpty(toastPrefix)) message = toastPrefix + message;
         Log.Info("RewardZoneSystem", $"Reward: {message}");
         EnsureToast();
         if (toastText == null) return;

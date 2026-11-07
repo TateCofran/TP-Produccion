@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -198,6 +198,22 @@ public class SpawnManager : MonoBehaviour
         }
 
         enemy.Init(route);
+        TryMakeElite(enemy, type);
+    }
+
+    [Header("Elites")]
+    [SerializeField] private EliteSpawnRules eliteRules;
+
+    public EliteSpawnRules EliteRules => eliteRules;
+
+    private void TryMakeElite(Enemy enemy, EnemyType type)
+    {
+        if (eliteRules == null || enemy == null || enemy.IsSummoned) return;
+        int wave = waveManager != null ? waveManager.GetCurrentWave() : 1;
+        if (!eliteRules.TryRoll(wave, type, out var affix)) return;
+        var elite = enemy.GetComponent<EliteController>();
+        if (elite == null) elite = enemy.gameObject.AddComponent<EliteController>();
+        elite.Apply(affix);
     }
 
     private void CancelPendingEnemy()

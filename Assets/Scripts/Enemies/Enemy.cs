@@ -25,6 +25,22 @@ public class Enemy : MonoBehaviour, IEnemyDeathHandler, IWorldAware
 
     public Component LastHitSource { get; set; }
 
+    public List<Vector3> RemainingRoute()
+    {
+        var result = new List<Vector3>();
+        for (int i = Mathf.Clamp(_idx, 0, _route.Count); i < _route.Count; i++) result.Add(_route[i]);
+        return result;
+    }
+
+    public bool IsElite
+    {
+        get
+        {
+            var elite = GetComponent<EliteController>();
+            return elite != null && elite.IsElite;
+        }
+    }
+
     public float RouteProgress
     {
         get
@@ -82,6 +98,10 @@ public class Enemy : MonoBehaviour, IEnemyDeathHandler, IWorldAware
         IsSummoned = false;
         LastHitSource = null;
         if (_effects != null) _effects.ClearStatus();
+        var elite = GetComponent<EliteController>();
+        if (elite != null) elite.Clear();
+        var bountyMarker = GetComponent<BountyMarker>();
+        if (bountyMarker != null) bountyMarker.Clear();
         _knockbackImmuneUntil = 0f;
         _knockbackCount = 0;
 
@@ -250,7 +270,10 @@ public class Enemy : MonoBehaviour, IEnemyDeathHandler, IWorldAware
         foreach (var ab in _abilities)
             ab.OnArrivedToCore();
 
-        if (core != null && data != null)
+        var bounty = GetComponent<BountyMarker>();
+        bool isBounty = bounty != null && bounty.IsActive;
+        if (isBounty) bounty.HandleEscaped();
+        else if (core != null && data != null)
             core.TakeDamage(data.damageToCore);
 
         NotifyDeath();

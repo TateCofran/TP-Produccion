@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections.Generic;
 
 public class EnemyPool : MonoBehaviour
@@ -98,6 +98,7 @@ public class EnemyPool : MonoBehaviour
         if (!go.TryGetComponent<Enemy>(out _)) go.AddComponent<Enemy>();
         if (!go.TryGetComponent<EnemyHealth>(out _)) go.AddComponent<EnemyHealth>();
         if (!go.TryGetComponent<EnemyHealthBar>(out _)) go.AddComponent<EnemyHealthBar>();
+        if (!go.TryGetComponent<EliteController>(out _)) go.AddComponent<EliteController>();
 
         go.SetActive(false);
         return go;
